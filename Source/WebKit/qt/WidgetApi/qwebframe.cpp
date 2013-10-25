@@ -934,6 +934,11 @@ QWebFrame *QWebFramePrivate::kit(const QWebFrameAdapter* frameAdapter)
     return static_cast<const QWebFramePrivate*>(frameAdapter)->q;
 }
 
+bool QWebFrame::hasPendingStyleSheets() const
+{
+    return handle()->hasPendingStylesheets();
+}
+
 
 /*!
     \fn void QWebFrame::javaScriptWindowObjectCleared()

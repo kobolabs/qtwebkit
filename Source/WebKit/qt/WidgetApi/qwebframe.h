@@ -204,6 +204,8 @@ public:
     QWebSecurityOrigin securityOrigin() const;
     QWebFrameAdapter* handle() const;
 
+    bool hasPendingStyleSheets() const;
+
 public Q_SLOTS:
     QVariant evaluateJavaScript(const QString& scriptSource);
 #ifndef QT_NO_PRINTER
