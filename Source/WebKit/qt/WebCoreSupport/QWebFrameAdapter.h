@@ -219,6 +219,7 @@ public:
     void setViewportSize(const QSize&);
     void setPaintsEntireContents(bool /*resizesToContents*/);
     void setDelegatesScrolling(bool /*resizesToContents*/);
+    void setConstrainsScrollingToContentEdge(bool constrainsScrollingToContentEdge);
 
     QWebPageAdapter* pageAdapter;
 
