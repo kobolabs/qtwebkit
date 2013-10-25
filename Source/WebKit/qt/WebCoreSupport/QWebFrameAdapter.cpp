@@ -992,3 +992,10 @@ void QWebFrameAdapter::setConstrainsScrollingToContentEdge(bool constrainsScroll
     ASSERT(frame->view());
     frame->view()->setConstrainsScrollingToContentEdge(constrainsScrollingToContentEdge);
 }
+
+bool QWebFrameAdapter::hasPendingStylesheets() const
+{
+    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(frame->document());
+    return frame->document()->didLayoutWithPendingStylesheets();
+}

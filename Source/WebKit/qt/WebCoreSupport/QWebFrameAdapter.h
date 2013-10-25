@@ -220,6 +220,7 @@ public:
     void setPaintsEntireContents(bool /*resizesToContents*/);
     void setDelegatesScrolling(bool /*resizesToContents*/);
     void setConstrainsScrollingToContentEdge(bool constrainsScrollingToContentEdge);
+    bool hasPendingStylesheets() const;
 
     QWebPageAdapter* pageAdapter;
 
