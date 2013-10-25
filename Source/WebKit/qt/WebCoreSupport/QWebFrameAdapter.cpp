@@ -985,3 +985,10 @@ void QWebFrameAdapter::setDelegatesScrolling(bool resizesToContents)
     ASSERT(frame->view());
     frame->view()->setDelegatesScrolling(resizesToContents);
 }
+
+void QWebFrameAdapter::setConstrainsScrollingToContentEdge(bool constrainsScrollingToContentEdge)
+{
+    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(frame->view());
+    frame->view()->setConstrainsScrollingToContentEdge(constrainsScrollingToContentEdge);
+}
