@@ -3176,6 +3176,35 @@ QWebPage::VisibilityState QWebPage::visibilityState() const
     return static_cast<VisibilityState>(d->visibilityState());
 }
 
+void QWebPage::selectCharacterAtPoint(QPoint docPoint)
+{
+    d->createMainFrame();
+    handle()->selectCharacterAtPoint(docPoint);
+}
+
+void QWebPage::selectWordAtPoint(QPoint docPoint, QRect bounds, bool selectOnlyLetters, bool expandToWordBoundaries)
+{
+    d->createMainFrame();
+    handle()->selectWordAtPoint(docPoint, bounds, selectOnlyLetters, expandToWordBoundaries);
+}
+
+void QWebPage::clearSelection()
+{
+    d->createMainFrame();
+    handle()->clearSelection();
+}
+
+void QWebPage::selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd)
+{
+    d->createMainFrame();
+    handle()->selectBetweenPoints(one, two, expandToWordBoundaries, pageEnd);
+}
+
+QPair<QRect, QRect> QWebPage::selectionEndPoints()
+{
+    d->createMainFrame();
+    return handle()->selectionEndPoints();
+}
 
 /*!
     \since 4.8

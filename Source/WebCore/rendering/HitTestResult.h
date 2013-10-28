@@ -75,6 +75,7 @@ public:
 
     // The hit-tested point in the coordinates of the innerNode frame, the frame containing innerNode.
     const LayoutPoint& pointInInnerNodeFrame() const { return m_pointInInnerNodeFrame; }
+    void setPointInInnerNodeFrame(const LayoutPoint& p) { m_pointInInnerNodeFrame = p; }
     IntPoint roundedPointInInnerNodeFrame() const { return roundedIntPoint(pointInInnerNodeFrame()); }
     Frame* innerNodeFrame() const;
 
