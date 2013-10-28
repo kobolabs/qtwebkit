@@ -999,3 +999,16 @@ bool QWebFrameAdapter::hasPendingStylesheets() const
     ASSERT(frame->document());
     return frame->document()->didLayoutWithPendingStylesheets();
 }
+
+namespace WebCore {
+    QList<QRect> getRunRects(RenderView*, bool, bool);
+}
+
+QList<QRect> QWebFrameAdapter::renderTreeRunRects(bool imgRun)
+{
+    ASSERT(frame->view());
+    if (frame->view() && frame->view()->layoutPending())
+        frame->view()->layout();
+    RenderView* o = frame->contentRenderer();
+    return WebCore::getRunRects(o, imgRun, documentElement().styleProperty("-epub-writing-mode", QWebElement::ComputedStyle).startsWith("vertical"));
+}
