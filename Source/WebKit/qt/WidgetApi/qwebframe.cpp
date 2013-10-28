@@ -944,6 +944,11 @@ QList<QRect> QWebFrame::renderTreeRunRects(bool imgRun)
     return handle()->renderTreeRunRects(imgRun);
 }
 
+bool QWebFrame::selectionIntersectsElement(const QString &nodeName, const QString &className, const QString &retrievedAttribute, QString &id)
+{
+    return handle()->selectionIntersectsElement(nodeName, className, retrievedAttribute, id);
+}
+
 
 /*!
     \fn void QWebFrame::javaScriptWindowObjectCleared()

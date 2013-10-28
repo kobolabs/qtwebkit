@@ -207,6 +207,7 @@ public:
     bool hasPendingStyleSheets() const;
 
     QList<QRect> renderTreeRunRects(bool imgRun);
+    bool selectionIntersectsElement(const QString &nodeName, const QString &className, const QString &retrievedAttribute, QString &id);
 
 public Q_SLOTS:
     QVariant evaluateJavaScript(const QString& scriptSource);
