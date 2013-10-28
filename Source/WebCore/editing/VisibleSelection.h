@@ -113,6 +113,9 @@ public:
 
     void setWithoutValidation(const Position&, const Position&);
 
+    void setSelectOnlyLetters(bool selectOnlyLetters);
+    bool selectOnlyLetters() const;
+
 private:
     void validate(TextGranularity = CharacterGranularity);
 
@@ -139,12 +142,14 @@ private:
     SelectionType m_selectionType; // None, Caret, Range
     bool m_baseIsFirst : 1; // True if base is before the extent
     bool m_isDirectional : 1; // Non-directional ignores m_baseIsFirst and selection always extends on shift + arrow key.
+
+    bool m_selectOnlyLetters : 1;
 };
 
 inline bool operator==(const VisibleSelection& a, const VisibleSelection& b)
 {
     return a.start() == b.start() && a.end() == b.end() && a.affinity() == b.affinity() && a.isBaseFirst() == b.isBaseFirst()
-        && a.isDirectional() == b.isDirectional();
+        && a.isDirectional() == b.isDirectional() && a.selectOnlyLetters() == b.selectOnlyLetters();
 }
 
 inline bool operator!=(const VisibleSelection& a, const VisibleSelection& b)

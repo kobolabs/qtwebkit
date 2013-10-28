@@ -82,7 +82,9 @@
 #include "PluginPackage.h"
 #include "ProgressTracker.h"
 #include "QWebFrameAdapter.h"
+#include "RenderLayer.h"
 #include "RenderTextControl.h"
+#include "RenderView.h"
 #include "SchemeRegistry.h"
 #include "Scrollbar.h"
 #include "ScrollbarTheme.h"
@@ -1461,4 +1463,161 @@ bool QWebPageAdapter::swallowContextMenuEvent(QContextMenuEvent *event, QWebFram
     // on maps.google.com for example.
 
     return !menu;
+}
+
+void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint)
+{
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    IntPoint point(docPoint.x(),docPoint.y());
+    HitTestRequest request(HitTestRequest::ReadOnly | HitTestRequest::Active);
+    HitTestResult result(point);
+    frame->document()->renderView()->layer()->hitTest(request, result);
+    Node* innerNode = result.innerNode();
+    if (innerNode && innerNode->renderer()) {
+        VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
+        if (pos.isNotNull()) {
+            VisibleSelection newSelection(pos, pos.next());
+            frame->selection()->setSelection(newSelection);
+        }
+    }
+}
+
+//If selectOnlyLetters == true the selection will be modified to discard non letters.
+//This causes a performance hit though, so it should only be used for the final selecting
+void QWebPageAdapter::selectWordAtPoint(QPoint docPoint, QRect bounds, bool selectOnlyLetters, bool expandToWordBoundaries)
+{
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    IntPoint point(docPoint.x(),docPoint.y());
+    HitTestRequest request(HitTestRequest::ReadOnly | HitTestRequest::Active);
+    HitTestResult result(point);
+    frame->document()->renderView()->layer()->hitTest(request, result);
+    Node* innerNode = result.innerNode();
+    if (innerNode && innerNode->renderer()) {
+        VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
+        VisibleSelection newSelection;
+        newSelection.setSelectOnlyLetters(selectOnlyLetters);
+        if (pos.isNotNull()) {
+            newSelection = VisibleSelection(pos);
+            newSelection.setSelectOnlyLetters(selectOnlyLetters);
+            if (expandToWordBoundaries) {
+                newSelection.expandUsingGranularity(WordGranularity);
+            }
+        }
+        if (newSelection.isRange()) {
+            frame->selection()->setSelection(newSelection, WordGranularity);
+        } else {
+            frame->selection()->setSelection(newSelection);
+        }
+    }
+}
+
+void QWebPageAdapter::clearSelection()
+{
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    frame->selection()->clear();
+}
+
+static bool getPageHit(Frame *frame, QPoint hitPoint, WebCore::Node **nodePtr, HitTestResult& hitResult, int pageEnd)
+{
+    if (nodePtr == NULL || frame == NULL) {
+        return false;
+    }
+
+    QList<IntPoint> deltas;
+    foreach(int deltaY, QList<int>() << 0 << -5 << 5 << -10 << 10 << -20 << 20) {
+        foreach(int deltaX, QList<int>() << 0 << 5 << -5 << 10 << -10 << 15 << -15 << 20 << -20) {
+            deltas << IntPoint(deltaX, deltaY);
+        }
+    }
+
+    foreach(IntPoint delta, deltas) {
+        IntPoint testPoint(hitPoint.x() + delta.x(), hitPoint.y() + delta.y());
+        HitTestRequest onerequest(HitTestRequest::ReadOnly | HitTestRequest::Active);
+        hitResult.setPointInInnerNodeFrame(testPoint);
+        frame->document()->renderView()->layer()->hitTest(onerequest, hitResult);
+        *nodePtr = hitResult.innerNode();
+        if (*nodePtr && (*nodePtr)->renderer() && (*nodePtr)->isTextNode()) {
+            if (pageEnd < 0 || ((pageEnd > 0) && (testPoint.y() < pageEnd)) ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void QWebPageAdapter::selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd)
+{
+    if (one == two) {
+        return;
+    }
+
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    Node *oneNode = NULL;
+    Node *twoNode = NULL;
+    HitTestResult oneResult;
+    HitTestResult twoResult;
+    if (getPageHit(frame, one, &oneNode, oneResult, pageEnd)) {
+        if (getPageHit(frame, two, &twoNode, twoResult, pageEnd)) {
+            VisiblePosition onepos(oneNode->renderer()->positionForPoint(oneResult.localPoint()));
+            VisiblePosition twopos(twoNode->renderer()->positionForPoint(twoResult.localPoint()));
+            VisibleSelection newSelection;
+            if (onepos.isNotNull() && twopos.isNotNull()) {
+                newSelection = VisibleSelection(onepos, twopos);
+            }
+            if (expandToWordBoundaries) {
+                newSelection.expandUsingGranularity(WordGranularity);
+            } else {
+                newSelection.expandUsingGranularity(CharacterGranularity);
+            }
+            // don't stomp on a good selection with a bogus one
+            QString oldText = selectedText();
+            VisibleSelection oldSelection = frame->selection()->selection();
+            frame->selection()->setSelection(newSelection);
+            if (selectedText().isEmpty() && !oldText.isEmpty()) {
+                frame->selection()->setSelection(oldSelection);
+            }
+        }
+    }
+}
+
+QPair<QRect, QRect> QWebPageAdapter::selectionEndPoints()
+{
+    VisibleSelection selection = page->focusController()->focusedOrMainFrame()->selection()->selection();
+    PassRefPtr<Range> range = selection.firstRange();
+    Vector<IntRect> rects;
+    if (range.get() != NULL) {
+        range.get()->textRects(rects, true);
+    }
+    if (rects.size() == 0) {
+        return QPair<QRect, QRect>();
+    }
+    IntRect startRect = rects.first();
+    IntRect endRect = rects.last();
+    QString writingMode = mainFrameAdapter()->documentElement().styleProperty(QString::fromLatin1("-epub-writing-mode"), QWebElement::ComputedStyle);
+    if (writingMode == QString::fromLatin1("vertical-rl") || writingMode == QString::fromLatin1("tb-rl")) {
+        QRect startQRect(startRect.x(), startRect.y(), startRect.width(), startRect.height());
+        QRect endQRect(endRect.x(), endRect.y(), qMax(endRect.width(), 1), qMax(endRect.height(), 1));
+        return QPair<QRect, QRect>(startQRect, endQRect);
+    }
+    QRect startQRect(startRect.x(), startRect.y(), 1, startRect.height());
+    QRect endQRect(endRect.x() + endRect.width(), endRect.y(), 1, endRect.height());
+
+    // this is a bit awkward...
+    // The rects returned by the Range are taller than what we want, but the
+    // rects returned by absoluteCaretBounds are sometimes totally wrong
+    // (specifically, on selecting a single word at the end of certain lines,
+    // it gives an end rect that's at the end of the current DOM node).
+    // So we take the height of the caretBounds rects and the position of the
+    // Range rects, and mash them together into something reasonable.
+    VisiblePosition start = selection.visibleStart();
+    VisiblePosition end = selection.visibleEnd();
+    IntRect startRect2 = start.absoluteCaretBounds();
+    IntRect endRect2 = end.absoluteCaretBounds();
+    QRect startQRect2(startRect2.x(), startRect2.y(), startRect2.width(), startRect2.height());
+    QRect endQRect2(endRect2.x(), endRect2.y(), endRect2.width(), endRect2.height());
+
+    QRect startQRect3(startQRect.x(), startQRect.y() + (startQRect.height() - startQRect2.height()), 1, startQRect2.height());
+    QRect endQRect3(endQRect.x(), endQRect.y() + (endQRect.height() - endQRect2.height()), 1, endQRect2.height());
+
+    return QPair<QRect, QRect>(startQRect3,endQRect3);
 }

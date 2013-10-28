@@ -364,6 +364,12 @@ public:
     quint64 m_bytesReceived;
     QWebHistory history;
 
+    void selectCharacterAtPoint(QPoint point);
+    void selectWordAtPoint(QPoint point, QRect bounds, bool selectLettersOnly, bool expandToWordBoundaries = true);
+    void clearSelection();
+    void selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd);
+    QPair<QRect, QRect> selectionEndPoints();
+
 private:
     QNetworkAccessManager *networkManager;
 
