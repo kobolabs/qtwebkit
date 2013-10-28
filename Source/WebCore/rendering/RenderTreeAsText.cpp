@@ -939,4 +939,199 @@ String markerTextForListItem(Element* element)
     return toRenderListItem(renderer)->markerText();
 }
 
+static bool containsOnlyUnicodeWhitespace(const RenderText& renderText)
+{
+    // Most common Unicode space is 0x3000 (Ideographic Space)
+    // Full list : {0x00a0, 0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x2028, 0x2029, 0x202f, 0x205f, 0x3000};
+    const UChar* text = renderText.characters();
+    for (unsigned k = 0; k < renderText.textLength(); k++) {
+        if (text[k] != 0x3000) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, bool imgRun, bool vertical/*, int indent*/)
+{
+    /* Figure out what the runs' positions are relative to. */
+    FloatPoint origin;
+    bool flippedVertical = false;
+    bool isRubyBlock = false;
+    bool horizontalInVerticalDoc = false;
+    int rubyRunBlockWidth = 0;
+    int verticalBlockLineHeight = 0;
+    static float EXPANSION_SCALE = 1.48f;
+
+    if (RenderBlock* block = o.containingBlock()) {
+        if (dynamic_cast< RenderRubyText* > (block) ) {
+             // Ignore the ruby text block, since the ruby base block rect will be enlarged to cover the whole ruby run
+             return;
+        }
+        else if (dynamic_cast< RenderRubyBase* > (block) ) {
+            isRubyBlock = true;
+        }
+        origin = block->localToAbsolute(FloatPoint());
+        flippedVertical = !block->style()->isHorizontalWritingMode() && block->style()->isFlippedBlocksWritingMode();
+        if (flippedVertical) {
+            RenderObject* pa = o.parent();
+            RenderBlock* paBlock = NULL;
+            RenderObject* grandPa = NULL;
+            RenderBlock* grandPaBlock = NULL;
+            RenderObject* greatGrandPa = NULL;
+            RenderBlock* greatGrandPaBlock = NULL;
+            verticalBlockLineHeight = block->lineHeight(true, VerticalLine);
+            if (pa) {
+                paBlock = pa->containingBlock();
+                grandPa = pa->parent();
+                if (grandPa) {
+                    greatGrandPa = grandPa->parent();
+                    if (greatGrandPa) {
+                        grandPaBlock = grandPa->containingBlock();
+                        greatGrandPaBlock = greatGrandPa->containingBlock();
+                    }
+                }
+            }
+            if (isRubyBlock) {
+                if (grandPaBlock && greatGrandPaBlock) {
+                    FloatPoint greatGrandPaOrigin = greatGrandPaBlock->localToAbsolute(FloatPoint());
+                    greatGrandPaOrigin.setX(greatGrandPaOrigin.x() + greatGrandPaBlock->width());
+                    if (grandPaBlock->x() != greatGrandPaBlock->x()) {
+                        origin.setX(greatGrandPaOrigin.x() - grandPaBlock->x());
+                    }
+                    else {
+                        origin.setX(greatGrandPaOrigin.x() - paBlock->x());
+                    }
+                    rubyRunBlockWidth = block->width();
+                }
+            }
+            else if (o.isImage() && paBlock && grandPaBlock && imgRun) {
+                if ((grandPaBlock->x() == paBlock->x()) && ( grandPaBlock->y() == paBlock->y())) {
+                    FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
+                    out.append(QRect(paOrigin.x() + paBlock->width() - block->width() + 1, block->y(), block->width(), block->height()));
+                }
+                else {
+                    out.append(QRect(origin.x() + 1, origin.y(), block->width(), block->height()));
+                }
+                return;
+            }
+            else  if(o.isText() && pa && paBlock && pa->isTableCell()) {
+                FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
+                origin.setX(paOrigin.x() + paBlock->width() - block->x());
+            }
+            else {
+                origin.setX(origin.x() + block->width());
+            }
+        }
+        else {
+            if (vertical) {
+                RenderObject* pa = o.parent();
+                RenderBlock* paBlock = NULL;
+                RenderObject* grandPa = NULL;
+                RenderObject* greatGrandPa = NULL;
+                verticalBlockLineHeight = block->lineHeight(true, VerticalLine);
+                if (pa) {
+                    paBlock = pa->containingBlock();
+                    grandPa = pa->parent();
+                    if (grandPa) {
+                        greatGrandPa = grandPa->parent();
+                    }
+                }
+
+                if (pa && paBlock) {
+                    horizontalInVerticalDoc = !paBlock->style()->isHorizontalWritingMode() && paBlock->style()->isFlippedBlocksWritingMode();
+                    if (horizontalInVerticalDoc) {
+                        FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
+                        origin.setX(paOrigin.x() + paBlock->width() - block->x() - block->width());
+                    }
+                }
+            }
+        }
+    }
+
+    if (o.isText() && !o.isBR() && !imgRun) {
+        const RenderText& text = *toRenderText(&o);
+        bool isVerticalWhitespaceText = (flippedVertical && containsOnlyUnicodeWhitespace(text));
+        if (!isVerticalWhitespaceText) {
+            for (InlineTextBox* box = text.firstTextBox(); box; box = box->nextTextBox()) {
+                InlineTextBox& run = *box;
+                int dy = 0;
+                if (o.containingBlock()->isTableCell()) {
+                    dy = toRenderTableCell(o.containingBlock())->intrinsicPaddingBefore();
+                }
+                QRect r(run.x()+origin.x(), run.y()+origin.y(), run.width(), run.height());
+                if (flippedVertical) {
+                    if (isRubyBlock) {
+                        r = QRect(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyRunBlockWidth, run.height());
+                    }
+                    else {
+                        if (verticalBlockLineHeight < 1) {
+                            // Assume there is always a ruby block and scale up the original width (add padding), so that first text block of each page has roughly the same right-side margin
+                            verticalBlockLineHeight = run.width() * EXPANSION_SCALE;
+                        }
+                        else {
+                            verticalBlockLineHeight = qMin(verticalBlockLineHeight, int(run.width() * EXPANSION_SCALE));
+                        }
+                        r = QRect(origin.x() - run.width() - run.x(), run.y() + origin.y(), verticalBlockLineHeight, run.height());
+                    }
+                }
+                else if (horizontalInVerticalDoc) {
+                    r = QRect(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
+                }
+                else if (isRubyBlock) {
+                    int newHeight = run.height() * EXPANSION_SCALE;
+                    r = QRect(r.x(), r.y() - (newHeight - run.height()), run.width(), newHeight);
+                }
+                out.append(r);
+            }
+        }
+    }
+
+    for (RenderObject* child = o.firstChild(); child; child = child->nextSibling()) {
+        if (child->hasLayer()) {
+            continue;
+        }
+        getRunRectsRecursively(out, *child, imgRun, vertical);
+    }
+}
+
+static void getRunRectsForAllLayers(QList<QRect>& out, RenderLayer* l, bool imgRun, bool vertical)
+{
+    /* heavily based on writeLayers, mostly without any understanding of what "layers" even are. */
+    l->updateLayerListsIfNeeded();
+
+    Vector<RenderLayer*>* negList = l->negZOrderList();
+    if (negList) {
+        for (unsigned i = 0; i != negList->size(); ++i)
+            getRunRectsForAllLayers(out, negList->at(i), imgRun, vertical);
+    }
+
+    getRunRectsRecursively(out, *l->renderer(), imgRun, vertical);
+
+    Vector<RenderLayer*>* normalFlowList = l->normalFlowList();
+    if (normalFlowList) {
+        for (unsigned i = 0; i != normalFlowList->size(); ++i)
+            getRunRectsForAllLayers(out, normalFlowList->at(i), imgRun, vertical);
+    }
+
+    Vector<RenderLayer*>* posList = l->posZOrderList();
+    if (posList) {
+        for (unsigned i = 0; i != posList->size(); ++i)
+            getRunRectsForAllLayers(out, posList->at(i), imgRun, vertical);
+    }
+}
+
+QList<QRect> getRunRects(RenderView* o, bool imgRun, bool vertical)
+{
+    if (o->view()->frameView())
+        o->view()->frameView()->layout();
+
+    QList<QRect> out;
+    if (o->hasLayer()) {
+        RenderLayer *l = o->layer();
+        getRunRectsForAllLayers(out, l, imgRun, vertical);
+    }
+    return out;
+}
+
 } // namespace WebCore

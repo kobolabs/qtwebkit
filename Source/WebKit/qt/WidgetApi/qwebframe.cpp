@@ -939,6 +939,11 @@ bool QWebFrame::hasPendingStyleSheets() const
     return handle()->hasPendingStylesheets();
 }
 
+QList<QRect> QWebFrame::renderTreeRunRects(bool imgRun)
+{
+    return handle()->renderTreeRunRects(imgRun);
+}
+
 
 /*!
     \fn void QWebFrame::javaScriptWindowObjectCleared()

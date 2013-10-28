@@ -221,6 +221,7 @@ public:
     void setDelegatesScrolling(bool /*resizesToContents*/);
     void setConstrainsScrollingToContentEdge(bool constrainsScrollingToContentEdge);
     bool hasPendingStylesheets() const;
+    QList<QRect> renderTreeRunRects(bool imgRun);
 
     QWebPageAdapter* pageAdapter;
 

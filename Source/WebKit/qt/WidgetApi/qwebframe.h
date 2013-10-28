@@ -206,6 +206,8 @@ public:
 
     bool hasPendingStyleSheets() const;
 
+    QList<QRect> renderTreeRunRects(bool imgRun);
+
 public Q_SLOTS:
     QVariant evaluateJavaScript(const QString& scriptSource);
 #ifndef QT_NO_PRINTER
