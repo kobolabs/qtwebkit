@@ -181,7 +181,7 @@ void Font::drawComplexText(GraphicsContext* ctx, const TextRun& run, const Float
 
     QList<QGlyphRun> runs = line.glyphRuns(from, to - from);
     Q_FOREACH(QGlyphRun glyphRun, runs)
-        drawQtGlyphRun(ctx, glyphRun, adjustedPoint, line.ascent(), m_fontDescription.orientation() == FontOrientation::Vertical);
+        drawQtGlyphRun(ctx, glyphRun, adjustedPoint, line.ascent(), m_fontDescription.orientation() == Vertical);
 }
 
 float Font::floatWidthForComplexText(const TextRun& run, HashSet<const SimpleFontData*>*, GlyphOverflow*) const
@@ -310,7 +310,7 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
     qtGlyphs.setPositions(positions);
     qtGlyphs.setRawFont(font);
 
-    drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0, m_fontDescription.orientation() == FontOrientation::Vertical);
+    drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0, m_fontDescription.orientation() == Vertical);
 }
 
 
