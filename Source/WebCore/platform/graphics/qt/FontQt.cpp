@@ -117,13 +117,13 @@ static QPainterPath pathForGlyphs(const QGlyphRun& glyphRun, const QPointF& offs
     return path;
 }
 
-static void drawQtGlyphRun(GraphicsContext* context, const QGlyphRun& qtGlyphRun, const QPointF& point, int baseLineOffset)
+static void drawQtGlyphRun(GraphicsContext* context, const QGlyphRun& qtGlyphRun, const QPointF& point, int baseLineOffset, bool isVertical)
 {
     QPainter* painter = context->platformContext();
 
     QPainterPath textStrokePath;
     if (context->textDrawingMode() & TextModeStroke)
-        textStrokePath = pathForGlyphs(qtGlyphRun, point);
+        textStrokePath = pathForGlyphs(qtGlyphRun, point); /* TODO: add isVertical to pathForGlyphs */
 
     if (context->hasShadow()) {
         const GraphicsContextState& state = context->state();
@@ -138,7 +138,7 @@ static void drawQtGlyphRun(GraphicsContext* context, const QGlyphRun& qtGlyphRun
                 QPainter* shadowPainter = shadowContext->platformContext();
                 shadowPainter->setPen(state.shadowColor);
                 if (shadowContext->textDrawingMode() & TextModeFill)
-                    shadowPainter->drawGlyphRun(point, qtGlyphRun);
+                    shadowPainter->drawGlyphRun(point, qtGlyphRun, isVertical);
                 else if (shadowContext->textDrawingMode() & TextModeStroke)
                     shadowPainter->strokePath(textStrokePath, shadowPainter->pen());
                 shadow.endShadowLayer(context);
@@ -149,7 +149,7 @@ static void drawQtGlyphRun(GraphicsContext* context, const QGlyphRun& qtGlyphRun
             const QPointF shadowOffset(state.shadowOffset.width(), state.shadowOffset.height());
             painter->translate(shadowOffset);
             if (context->textDrawingMode() & TextModeFill)
-                painter->drawGlyphRun(point, qtGlyphRun);
+                painter->drawGlyphRun(point, qtGlyphRun, isVertical);
             else if (context->textDrawingMode() & TextModeStroke)
                 painter->strokePath(textStrokePath, painter->pen());
             painter->translate(-shadowOffset);
@@ -157,13 +157,14 @@ static void drawQtGlyphRun(GraphicsContext* context, const QGlyphRun& qtGlyphRun
         }
     }
 
+    QPointF pt(point.x(), point.y());
     if (context->textDrawingMode() & TextModeStroke)
         painter->strokePath(textStrokePath, strokePenForContext(context));
 
     if (context->textDrawingMode() & TextModeFill) {
         QPen previousPen = painter->pen();
         painter->setPen(fillPenForContext(context));
-        painter->drawGlyphRun(point, qtGlyphRun);
+        painter->drawGlyphRun(point, qtGlyphRun, isVertical);
         painter->setPen(previousPen);
     }
 }
@@ -180,7 +181,7 @@ void Font::drawComplexText(GraphicsContext* ctx, const TextRun& run, const Float
 
     QList<QGlyphRun> runs = line.glyphRuns(from, to - from);
     Q_FOREACH(QGlyphRun glyphRun, runs)
-        drawQtGlyphRun(ctx, glyphRun, adjustedPoint, line.ascent());
+        drawQtGlyphRun(ctx, glyphRun, adjustedPoint, line.ascent(), m_fontDescription.orientation() == FontOrientation::Vertical);
 }
 
 float Font::floatWidthForComplexText(const TextRun& run, HashSet<const SimpleFontData*>*, GlyphOverflow*) const
@@ -309,7 +310,7 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
     qtGlyphs.setPositions(positions);
     qtGlyphs.setRawFont(font);
 
-    drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0);
+    drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0, m_fontDescription.orientation() == FontOrientation::Vertical);
 }
 
 
