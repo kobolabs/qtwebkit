@@ -834,6 +834,7 @@ QWebHitTestResultPrivate::QWebHitTestResultPrivate(const WebCore::HitTestResult 
     linkTitle = hitTest.titleDisplayString();
     alternateText = hitTest.altDisplayString();
     imageUrl = hitTest.absoluteImageURL();
+    mediaUrl = hitTest.absoluteMediaURL();
     innerNode = hitTest.innerNode();
     innerNode->ref();
     innerNonSharedNode = hitTest.innerNonSharedNode();
@@ -885,6 +886,7 @@ QWebHitTestResultPrivate& QWebHitTestResultPrivate::operator=(const QWebHitTestR
     linkElement = other.linkElement;
     alternateText = other.alternateText;
     imageUrl = other.imageUrl;
+    mediaUrl = other.mediaUrl;
     pixmap = other.pixmap;
     isContentEditable = other.isContentEditable;
     isContentSelected = other.isContentSelected;
@@ -971,6 +973,9 @@ void QWebFrameAdapter::setViewportSize(const QSize& size)
     ASSERT(view);
     view->resize(size);
     view->adjustViewSize();
+
+    if (view->needsLayout())
+        view->layout();
 }
 
 

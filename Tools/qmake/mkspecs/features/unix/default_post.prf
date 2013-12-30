@@ -8,8 +8,10 @@
 # 387 to make layout test results same on 32 and on 64 bit builds.
 # See https://bugs.webkit.org/show_bug.cgi?id=52810#c39 for details.
 linux-g++*:isEqual(QT_ARCH,i386) {
-    QMAKE_CFLAGS += -march=pentium4 -msse2 -mfpmath=sse
-    QMAKE_CXXFLAGS += -march=pentium4 -msse2 -mfpmath=sse
+    !production_build {
+        QMAKE_CFLAGS += -march=pentium4 -msse2 -mfpmath=sse
+        QMAKE_CXXFLAGS += -march=pentium4 -msse2 -mfpmath=sse
+    }
 
     # Use the stabs format for 32 bit debug builds to make the object files a bit smaller.
     QMAKE_CXXFLAGS_DEBUG -= -g
@@ -21,6 +23,9 @@ linux-*g++* {
         # Treat warnings as errors on x86/Linux/GCC
         isEqual(QT_ARCH,x86_64)|isEqual(QT_ARCH,i386): QMAKE_CXXFLAGS += -Werror
     }
+}
+
+*-g++* {
     greaterThan(QT_GCC_MAJOR_VERSION, 3):greaterThan(QT_GCC_MINOR_VERSION, 5) {
         !contains(QMAKE_CXXFLAGS, -std=(c|gnu)\\+\\+(0x|11)) {
             # We need to deactivate those warnings because some names conflicts with upcoming c++0x types (e.g.nullptr).
