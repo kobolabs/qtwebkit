@@ -1544,11 +1544,12 @@ static bool getPageHit(Frame *frame, QPoint hitPoint, WebCore::Node **nodePtr, H
     foreach (IntPoint delta, deltas) {
         IntPoint testPoint(hitPoint.x() + delta.x(), hitPoint.y() + delta.y());
         HitTestRequest onerequest(HitTestRequest::ReadOnly | HitTestRequest::Active);
-        hitResult.setPointInInnerNodeFrame(testPoint);
-        frame->document()->renderView()->layer()->hitTest(onerequest, hitResult);
-        *nodePtr = hitResult.innerNode();
+        HitTestResult testResult(testPoint);
+        frame->document()->renderView()->hitTest(onerequest, testResult);
+        *nodePtr = testResult.innerNode();
         if (*nodePtr && (*nodePtr)->renderer() && (*nodePtr)->isTextNode()) {
             if (pageEnd < 0 || ((pageEnd > 0) && (testPoint.y() < pageEnd)) ) {
+                hitResult = testResult;
                 return true;
             }
         }
@@ -1562,7 +1563,7 @@ void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint)
     IntPoint point(docPoint.x(),docPoint.y());
     HitTestRequest request(HitTestRequest::ReadOnly | HitTestRequest::Active);
     HitTestResult result(point);
-    frame->document()->renderView()->layer()->hitTest(request, result);
+    frame->document()->renderView()->hitTest(request, result);
     Node* innerNode = result.innerNode();
     if (innerNode && innerNode->renderer()) {
         VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
