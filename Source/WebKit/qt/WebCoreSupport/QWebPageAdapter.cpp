@@ -1574,9 +1574,7 @@ void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint)
     }
 }
 
-//If selectOnlyLetters == true the selection will be modified to discard non letters.
-//This causes a performance hit though, so it should only be used for the final selecting
-void QWebPageAdapter::selectWordAtPoint(QPoint docPoint, int pageEnd, bool selectOnlyLetters, bool expandToWordBoundaries)
+void QWebPageAdapter::selectWordAtPoint(QPoint docPoint, int pageEnd, bool expandToWordBoundaries)
 {
     Frame *frame = page->focusController()->focusedOrMainFrame();
     Node *innerNode = NULL;
@@ -1584,10 +1582,8 @@ void QWebPageAdapter::selectWordAtPoint(QPoint docPoint, int pageEnd, bool selec
     if (getPageHit(frame, docPoint, &innerNode, result, pageEnd)) {
         VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
         VisibleSelection newSelection;
-        newSelection.setSelectOnlyLetters(selectOnlyLetters);
         if (pos.isNotNull()) {
             newSelection = VisibleSelection(pos);
-            newSelection.setSelectOnlyLetters(selectOnlyLetters);
             if (expandToWordBoundaries) {
                 newSelection.expandUsingGranularity(WordGranularity);
             }
