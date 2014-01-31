@@ -3205,10 +3205,10 @@ void QWebPage::selectCharacterAtPoint(QPoint docPoint)
     handle()->selectCharacterAtPoint(docPoint);
 }
 
-void QWebPage::selectWordAtPoint(QPoint docPoint, int pageEnd, bool selectOnlyLetters, bool expandToWordBoundaries)
+void QWebPage::selectWordAtPoint(QPoint docPoint, int pageEnd, bool expandToWordBoundaries)
 {
     d->createMainFrame();
-    handle()->selectWordAtPoint(docPoint, pageEnd, selectOnlyLetters, expandToWordBoundaries);
+    handle()->selectWordAtPoint(docPoint, pageEnd, expandToWordBoundaries);
 }
 
 void QWebPage::clearSelection()
