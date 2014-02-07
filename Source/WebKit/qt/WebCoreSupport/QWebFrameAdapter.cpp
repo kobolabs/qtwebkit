@@ -31,6 +31,7 @@
 #include "Frame.h"
 #include "FrameLoadRequest.h"
 #include "FrameLoaderClientQt.h"
+#include "FrameSelection.h"
 #include "FrameView.h"
 #include "HTMLMetaElement.h"
 #include "HTTPParsers.h"
@@ -1020,42 +1021,46 @@ QList<QRect> QWebFrameAdapter::renderTreeRunRects(bool imgRun)
     return WebCore::getRunRects(o, imgRun, documentElement().styleProperty(QString::fromLatin1("-epub-writing-mode"), QWebElement::ComputedStyle).startsWith(QString::fromLatin1("vertical")));
 }
 
+static Element *findAncestorElement(Element *element, const QString &nodeName, const QString &className)
+{
+    while (element) {
+        if (QString::compare(nodeName, element->nodeName(), Qt::CaseInsensitive) == 0 && element->hasAttribute("class") && QString::compare(className, element->getAttribute("class")) == 0) {
+            return element;
+        }
+        element = element->parentElement();
+    }
+    return NULL;
+}
+
 bool QWebFrameAdapter::selectionIntersectsElement(const QString &nodeName, const QString &className, const QString &retrievedAttribute, QString &id)
 {
-    ExceptionCode ec = 0;
-    PassRefPtr<Range> range = frame->document()->domWindow()->getSelection()->getRangeAt(0, ec);
+    PassRefPtr<Range> range = frame->selection()->selection().firstRange();
     if (!range) {
         return false;
     }
     Node *node = range->startContainer();
-    bool done = false;
-    while (!done) {
-        if (!node) {
-            return false;
-        }
+    while (node) {
         Element *element;
         if (node->nodeType() == Node::ELEMENT_NODE) {
             element = static_cast<Element*>(node);
         } else {
             element = node->parentElement();
         }
-        if (element && !QString::compare(nodeName, element->nodeName(), Qt::CaseInsensitive) && element->hasAttribute("class") && !QString::compare(className, element->getAttribute("class"))) {
+        Element *foundElement = findAncestorElement(element, nodeName, className);
+        if (foundElement) {
             if (!retrievedAttribute.isEmpty()) {
-                if (element->hasAttribute(retrievedAttribute)) {
-                    id = element->getAttribute(retrievedAttribute);
-                } else {
+                if (!foundElement->hasAttribute(retrievedAttribute)) {
                     qDebug() << "ERROR: Requested attribute" << retrievedAttribute << "of DOM element" << nodeName << "was not found!";
                     return false;
                 }
+                id = foundElement->getAttribute(retrievedAttribute);
             }
             return true;
         }
         if (node == range->endContainer()) {
-            done = true;
-        } else {
-            node = NodeTraversal::next(node);
+            return false;
         }
+        node = NodeTraversal::next(node);
     }
     return false;
 }
-
