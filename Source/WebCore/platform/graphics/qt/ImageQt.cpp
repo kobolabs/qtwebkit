@@ -305,18 +305,29 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     CompositeOperator previousOperator = ctxt->compositeOperation();
     BlendMode previousBlendMode = ctxt->blendModeOperation();
     ctxt->setCompositeOperation(!image->hasAlpha() && op == CompositeSourceOver && blendMode == BlendModeNormal ? CompositeCopy : op, blendMode);
+ 
+    QPixmap resizedImage;
+    const int maxResize = qMin(128 * 128, static_cast<int>(normalizedSrc.width()) * static_cast<int>(normalizedSrc.height()));
+    const int resizeWidth = static_cast<int>(normalizedDst.width());
+    const int resizeHeight = static_cast<int>(normalizedDst.height());
+    bool resize = resizeWidth * resizeHeight < maxResize;
+    if (resize) {
+        resizedImage = image->copy(image->rect());
+        resizedImage = resizedImage.scaled(resizeWidth, resizeHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        normalizedSrc = QRectF(normalizedSrc.x(), normalizedSrc.y(), normalizedDst.width(), normalizedDst.height());
+    }
 
     if (ctxt->hasShadow()) {
         ShadowBlur shadow(ctxt->state());
         GraphicsContext* shadowContext = shadow.beginShadowLayer(ctxt, normalizedDst);
         if (shadowContext) {
             QPainter* shadowPainter = shadowContext->platformContext();
-            shadowPainter->drawPixmap(normalizedDst, *image, normalizedSrc);
+            shadowPainter->drawPixmap(normalizedDst, resize ? resizedImage : *image, normalizedSrc);
             shadow.endShadowLayer(ctxt);
         }
     }
 
-    ctxt->platformContext()->drawPixmap(normalizedDst, *image, normalizedSrc);
+    ctxt->platformContext()->drawPixmap(normalizedDst, resize ? resizedImage : *image, normalizedSrc);
 
     ctxt->setCompositeOperation(previousOperator, previousBlendMode);
 
