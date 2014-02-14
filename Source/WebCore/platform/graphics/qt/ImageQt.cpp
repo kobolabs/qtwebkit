@@ -307,10 +307,13 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     ctxt->setCompositeOperation(!image->hasAlpha() && op == CompositeSourceOver && blendMode == BlendModeNormal ? CompositeCopy : op, blendMode);
  
     QPixmap resizedImage;
-    bool resize = normalizedDst.size() != normalizedSrc.size();
+    const int maxResize = qMin(128 * 128, static_cast<int>(normalizedSrc.width()) * static_cast<int>(normalizedSrc.height()));
+    const int resizeWidth = static_cast<int>(normalizedDst.width());
+    const int resizeHeight = static_cast<int>(normalizedDst.height());
+    bool resize = resizeWidth * resizeHeight < maxResize;
     if (resize) {
         resizedImage = image->copy(image->rect());
-        resizedImage = resizedImage.scaled(static_cast<int>(normalizedDst.width()), static_cast<int>(normalizedDst.height()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        resizedImage = resizedImage.scaled(resizeWidth, resizeHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         normalizedSrc = QRectF(normalizedSrc.x(), normalizedSrc.y(), normalizedDst.width(), normalizedDst.height());
     }
 
