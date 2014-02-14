@@ -305,6 +305,11 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     CompositeOperator previousOperator = ctxt->compositeOperation();
     BlendMode previousBlendMode = ctxt->blendModeOperation();
     ctxt->setCompositeOperation(!image->hasAlpha() && op == CompositeSourceOver && blendMode == BlendModeNormal ? CompositeCopy : op, blendMode);
+ 
+    if (normalizedDst.size() != normalizedSrc.size()) {
+        *image = image->scaled(static_cast<int>(normalizedDst.width()), static_cast<int>(normalizedDst.height()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        normalizedSrc = QRectF(normalizedSrc.x(), normalizedSrc.y(), normalizedDst.width(), normalizedDst.height());
+    }
 
     if (ctxt->hasShadow()) {
         ShadowBlur shadow(ctxt->state());
