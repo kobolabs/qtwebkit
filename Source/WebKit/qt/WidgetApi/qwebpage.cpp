@@ -3199,10 +3199,10 @@ QWebPage::VisibilityState QWebPage::visibilityState() const
     return static_cast<VisibilityState>(d->visibilityState());
 }
 
-void QWebPage::selectCharacterAtPoint(QPoint docPoint)
+void QWebPage::selectCharacterAtPoint(QPoint docPoint, int pageEnd)
 {
     d->createMainFrame();
-    handle()->selectCharacterAtPoint(docPoint);
+    handle()->selectCharacterAtPoint(docPoint, pageEnd);
 }
 
 void QWebPage::selectWordAtPoint(QPoint docPoint, int pageEnd, bool expandToWordBoundaries)

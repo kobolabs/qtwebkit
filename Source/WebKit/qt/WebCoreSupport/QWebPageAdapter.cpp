@@ -1557,15 +1557,12 @@ static bool getPageHit(Frame *frame, QPoint hitPoint, WebCore::Node **nodePtr, H
     return false;
 }
 
-void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint)
+void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint, int pageEnd)
 {
     Frame *frame = page->focusController()->focusedOrMainFrame();
-    IntPoint point(docPoint.x(),docPoint.y());
-    HitTestRequest request(HitTestRequest::ReadOnly | HitTestRequest::Active);
-    HitTestResult result(point);
-    frame->document()->renderView()->hitTest(request, result);
-    Node* innerNode = result.innerNode();
-    if (innerNode && innerNode->renderer()) {
+    Node *innerNode = NULL;
+    HitTestResult result;
+    if (getPageHit(frame, docPoint, &innerNode, result, pageEnd)) {
         VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
         if (pos.isNotNull()) {
             VisibleSelection newSelection(pos, pos.next());
