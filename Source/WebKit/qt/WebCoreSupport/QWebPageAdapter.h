@@ -371,7 +371,7 @@ public:
     quint64 m_bytesReceived;
     QWebHistory history;
 
-    void selectCharacterAtPoint(QPoint point);
+    void selectCharacterAtPoint(QPoint point, int pageEnd);
     void selectWordAtPoint(QPoint point, int pageEnd, bool expandToWordBoundaries = true);
     void clearSelection();
     void selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd);
