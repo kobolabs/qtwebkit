@@ -36,6 +36,9 @@
 
 #include "stdio.h"
 
+// gross...
+#include <QSettings>
+
 using namespace std;
 
 namespace WebCore {
@@ -466,7 +469,25 @@ void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run,
     if (paintingDisabled())
         return;
 
-    fillRect(font.selectionRectForText(run, point, h, from, to), backgroundColor, colorSpace);
+    QSettings settings;
+    if (settings.value("selectionStyle", "underline") == "underline") {
+        FloatRect rect(font.selectionRectForText(run, point, h, from, to));
+        rect.setY(rect.y() + rect.height() - 3);
+        rect.setHeight(3);
+        rect.setWidth(rect.width() - 1);
+        Color color(0,0,0);
+        fillRect(rect, color, colorSpace);
+    } else if (settings.value("selectionStyle", "underline") == "overline") {
+        FloatRect rect(font.selectionRectForText(run, point, h, from, to));
+        rect.setY(rect.y());
+        rect.setHeight(3);
+        rect.setWidth(rect.width() - 1);
+        Color color(0,0,0);
+        fillRect(rect, color, colorSpace);
+    }
+    else {
+        fillRect(font.selectionRectForText(run, point, h, from, to), backgroundColor, colorSpace);
+    }
 }
 
 void GraphicsContext::drawImage(Image* image, ColorSpace styleColorSpace, const IntPoint& p, CompositeOperator op, RespectImageOrientationEnum shouldRespectImageOrientation)
