@@ -578,7 +578,7 @@ LayoutUnit RootInlineBox::selectionTop() const
     if (m_hasAnnotationsBefore)
         selectionTop -= !renderer()->style()->isFlippedLinesWritingMode() ? computeOverAnnotationAdjustment(m_lineTop) : computeUnderAnnotationAdjustment(m_lineTop);
 
-    if (renderer()->style()->isFlippedLinesWritingMode())
+    if (!renderer()->style()->isFlippedLinesWritingMode())
         return selectionTop;
 
     LayoutUnit prevBottom = prevRootBox() ? prevRootBox()->selectionBottom() : block()->borderAndPaddingBefore();
