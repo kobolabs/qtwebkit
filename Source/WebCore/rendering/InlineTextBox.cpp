@@ -48,6 +48,7 @@
 #include "Text.h"
 #include "break_lines.h"
 #include <wtf/text/CString.h>
+#include <QSettings>
 
 using namespace std;
 
@@ -622,6 +623,12 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     float selectionStrokeWidth = textStrokeWidth;
     const ShadowData* selectionShadow = textShadow;
     if (haveSelection) {
+
+        QSettings settings;
+        if (settings.value(QLatin1String("selectionForceBlackText"),false).toBool()) {
+            paintInfo.setForceBlackText();
+        }
+
         // Check foreground color first.
         Color foreground = paintInfo.forceBlackText() ? Color::black : renderer()->selectionForegroundColor();
         if (foreground.isValid() && foreground != selectionFillColor) {
