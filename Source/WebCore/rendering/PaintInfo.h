@@ -86,6 +86,7 @@ struct PaintInfo {
     }
 
     bool forceBlackText() const { return paintBehavior & PaintBehaviorForceBlackText; }
+    void setForceBlackText() { paintBehavior |= PaintBehaviorForceBlackText; }
 
     bool skipRootBackground() const { return paintBehavior & PaintBehaviorSkipRootBackground; }
     bool paintRootBackgroundOnly() const { return paintBehavior & PaintBehaviorRootBackgroundOnly; }
