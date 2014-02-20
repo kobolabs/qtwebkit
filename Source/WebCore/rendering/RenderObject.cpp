@@ -1632,7 +1632,13 @@ Color RenderObject::selectionBackgroundColor() const
     Color color;
     if (style()->userSelect() != SELECT_NONE) {
         if (frame()->selection()->shouldShowBlockCursor() && frame()->selection()->isCaret())
+// HACK: we don't want this to be blended with white on the Nickel, because we want our selections
+// to actually be white, instead of off-white
+#if OS(LINUX) && !(CPU(X86) || CPU(X86_64))
+            color = style()->visitedDependentColor(CSSPropertyColor);
+#else
             color = style()->visitedDependentColor(CSSPropertyColor).blendWithWhite();
+#endif 
         else {
             RefPtr<RenderStyle> pseudoStyle = getUncachedPseudoStyle(PseudoStyleRequest(SELECTION));
             if (pseudoStyle && pseudoStyle->visitedDependentColor(CSSPropertyBackgroundColor).isValid())
