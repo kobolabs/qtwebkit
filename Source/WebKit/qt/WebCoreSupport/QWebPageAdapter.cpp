@@ -1528,7 +1528,7 @@ bool QWebPageAdapter::swallowContextMenuEvent(QContextMenuEvent *event, QWebFram
     return !menu;
 }
 
-static bool getPageHit(Frame *frame, QPoint hitPoint, WebCore::Node **nodePtr, HitTestResult& hitResult, int pageEnd)
+static bool getPageHit(Frame *frame, const QPoint& hitPoint, WebCore::Node **nodePtr, HitTestResult& hitResult, int pageEnd)
 {
     if (nodePtr == NULL || frame == NULL) {
         return false;
@@ -1557,7 +1557,7 @@ static bool getPageHit(Frame *frame, QPoint hitPoint, WebCore::Node **nodePtr, H
     return false;
 }
 
-void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint, int pageEnd)
+void QWebPageAdapter::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd)
 {
     Frame *frame = page->focusController()->focusedOrMainFrame();
     Node *innerNode = NULL;
@@ -1571,7 +1571,7 @@ void QWebPageAdapter::selectCharacterAtPoint(QPoint docPoint, int pageEnd)
     }
 }
 
-void QWebPageAdapter::selectWordAtPoint(QPoint docPoint, int pageEnd, bool expandToWordBoundaries)
+void QWebPageAdapter::selectWordAtPoint(const QPoint &docPoint, int pageEnd, bool expandToWordBoundaries)
 {
     Frame *frame = page->focusController()->focusedOrMainFrame();
     Node *innerNode = NULL;
@@ -1599,7 +1599,7 @@ void QWebPageAdapter::clearSelection()
     frame->selection()->clear();
 }
 
-void QWebPageAdapter::selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd)
+void QWebPageAdapter::selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
 {
     if (one == two) {
         return;
@@ -1632,6 +1632,51 @@ void QWebPageAdapter::selectBetweenPoints(QPoint one, QPoint two, bool expandToW
             }
         }
     }
+}
+
+bool QWebPageAdapter::updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped)
+{
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    VisibleSelection selection = frame->selection()->selection();
+    VisiblePosition startPos = selection.visibleStart();
+    VisiblePosition endPos = selection.visibleEnd();
+    HitTestResult test;
+    Node *node = NULL;
+    if (getPageHit(frame, newPoint, &node, test, pageEnd)) {
+        VisiblePosition newPos(node->renderer()->positionForPoint(test.localPoint()));
+        if (isStart) {
+            startPos = newPos;
+        }
+        else {
+            endPos = newPos;
+        }
+        VisibleSelection newSelection(startPos, endPos);
+        flipped = !newSelection.isBaseFirst();
+        if (flipped) {
+            qSwap(startPos, endPos);
+            isStart = !isStart;
+        }
+        if (expandToWordBoundaries) {
+            newSelection.expandUsingGranularity(WordGranularity);
+        }
+        else {
+            newSelection.expandUsingGranularity(CharacterGranularity);
+        }
+        if (isStart) {
+            newSelection = VisibleSelection(newSelection.visibleStart(), endPos);
+        }
+        else {
+            newSelection = VisibleSelection(startPos, newSelection.visibleEnd());
+        }
+        QString oldText = selectedText();
+        PassRefPtr<Range> range = newSelection.firstRange();
+        if ((oldText.isEmpty() || (range && !range->text().isEmpty())) && (newSelection != frame->selection()->selection())) {
+            frame->selection()->setSelection(newSelection);
+        }
+        return true;
+    }
+    flipped = false;
+    return false;
 }
 
 QPair<QRect, QRect> QWebPageAdapter::selectionEndPoints()

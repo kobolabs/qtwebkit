@@ -3199,13 +3199,13 @@ QWebPage::VisibilityState QWebPage::visibilityState() const
     return static_cast<VisibilityState>(d->visibilityState());
 }
 
-void QWebPage::selectCharacterAtPoint(QPoint docPoint, int pageEnd)
+void QWebPage::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd)
 {
     d->createMainFrame();
     handle()->selectCharacterAtPoint(docPoint, pageEnd);
 }
 
-void QWebPage::selectWordAtPoint(QPoint docPoint, int pageEnd, bool expandToWordBoundaries)
+void QWebPage::selectWordAtPoint(const QPoint &docPoint, int pageEnd, bool expandToWordBoundaries)
 {
     d->createMainFrame();
     handle()->selectWordAtPoint(docPoint, pageEnd, expandToWordBoundaries);
@@ -3217,10 +3217,16 @@ void QWebPage::clearSelection()
     handle()->clearSelection();
 }
 
-void QWebPage::selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd)
+void QWebPage::selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
 {
     d->createMainFrame();
     handle()->selectBetweenPoints(one, two, expandToWordBoundaries, pageEnd);
+}
+
+bool QWebPage::updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped)
+{
+    d->createMainFrame();
+    return handle()->updateSelection(newPoint, expandToWordBoundaries, pageEnd, isStart, flipped);
 }
 
 QPair<QRect, QRect> QWebPage::selectionEndPoints()
