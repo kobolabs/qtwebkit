@@ -389,10 +389,11 @@ public:
 
     virtual bool shouldInterruptJavaScript();
 
-    void selectCharacterAtPoint(QPoint point, int pageEnd);
-    void selectWordAtPoint(QPoint point, int pageEnd, bool expandToWordBoundaries = true);
+    void selectCharacterAtPoint(const QPoint &point, int pageEnd);
+    void selectWordAtPoint(const QPoint &point, int pageEnd, bool expandToWordBoundaries = true);
     void clearSelection();
-    void selectBetweenPoints(QPoint one, QPoint two, bool expandToWordBoundaries, int pageEnd);
+    void selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
+    bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
 
 Q_SIGNALS:
