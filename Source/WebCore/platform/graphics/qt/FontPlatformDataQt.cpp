@@ -77,6 +77,8 @@ FontPlatformData::FontPlatformData(const FontDescription& description, const Ato
     if (description.fontSmoothing() == NoSmoothing
         || (description.fontSmoothing() == AutoSmoothing && !Font::shouldUseSmoothing()))
         font.setStyleStrategy(QFont::NoAntialias);
+    font.setCSMSharpnessOffset(description.sharpness());
+    font.setCSMThicknessOffset(description.thickness());
 
     m_data->bold = font.bold();
     // WebKit allows font size zero but QFont does not. We will return

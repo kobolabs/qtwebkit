@@ -35,7 +35,7 @@ namespace WebCore {
 struct SameSizeAsFontDescription {
     Vector<AtomicString, 1> families;
     RefPtr<FontFeatureSettings> m_featureSettings;
-    float sizes[2];
+    float sizes[4];
     // FXIME: Make them fit into one word.
     uint32_t bitfields;
     uint32_t bitfields2 : 8;

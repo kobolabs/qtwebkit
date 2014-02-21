@@ -98,6 +98,8 @@ public:
         , m_textRendering(AutoTextRendering)
         , m_isSpecifiedFont(false)
         , m_script(USCRIPT_COMMON)
+        , m_sharpness(.0)
+        , m_thickness(.0)
     {
     }
 
@@ -168,6 +170,11 @@ public:
     void setScript(UScriptCode s) { m_script = s; }
     void setFeatureSettings(PassRefPtr<FontFeatureSettings> settings) { m_featureSettings = settings; }
 
+    void setSharpness(float s) { m_sharpness = s; }
+    float sharpness() const { return m_sharpness; }
+    void setThickness(float s) { m_thickness = s; }
+    float thickness() const { return m_thickness; }
+
 private:
     Vector<AtomicString, 1> m_families;
     RefPtr<FontFeatureSettings> m_featureSettings;
@@ -204,6 +211,9 @@ private:
     unsigned m_textRendering : 2; // TextRenderingMode
     unsigned m_isSpecifiedFont : 1; // True if a web page specifies a non-generic font family as the first font family.
     unsigned m_script : 7; // Used to help choose an appropriate font for generic font families.
+
+    float m_sharpness;
+    float m_thickness;
 };
 
 inline bool FontDescription::operator==(const FontDescription& other) const
@@ -230,7 +240,10 @@ inline bool FontDescription::operator==(const FontDescription& other) const
         && m_nonCJKGlyphOrientation == other.m_nonCJKGlyphOrientation
         && m_widthVariant == other.m_widthVariant
         && m_script == other.m_script
-        && m_featureSettings == other.m_featureSettings;
+        && m_featureSettings == other.m_featureSettings
+        && m_sharpness == other.m_sharpness
+        && m_thickness == other.m_thickness
+        ;
 }
 
 }

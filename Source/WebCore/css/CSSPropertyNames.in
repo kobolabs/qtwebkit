@@ -448,3 +448,5 @@ user-zoom
 #if defined(ENABLE_ACCELERATED_OVERFLOW_SCROLLING) && ENABLE_ACCELERATED_OVERFLOW_SCROLLING
 -webkit-overflow-scrolling
 #endif
+-kobo-font-sharpness
+-kobo-font-thickness
