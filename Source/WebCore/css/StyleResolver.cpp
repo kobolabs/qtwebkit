@@ -3130,6 +3130,20 @@ void StyleResolver::applyProperty(CSSPropertyID id, CSSValue* value)
 #endif
         ASSERT_NOT_REACHED();
         return;
+    case CSSPropertyKoboFontSharpness:
+    case CSSPropertyKoboFontThickness: {
+        if (!primitiveValue)
+            return;
+        float value = primitiveValue->getFloatValue();
+        FontDescription fontDescription = state.style()->fontDescription();
+        if (id == CSSPropertyKoboFontSharpness)
+            fontDescription.setSharpness(value);
+        else
+            fontDescription.setThickness(value);
+        setFontDescription(fontDescription);
+        return;
+    }
+
     default:
 #if ENABLE(SVG)
         // Try the SVG properties

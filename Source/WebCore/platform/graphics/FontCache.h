@@ -68,11 +68,15 @@ struct FontDescriptionFontDataCacheKey {
         : size(size)
         , weight(0)
         , flags(0)
+        , sharpness(.0)
+        , thickness(.0)
     { }
     FontDescriptionFontDataCacheKey(const FontDescription& description)
         : size(description.computedPixelSize())
         , weight(description.weight())
         , flags(makeFlagKey(description))
+        , sharpness(description.sharpness())
+        , thickness(description.thickness())
     { }
     static unsigned makeFlagKey(const FontDescription& description)
     {
@@ -84,7 +88,7 @@ struct FontDescriptionFontDataCacheKey {
     }
     bool operator==(const FontDescriptionFontDataCacheKey& other) const
     {
-        return size == other.size && weight == other.weight && flags == other.flags;
+        return size == other.size && weight == other.weight && flags == other.flags && sharpness == other.sharpness && thickness == other.thickness;
     }
     bool operator!=(const FontDescriptionFontDataCacheKey& other) const
     {
@@ -97,6 +101,8 @@ struct FontDescriptionFontDataCacheKey {
     unsigned size;
     unsigned weight;
     unsigned flags;
+    float sharpness;
+    float thickness;
 };
 
 class FontCache {

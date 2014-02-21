@@ -3110,6 +3110,13 @@ bool CSSParser::parseValue(CSSPropertyID propId, bool important)
         validPrimitive = false;
         break;
 #endif
+
+    case CSSPropertyKoboFontSharpness:
+    case CSSPropertyKoboFontThickness:
+        if (validUnit(value, FNumber))
+            validPrimitive = true;
+        break;
+
 #if ENABLE(SVG)
     default:
         return parseSVGValue(propId, important);
