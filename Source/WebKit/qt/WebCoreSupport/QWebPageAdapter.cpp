@@ -1625,10 +1625,9 @@ void QWebPageAdapter::selectBetweenPoints(const QPoint &one, const QPoint &two, 
             }
             // don't stomp on a good selection with a bogus one
             QString oldText = selectedText();
-            VisibleSelection oldSelection = frame->selection()->selection();
-            frame->selection()->setSelection(newSelection);
-            if (selectedText().isEmpty() && !oldText.isEmpty()) {
-                frame->selection()->setSelection(oldSelection);
+            PassRefPtr<Range> range = newSelection.firstRange();
+            if (oldText.isEmpty() || (range && !range->text().isEmpty())) {
+              frame->selection()->setSelection(newSelection);
             }
         }
     }
