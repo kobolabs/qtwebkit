@@ -41,3 +41,4 @@ mac {
 
 # MSVC is lacking stdint.h as well as inttypes.h.
 win32-msvc*|win32-icc|wince*: INCLUDEPATH += $$ROOT_WEBKIT_DIR/Source/JavaScriptCore/os-win32
+win32-msv200*: INCLUDEPATH += $$ROOT_WEBKIT_DIR/Source/ThirdParty/leveldb/port/win
