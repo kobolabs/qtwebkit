@@ -3141,6 +3141,8 @@ void StyleResolver::applyProperty(CSSPropertyID id, CSSValue* value)
         else
             fontDescription.setThickness(value);
         setFontDescription(fontDescription);
+        state.setFontDirty(true);
+        updateFont();
         return;
     }
 
