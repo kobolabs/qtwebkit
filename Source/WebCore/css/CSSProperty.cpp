@@ -383,6 +383,8 @@ bool CSSProperty::isInheritedProperty(CSSPropertyID propertyID)
 #if ENABLE(TOUCH_EVENTS)
     case CSSPropertyWebkitTapHighlightColor:
 #endif
+    case CSSPropertyKoboFontSharpness:
+    case CSSPropertyKoboFontThickness:
         return true;
     case CSSPropertyDisplay:
     case CSSPropertyZoom:
