@@ -297,6 +297,8 @@ mac {
     LIBS_PRIVATE += -framework Carbon -framework AppKit
 }
 
+linux*: LIBS += -ldl
+
 # -ffunction-section conflicts with -pg option
 !contains(CONFIG, gprof) {
     unix:!mac:*-g++*:QMAKE_CXXFLAGS += -ffunction-sections
