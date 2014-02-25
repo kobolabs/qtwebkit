@@ -964,7 +964,7 @@ SOURCES += \
     platform/Arena.cpp \
     platform/text/BidiContext.cpp \
     platform/text/DateTimeFormat.cpp \
-    platform/text/Hyphenation.cpp \
+    platform/text/qt/HyphenationQt.cpp \
     platform/text/LocaleNone.cpp \
     platform/text/LocaleToScriptMappingDefault.cpp \
     platform/text/PlatformLocale.cpp \
