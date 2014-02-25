@@ -273,6 +273,9 @@ win32 {
         LIBS += -lgdi32
         LIBS += -lole32
         LIBS += -luser32
+
+        DEFINES += PSAPI_VERSION=1
+        LIBS += -lpsapi
     }
 }
 
