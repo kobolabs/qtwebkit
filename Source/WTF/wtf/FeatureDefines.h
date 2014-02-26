@@ -572,6 +572,10 @@
 #define ENABLE_MATHML 1
 #endif
 
+#if !defined(ENABLE_EPUB3)
+#define ENABLE_EPUB3 1
+#endif
+
 #if !defined(ENABLE_MEDIA_CAPTURE)
 #define ENABLE_MEDIA_CAPTURE 0
 #endif

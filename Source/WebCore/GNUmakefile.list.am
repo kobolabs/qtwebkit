@@ -5,6 +5,10 @@ webcore_built_sources += \
 	DerivedSources/WebCore/CSSPropertyNames.cpp \
 	DerivedSources/WebCore/CSSValueKeywords.h \
 	DerivedSources/WebCore/CSSValueKeywords.cpp \
+	DerivedSources/WebCore/epubElementFactory.cpp \
+	DerivedSources/WebCore/epubElementFactory.h \
+	DerivedSources/WebCore/epubNames.cpp \
+	DerivedSources/WebCore/epubNames.h \
 	DerivedSources/WebCore/EventFactory.cpp \
 	DerivedSources/WebCore/EventHeaders.h \
 	DerivedSources/WebCore/EventInterfaces.h \
@@ -3258,6 +3262,14 @@ webcore_sources += \
 	Source/WebCore/editing/WrapContentsInDummySpanCommand.cpp \
 	Source/WebCore/editing/WrapContentsInDummySpanCommand.h \
 	Source/WebCore/editing/WritingDirection.h \
+	Source/WebCore/epub/EPubCaseElement.cpp \
+	Source/WebCore/epub/EPubCaseElement.h \
+	Source/WebCore/epub/EPubDefaultElement.cpp \
+	Source/WebCore/epub/EPubDefaultElement.h \
+	Source/WebCore/epub/epubElement.cpp \
+	Source/WebCore/epub/epubElement.h \
+	Source/WebCore/epub/EPubSwitchElement.cpp \
+	Source/WebCore/epub/EPubSwitchElement.h \
 	Source/WebCore/fileapi/AsyncFileStream.cpp \
 	Source/WebCore/fileapi/AsyncFileStream.h \
 	Source/WebCore/fileapi/Blob.cpp \

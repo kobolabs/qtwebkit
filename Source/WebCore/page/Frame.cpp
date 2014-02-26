@@ -67,6 +67,7 @@
 #include "JSDOMWindowShell.h"
 #include "Logging.h"
 #include "MathMLNames.h"
+#include "epubNames.h"
 #include "MediaFeatureNames.h"
 #include "Navigator.h"
 #include "NodeList.h"
@@ -175,6 +176,7 @@ inline Frame::Frame(Page* page, HTMLFrameOwnerElement* ownerElement, FrameLoader
     MediaFeatureNames::init();
     SVGNames::init();
     XLinkNames::init();
+    epubNames::init();
     MathMLNames::init();
     XMLNSNames::init();
     XMLNames::init();

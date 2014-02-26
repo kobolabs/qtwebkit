@@ -95,6 +95,10 @@ public:
     void insertTextNode(const String&, WhitespaceMode = WhitespaceUnknown);
     void insertForeignElement(AtomicHTMLToken*, const AtomicString& namespaceURI);
 
+#if ENABLE(EPUB3)
+    void insertEPubElement(AtomicHTMLToken*);
+#endif
+
     void insertHTMLHtmlStartTagBeforeHTML(AtomicHTMLToken*);
     void insertHTMLHtmlStartTagInBody(AtomicHTMLToken*);
     void insertHTMLBodyStartTagInBody(AtomicHTMLToken*);
@@ -166,6 +170,10 @@ private:
 
     PassRefPtr<Element> createHTMLElement(AtomicHTMLToken*);
     PassRefPtr<Element> createElement(AtomicHTMLToken*, const AtomicString& namespaceURI);
+
+#if ENABLE(EPUB3)
+    PassRefPtr<Element> createEPubElement(AtomicHTMLToken*);
+#endif
 
     void mergeAttributesFromTokenIntoElement(AtomicHTMLToken*, Element*);
     void dispatchDocumentElementAvailableIfNeeded();

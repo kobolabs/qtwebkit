@@ -32,6 +32,7 @@ INCLUDEPATH += \
     $$SOURCE_DIR/dom \
     $$SOURCE_DIR/dom/default \
     $$SOURCE_DIR/editing \
+    $$SOURCE_DIR/epub \
     $$SOURCE_DIR/fileapi \
     $$SOURCE_DIR/history \
     $$SOURCE_DIR/html \

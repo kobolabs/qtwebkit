@@ -48,6 +48,11 @@
 #include "HTMLToken.h"
 #include "NotImplemented.h"
 #include "Text.h"
+#if ENABLE(EPUB3)
+#include "epubElement.h"
+#include "epubNames.h"
+#include "epubElementFactory.h"
+#endif
 
 namespace WebCore {
 
@@ -426,6 +431,23 @@ void HTMLConstructionSite::insertHTMLElement(AtomicHTMLToken* token)
     attachLater(currentNode(), element);
     m_openElements.push(HTMLStackItem::create(element.release(), token));
 }
+
+#if ENABLE(EPUB3)
+void HTMLConstructionSite::insertEPubElement(AtomicHTMLToken* token)
+{
+    RefPtr<Element> element = createEPubElement(token);
+    attachLater(currentNode(), element);
+    m_openElements.push(HTMLStackItem::create(element.release(), token));
+}
+
+PassRefPtr<Element> HTMLConstructionSite::createEPubElement(AtomicHTMLToken* token)
+{
+    QualifiedName tagName(nullAtom, token->name(), epubNames::epubNamespaceURI);
+    RefPtr<Element> element = epubElementFactory::createepubElement(tagName, ownerDocumentForCurrentNode(), true);
+    setAttributes(element.get(), token, m_parserContentPolicy);
+    return element.release();
+}
+#endif
 
 void HTMLConstructionSite::insertSelfClosingHTMLElement(AtomicHTMLToken* token)
 {

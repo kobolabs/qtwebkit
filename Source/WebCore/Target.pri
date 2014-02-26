@@ -1759,6 +1759,10 @@ HEADERS += \
     editing/VisibleSelection.h \
     editing/VisibleUnits.h \
     editing/WrapContentsInDummySpanCommand.h \
+    epub/epubelement.h \
+    epub/EPubCaseElement.h \
+    epub/EPubDefaultElement.h \
+    epub/EPubSwitchElement.h \
     fileapi/Blob.h \
     fileapi/BlobURL.h \
     fileapi/File.h \
@@ -3619,6 +3623,14 @@ enable?(FILTERS) {
         platform/graphics/filters/SpotLightSource.cpp \
         platform/graphics/filters/SourceAlpha.cpp \
         platform/graphics/filters/SourceGraphic.cpp \
+}
+
+enable?(EPUB3) {
+    SOURCES += \
+    epub/epubElement.cpp \
+    epub/EPubCaseElement.cpp \
+    epub/EPubDefaultElement.cpp \
+    epub/EPubSwitchElement.cpp
 }
 
 enable?(MATHML) {

@@ -26,6 +26,7 @@ set(WebCore_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}/dom"
     "${WEBCORE_DIR}/dom/default"
     "${WEBCORE_DIR}/editing"
+    "$(WEBCORE_DIR)/epub"
     "${WEBCORE_DIR}/fileapi"
     "${WEBCORE_DIR}/history"
     "${WEBCORE_DIR}/html"
@@ -2600,6 +2601,15 @@ set(WebCore_LIBRARIES
     JavaScriptCore
 )
 
+if (ENABLE_EPUB3)
+    list(APPEND WebCore_SOURCES
+        epub/epubElement.cpp
+        epub/EPubCaseElement.cpp
+        epub/EPubDefaultElement.cpp
+        epub/EPubSwitchElement.cpp
+    )
+endif ()
+
 if (ENABLE_SQL_DATABASE AND ENABLE_WORKERS)
     list(APPEND WebCore_SOURCES
         Modules/webdatabase/WorkerGlobalScopeWebDatabase.cpp
@@ -3160,6 +3170,11 @@ list(APPEND WebCoreTestSupport_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/InternalSe
 GENERATE_FONT_NAMES(${WEBCORE_DIR}/css/WebKitFontFamilyNames.in)
 list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/WebKitFontFamilyNames.cpp)
 
+GENERATE_DOM_NAMES(epub ${WEBCORE_DIR}/epub/epubattrs.in ${WEBCORE_DIR}/epub/epubtags.in "")
+list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/epubNames.cpp)
+if (ENABLE_EPUB3)
+    list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/epubElementFactory.cpp)
+endif()
 
 GENERATE_DOM_NAMES(MathML ${WEBCORE_DIR}/mathml/mathattrs.in ${WEBCORE_DIR}/mathml/mathtags.in "")
 list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/MathMLNames.cpp)
