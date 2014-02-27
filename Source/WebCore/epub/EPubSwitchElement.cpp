@@ -10,7 +10,7 @@ using namespace epubNames;
 EPubSwitchElement::EPubSwitchElement(const QualifiedName& tagName, Document* document)
     : epubElement(tagName, document), _switchHandled(false)
 {
-    ASSERT(hasTagName(epub_switchTag));
+    ASSERT(hasTagName(switchTag));
 }
 
 PassRefPtr<EPubSwitchElement> EPubSwitchElement::create(const QualifiedName& tagName, Document* document)
