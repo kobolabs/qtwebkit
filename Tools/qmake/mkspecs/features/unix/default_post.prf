@@ -25,12 +25,12 @@ linux-g++*:isEqual(QT_ARCH,i386) {
         # If DWARF-2 is desired -feliminate-dwarf2-dups can be used with GCC 4.7,
         # but it causes internal compiler errors in older versions of GCC.
         QMAKE_CXXFLAGS_DEBUG -= -g
-        QMAKE_CXXFLAGS_DEBUG += -gstabs
+        !macx:QMAKE_CXXFLAGS_DEBUG += -gstabs
         QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -g
-        QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO += -gstabs
+        !macx:QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO += -gstabs
         separate_debug_info {
             QMAKE_CXXFLAGS_RELEASE -= -g
-            QMAKE_CXXFLAGS_RELEASE += -gstabs
+            !macx:QMAKE_CXXFLAGS_RELEASE += -gstabs
         }
     }
 }
