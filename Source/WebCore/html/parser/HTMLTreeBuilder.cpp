@@ -929,6 +929,16 @@ void HTMLTreeBuilder::processStartTagForInBody(AtomicHTMLToken* token)
         m_tree.insertForeignElement(token, SVGNames::svgNamespaceURI);
         return;
     }
+#if ENABLE(EPUB3)
+    // oh man, what a dumb hack...
+    if (token->name().startsWith("epub:")) {
+        m_tree.reconstructTheActiveFormattingElements();
+        m_tree.insertEPubElement(token);
+        return;
+    }
+#else
+#error WHAT IS THE DEAL WITH CARDBOARD
+#endif
     if (isCaptionColOrColgroupTag(token->name())
         || token->name() == frameTag
         || token->name() == headTag

@@ -18,6 +18,8 @@ mac {
     GENERATORS += fwheader_generator
 }
 
+EPUB_NAMES = $$PWD/epub/epubtags.in
+
 MATHML_NAMES = $$PWD/mathml/mathtags.in
 
 SVG_NAMES = $$PWD/svg/svgtags.in
@@ -678,6 +680,16 @@ enable?(MEDIA_SOURCE) {
 }
 
 qtPrepareTool(QMAKE_MOC, moc)
+
+
+epubnames.output = epubNames.cpp
+epubnames.input = EPUB_NAMES
+epubnames.depends = $$PWD/epub/epubattrs.in
+epubnames.script = $$PWD/dom/make_names.pl
+epubnames.commands = perl -I$$PWD/bindings/scripts $$epubnames.script --tags $$PWD/epub/epubtags.in --attrs $$PWD/epub/epubattrs.in --extraDefines \"$${DEFINES} $$configDefines()\" --preprocessor \"$${QMAKE_MOC} -E\" --factory --wrapperFactory --outputDir ${QMAKE_FUNC_FILE_OUT_PATH}
+epubnames.extra_sources = epubElementFactory.cpp
+GENERATORS += epubnames
+
 
 mathmlnames.output = MathMLNames.cpp
 mathmlnames.input = MATHML_NAMES

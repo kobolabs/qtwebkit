@@ -953,6 +953,13 @@ ExceptionCodeDescription.cpp ExceptionCodeDescription.h ExceptionHeaders.h Excep
 
 # --------
 
+# EPUB3 tag and attribute names, and element factory
+
+epubElementFactory.cpp epubNames.cpp : dom/make_names.pl bindings/scripts/Hasher.pm bindings/scripts/StaticString.pm epub/epubtags.in epub/epubattrs.in
+	perl -I $(WebCore)/bindings/scripts $< --tags $(WebCore)/epub/epubtags.in --attrs $(WebCore)/epub/epubattrs.in --factor --wrapperFactory
+
+# --------
+
 # MathML tag and attribute names, and element factory
 
 MathMLElementFactory.cpp MathMLNames.cpp : dom/make_names.pl bindings/scripts/Hasher.pm bindings/scripts/StaticString.pm mathml/mathtags.in mathml/mathattrs.in

@@ -77,6 +77,7 @@ my (
     $directoryUploadSupport,
     $dom4EventsConstructor,
     $downloadAttributeSupport,
+    $epub3Support,
     $fileSystemSupport,
     $filtersSupport,
     $fontLoadEventsSupport,
@@ -259,6 +260,9 @@ my @features = (
 
     { option => "download-attribute", desc => "Toggle Download Attribute support",
       define => "ENABLE_DOWNLOAD_ATTRIBUTE", default => (isBlackBerry() || isEfl()), value => \$downloadAttributeSupport },
+
+    { option => "epub3", desc => "Toggle EPUB3 support",
+      define => "ENABLE_EPUB3", default => 1, value => \$epub3Support },
 
     { option => "file-system", desc => "Toggle File System support",
       define => "ENABLE_FILE_SYSTEM", default => isBlackBerry(), value => \$fileSystemSupport },
