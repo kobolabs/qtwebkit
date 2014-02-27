@@ -20,7 +20,7 @@ using namespace epubNames;
 EPubCaseElement::EPubCaseElement(const QualifiedName& tagName, Document* document)
     : epubElement(tagName, document)
 {
-    ASSERT(hasTagName(epub_caseTag));
+    ASSERT(hasTagName(caseTag));
 }
 
 PassRefPtr<EPubCaseElement> EPubCaseElement::create(const QualifiedName& tagName, Document* document)
