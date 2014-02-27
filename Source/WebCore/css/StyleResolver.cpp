@@ -3145,6 +3145,17 @@ void StyleResolver::applyProperty(CSSPropertyID id, CSSValue* value)
         updateFont();
         return;
     }
+    case CSSPropertyKoboFontHintstyle: {
+        if (!primitiveValue)
+            return;
+        int hintStyle = primitiveValue->getIntValue();
+        FontDescription fontDescription = state.style()->fontDescription();
+        fontDescription.setHintStyle(hintStyle);
+        setFontDescription(fontDescription);
+        state.setFontDirty(true);
+        updateFont();
+        return;
+    }
 
     default:
 #if ENABLE(SVG)

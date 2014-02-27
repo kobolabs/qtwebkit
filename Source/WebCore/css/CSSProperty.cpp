@@ -385,6 +385,7 @@ bool CSSProperty::isInheritedProperty(CSSPropertyID propertyID)
 #endif
     case CSSPropertyKoboFontSharpness:
     case CSSPropertyKoboFontThickness:
+    case CSSPropertyKoboFontHintstyle:
         return true;
     case CSSPropertyDisplay:
     case CSSPropertyZoom:
