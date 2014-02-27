@@ -11,7 +11,7 @@ using namespace epubNames;
 EPubDefaultElement::EPubDefaultElement(const QualifiedName& tagName, Document* document)
     : epubElement(tagName, document)
 {
-    ASSERT(hasTagName(epub_defaultTag));
+    ASSERT(hasTagName(defaultTag));
 }
 
 PassRefPtr<EPubDefaultElement> EPubDefaultElement::create(const QualifiedName& tagName, Document* document)
