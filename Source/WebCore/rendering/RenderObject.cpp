@@ -2877,6 +2877,7 @@ void RenderObject::getTextDecorationColors(int decorations, Color& underline, Co
     RenderObject* curr = this;
     RenderStyle* styleToUse = 0;
     TextDecoration currDecs = TextDecorationNone;
+    underline = overline = linethrough = Color::transparent;
     Color resultColor;
     do {
         styleToUse = curr->style(firstlineStyle);
