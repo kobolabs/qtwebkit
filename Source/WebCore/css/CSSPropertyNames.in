@@ -450,3 +450,4 @@ user-zoom
 #endif
 -kobo-font-sharpness
 -kobo-font-thickness
+-kobo-font-hintstyle

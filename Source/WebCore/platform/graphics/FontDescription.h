@@ -98,6 +98,7 @@ public:
         , m_textRendering(AutoTextRendering)
         , m_isSpecifiedFont(false)
         , m_script(USCRIPT_COMMON)
+        , m_hintStyle(0) 
         , m_sharpness(.0)
         , m_thickness(.0)
     {
@@ -170,6 +171,8 @@ public:
     void setScript(UScriptCode s) { m_script = s; }
     void setFeatureSettings(PassRefPtr<FontFeatureSettings> settings) { m_featureSettings = settings; }
 
+    void setHintStyle(unsigned s) { m_hintStyle = s; }
+    unsigned hintStyle() const { return m_hintStyle; }
     void setSharpness(float s) { m_sharpness = s; }
     float sharpness() const { return m_sharpness; }
     void setThickness(float s) { m_thickness = s; }
@@ -212,6 +215,7 @@ private:
     unsigned m_isSpecifiedFont : 1; // True if a web page specifies a non-generic font family as the first font family.
     unsigned m_script : 7; // Used to help choose an appropriate font for generic font families.
 
+    unsigned m_hintStyle : 2; // HintingPreference
     float m_sharpness;
     float m_thickness;
 };
@@ -243,6 +247,7 @@ inline bool FontDescription::operator==(const FontDescription& other) const
         && m_featureSettings == other.m_featureSettings
         && m_sharpness == other.m_sharpness
         && m_thickness == other.m_thickness
+        && m_hintStyle == other.m_hintStyle
         ;
 }
 

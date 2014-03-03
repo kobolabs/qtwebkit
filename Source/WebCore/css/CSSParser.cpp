@@ -3116,6 +3116,10 @@ bool CSSParser::parseValue(CSSPropertyID propId, bool important)
         if (validUnit(value, FNumber))
             validPrimitive = true;
         break;
+    case CSSPropertyKoboFontHintstyle:
+        if (validUnit(value, FInteger | FNonNeg) && value->iValue < 4)
+            validPrimitive = true;
+        break;
 
 #if ENABLE(SVG)
     default:
