@@ -449,6 +449,9 @@ static void collectActiveCSSStyleSheetsFromSeamlessParents(Vector<RefPtr<CSSStyl
     sheets.appendVector(seamlessParentIFrame->document()->styleSheetCollection()->activeAuthorStyleSheets());
 }
 
+#if CPU(ARM_NEON) && COMPILER(GCC)
+__attribute__((optimize("no-tree-vectorize")))
+#endif
 bool DocumentStyleSheetCollection::updateActiveStyleSheets(UpdateFlag updateFlag)
 {
     if (m_document->inStyleRecalc()) {
