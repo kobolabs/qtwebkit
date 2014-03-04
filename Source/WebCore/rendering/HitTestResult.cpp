@@ -50,6 +50,7 @@
 #include "SVGImageElement.h"
 #include "SVGNames.h"
 #include "XLinkNames.h"
+#include "RenderSVGImage.h"
 #endif
 
 namespace WebCore {
@@ -296,6 +297,10 @@ Image* HitTestResult::image() const
         RenderImage* image = static_cast<WebCore::RenderImage*>(renderer);
         if (image->cachedImage() && !image->cachedImage()->errorOccurred())
             return image->cachedImage()->imageForRenderer(image);
+    } else if (renderer && renderer->isSVGImage()) {
+        RenderSVGImage* image = static_cast<WebCore::RenderSVGImage*>(renderer);
+        if (image->imageResource()->cachedImage() && !image->imageResource()->cachedImage()->errorOccurred())
+            return image->imageResource()->cachedImage()->image();
     }
 
     return 0;
