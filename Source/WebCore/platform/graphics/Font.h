@@ -167,6 +167,9 @@ public:
     static bool isCJKIdeograph(UChar32);
     static bool isCJKIdeographOrSymbol(UChar32);
 
+
+    static bool isInterIdeographExpansionTarget(UChar32);
+    static bool isUnbreakableCharactersPair(UChar32, UChar32);
     static unsigned expansionOpportunityCount(const LChar*, size_t length, TextDirection, bool& isAfterExpansion);
     static unsigned expansionOpportunityCount(const UChar*, size_t length, TextDirection, bool& isAfterExpansion);
 

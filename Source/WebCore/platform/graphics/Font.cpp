@@ -603,6 +603,133 @@ Font::CodePath Font::characterRangeCodePath(const UChar* characters, unsigned le
     return result;
 }
 
+bool Font::isInterIdeographExpansionTarget(UChar32 c)
+{
+#if ENABLE(EPUB3)
+    // There is no spec. But, These may be good for japanese text.
+    // General Punctuation except HYPHEN and NON-BREAKING HYPHEN
+    if (c >= 0x2000 && c <= 0x206F && c != 0x2010 && c != 0x2011)
+        return true;
+
+    // Number Forms
+    if (c >= 0x2150 && c <= 0x218F)
+        return true;
+
+    // Enclosed Alphanumerics
+    if (c >= 0x2460 && c <= 0x24FF)
+        return true;
+
+    // Geometric Shapes
+    if (c >= 0x25A0 && c <= 0x25FF)
+        return true;
+
+    // Miscellaneous Symbol
+    if (c >= 0x2600 && c <= 0x26FF)
+        return true;
+
+    if (c == 0xFF1A // FULLWIDTH COLON, Full width ASCII variants
+       || c == 0xFF1B // FULLWIDTH SEMICOLON, Full width ASCII variants
+       || c == 0xFF1C // FULLWIDTH LESS-THAN SIGN, Full width ASCII variants
+       || c == 0xFF1E) // FULLWIDTH GREATER-THAN SIGN, Full width ASCII variants
+        return false;
+
+    if (c == 0x00B6 // PILCROW SIGN, Latin-1 punctuation and symbols
+       || c == 0x2103 // DEGREE CELSIUS, Letterlike symbols
+       || c == 0x212B // ANGSTROM SIGN, Letterlike symbols
+       || c == 0x22EF // MIDLINE HORIZONTAL ELLIPSIS
+       || c == 0xFE19) // PRESENTATION FORM FOR VERTICAL HORIZONTAL ELLIPSIS
+        return true;
+
+    // Halfwidth and Fullwidth Forms
+    // Usually only used in CJK
+    // Character codes for Halfwidth and Fullwidth Forms
+    // http://unicode.org/charts/PDF/UFF00.pdf
+
+    // Fullwidth ASCII variants
+    if (c >= 0xFF00 && c <= 0xFF5E)
+        return true;
+
+    // Fullwidth brackets
+    if (c >= 0xFF5F && c <= 0xFF60)
+        return true;
+
+    // Halfwidth CJK punctuation
+    if (c >= 0xFF61 && c <= 0xFF64)
+        return false;
+
+    // Halfwidth Katakana variants
+    if (c >= 0xFF65 && c <= 0xFF9F)
+        return false;
+
+    // Halfwidth Hangul variants
+    if (c >= 0xFFA0 && c <= 0xFFDC)
+        return false;
+
+    // Fullwidth symbol variants
+    if (c >= 0xFFE0 && c <= 0xFFE6)
+        return true;
+
+    // Halfwidth symbol variants
+    if (c >= 0xFFE8 && c <= 0xFFEE)
+        return false;
+
+#endif
+    return isCJKIdeographOrSymbol(c);
+}
+
+bool Font::isUnbreakableCharactersPair(UChar32 current, UChar32 next)
+{
+    switch (next)
+    {
+    case 0x009B: // RIGHT SIGNLE ANGLE QUOTATION MARK
+    case 0x00BB: // RIGHT DOUBLE ANGLE QUOTATION MARK
+    case 0x2019: // RIGHT SINGLE QUOTATION MARK
+    case 0x201D: // RIGHT DOUBLE QUOTATION MARK
+        return true;
+    }
+    switch (current) {
+    // Requirements for Japanese Text Layout
+    // 3.1.10 Unbreakable Character Sequences
+    // http://www.w3.org/TR/2012/NOTE-jlreq-20120403/#unbreakable_character_sequences
+    // LEADERS
+    case 0x2026: // HORIZONTAL ELLIPSIS
+    case 0x2025: // TWO DOT LEADER
+    // DASHES
+    case 0x2014: // EM DASH
+    case 0x2015: // HORIZONTAL BAR
+        return current == next;
+    case 0x2019: // RIGHT SINGLE QUOTATION MARK
+        return !isInterIdeographExpansionTarget(next);
+    // VERTICAL KANA REPEAT MARKS
+    case 0x3033: // VERTICAL KANA REPEAT MARK UPPER HALF
+    case 0x3034: // VERTICAL KANA REPEAT WITH VOICED SOUND MARK UPPER HALF
+        if (next == 0x3035) // VERTICAL KANA REPEAT MARK LOWER HALF
+            return true;
+
+    // There is no spec. But, These may be good for japanese text.
+    // LEADERS
+    case 0x22EF: // MIDLINE HORIZONTAL ELLIPSIS
+    case 0xFE19: // PRESENTATION FORM FOR VERTICAL HORIZONTAL ELLIPSIS
+    case 0xFE30: // PRESENTATION FORM FOR VERTICAL TWO DOT LEADER
+    case 0x205D: // TORICOLON
+    case 0x205A: // TWO DOT PUNCTUATION
+    // DASHES
+    case 0x2012: // FIGURE DASH
+    case 0x2013: // EN DASH
+    case 0x2053: // SWUNG DASH
+    case 0x301C: // WAVE DASH
+    case 0x3030: // WAVY DASH
+        return current == next;
+    case 0x008B: // LEFT SINGLE ANGLE QUOTATION MARK
+    case 0x00AB: // LEFT DOUBLE ANGLE QUOTATION MARK
+    case 0x2018: // LEFT SINGLE QUOTATION MARK
+    case 0x201C: // LEFT DOUBLE QUOTATION MARK
+        return true;
+    default:
+        return false;
+    }
+}
+
 bool Font::isCJKIdeograph(UChar32 c)
 {
     // The basic CJK Unified Ideographs block.
@@ -836,10 +963,12 @@ unsigned Font::expansionOpportunityCount(const UChar* characters, size_t length,
     static bool expandAroundIdeographs = canExpandAroundIdeographsInComplexText();
     unsigned count = 0;
     if (direction == LTR) {
+        UChar32 prev = 0;
         for (size_t i = 0; i < length; ++i) {
             UChar32 character = characters[i];
             if (treatAsSpace(character)) {
                 count++;
+                prev = character;
                 isAfterExpansion = true;
                 continue;
             }
@@ -847,20 +976,34 @@ unsigned Font::expansionOpportunityCount(const UChar* characters, size_t length,
                 character = U16_GET_SUPPLEMENTARY(character, characters[i + 1]);
                 i++;
             }
-            if (expandAroundIdeographs && isCJKIdeographOrSymbol(character)) {
-                if (!isAfterExpansion)
+
+            size_t j = i + 1;
+            UChar32 next = j < length ? characters[j] : 0;
+            if (U16_IS_LEAD(next) && j + 1 < length && U16_IS_TRAIL(characters[j + 1]))
+                next = U16_GET_SUPPLEMENTARY(next, characters[j + 1]);
+
+            if (expandAroundIdeographs && isInterIdeographExpansionTarget(character)) {
+                if (!isAfterExpansion && !isUnbreakableCharactersPair(prev, character))
                     count++;
-                count++;
-                isAfterExpansion = true;
+
+                if (!isUnbreakableCharactersPair(character, next)) {
+                    count++;
+                    isAfterExpansion = true;
+                } else
+                    isAfterExpansion = false;
+                prev = character;
                 continue;
             }
+            prev = character;
             isAfterExpansion = false;
         }
     } else {
+        UChar32 next = 0;
         for (size_t i = length; i > 0; --i) {
             UChar32 character = characters[i - 1];
             if (treatAsSpace(character)) {
                 count++;
+                next = character;
                 isAfterExpansion = true;
                 continue;
             }
@@ -868,13 +1011,25 @@ unsigned Font::expansionOpportunityCount(const UChar* characters, size_t length,
                 character = U16_GET_SUPPLEMENTARY(characters[i - 2], character);
                 i--;
             }
-            if (expandAroundIdeographs && isCJKIdeographOrSymbol(character)) {
-                if (!isAfterExpansion)
+            size_t j = i - 1;
+            UChar32 prev = j > 1 ? characters[j - 1] : 0;
+            if (prev && U16_IS_TRAIL(prev) && U16_IS_LEAD(characters[j - 2]))
+                prev = U16_GET_SUPPLEMENTARY(characters[j - 2], prev);
+
+            if (expandAroundIdeographs && isInterIdeographExpansionTarget(character)) {
+                if (!isAfterExpansion && !isUnbreakableCharactersPair(prev, character))
                     count++;
-                count++;
-                isAfterExpansion = true;
+
+                if (!isUnbreakableCharactersPair(character, next)) {
+                    count++;
+                    isAfterExpansion = true;
+                } else
+                    isAfterExpansion = false;
+
+                next = character;
                 continue;
             }
+            next = character;
             isAfterExpansion = false;
         }
     }

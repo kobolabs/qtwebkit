@@ -323,7 +323,7 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
 
 bool Font::canExpandAroundIdeographsInComplexText()
 {
-    return false;
+    return true;
 }
 
 QFont Font::syntheticFont() const
