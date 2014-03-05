@@ -210,6 +210,8 @@ private:
     int offsetForPositionForComplexText(const TextRun&, float position, bool includePartialGlyphs) const;
     FloatRect selectionRectForComplexText(const TextRun&, const FloatPoint&, int h, int from, int to) const;
 
+    static bool isUprightOrientation(UChar32 target);
+
     friend struct WidthIterator;
     friend class SVGTextRunRenderingContext;
 

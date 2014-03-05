@@ -46,6 +46,8 @@
 
 namespace WebCore {
 
+bool forceComplexPath = qgetenv("QT_FORCE_COMPLEX_PATH") == "1";
+
 static const QString fromRawDataWithoutRef(const String& string, int start = 0, int len = -1)
 {
     if (len < 0)
@@ -288,9 +290,11 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
 
     QVector<quint32> glyphIndexes;
     QVector<QPointF> positions;
+    QVector<bool> glyphIsCJKOrSymbol;
 
     glyphIndexes.reserve(numGlyphs);
     positions.reserve(numGlyphs);
+    glyphIsCJKOrSymbol.reserve(numGlyphs);
     const QRawFont& font(fontData->getQtRawFont());
 
     float width = 0;
@@ -298,10 +302,12 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
     for (int i = 0; i < numGlyphs; ++i) {
         Glyph glyph = glyphBuffer.glyphAt(from + i);
         float advance = glyphBuffer.advanceAt(from + i).width();
+        bool isCJKOrSymbol = glyphBuffer.glyphIsCJKOrSymbolAt(from + i);
         if (!glyph)
             continue;
         glyphIndexes.append(glyph);
         positions.append(QPointF(width, 0));
+        glyphIsCJKOrSymbol.append(isCJKOrSymbol);
         width += advance;
     }
 
@@ -309,6 +315,7 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
     qtGlyphs.setGlyphIndexes(glyphIndexes);
     qtGlyphs.setPositions(positions);
     qtGlyphs.setRawFont(font);
+    qtGlyphs.setGlyphIsCJKOrSymbol(glyphIsCJKOrSymbol);
 
     drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0, m_fontDescription.orientation() == Vertical);
 }
@@ -338,6 +345,11 @@ QFont Font::syntheticFont() const
 QRawFont Font::rawFont() const
 {
     return primaryFont()->getQtRawFont();
+}
+
+bool Font::isUprightOrientation(UChar32 target)
+{
+    return QRawFont::isUprightOrientation(static_cast<unsigned int>(target));
 }
 
 }

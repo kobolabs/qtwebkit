@@ -176,6 +176,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         int currentCharacterIndex = textIterator.currentCharacter();
         const GlyphData& glyphData = glyphDataForCharacter(character, rtl, currentCharacterIndex, advanceLength);
         Glyph glyph = glyphData.glyph;
+        bool isCJKOrSymbol = Font::isCJKIdeographOrSymbol(character);
         const SimpleFontData* fontData = glyphData.fontData;
 
         ASSERT(fontData);
@@ -227,7 +228,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
             static bool expandAroundIdeographs = Font::canExpandAroundIdeographsInComplexText();
             bool treatAsSpace = Font::treatAsSpace(character);
-            if (treatAsSpace || (expandAroundIdeographs && Font::isCJKIdeographOrSymbol(character))) {
+            if (treatAsSpace || (expandAroundIdeographs && isCJKOrSymbol)) {
                 // Distribute the run's total expansion evenly over all expansion opportunities in the run.
                 if (m_expansion) {
                     float previousExpansion = m_expansion;
@@ -239,9 +240,9 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                         if (glyphBuffer) {
                             if (glyphBuffer->isEmpty()) {
                                 if (m_forTextEmphasis)
-                                    glyphBuffer->add(fontData->zeroWidthSpaceGlyph(), fontData, m_expansionPerOpportunity);
+                                    glyphBuffer->add(fontData->zeroWidthSpaceGlyph(), fontData, m_expansionPerOpportunity, 0, isCJKOrSymbol);
                                 else
-                                    glyphBuffer->add(fontData->spaceGlyph(), fontData, expansionAtThisOpportunity);
+                                    glyphBuffer->add(fontData->spaceGlyph(), fontData, expansionAtThisOpportunity, 0, isCJKOrSymbol);
                                 m_characterIndexOfGlyph.append(currentCharacterIndex);
                             } else
                                 glyphBuffer->expandLastAdvance(expansionAtThisOpportunity);
@@ -310,7 +311,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         }
 
         if (glyphBuffer) {
-            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width));
+            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isCJKOrSymbol);
             m_characterIndexOfGlyph.append(currentCharacterIndex);
         }
 

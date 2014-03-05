@@ -419,8 +419,12 @@ TypesettingFeatures Font::defaultTypesettingFeatures()
     return s_defaultTypesettingFeatures;
 }
 
+extern bool forceComplexPath; // defined in FontQt.cpp
+
 Font::CodePath Font::codePath(const TextRun& run) const
 {
+    if (forceComplexPath)
+        return Complex;
     if (s_codePath != Auto)
         return s_codePath;
 
@@ -646,6 +650,9 @@ bool Font::isCJKIdeograph(UChar32 c)
 
 bool Font::isCJKIdeographOrSymbol(UChar32 c)
 {
+#if ENABLE(EPUB3)
+    return isUprightOrientation(c);
+#endif
     // 0x2C7 Caron, Mandarin Chinese 3rd Tone
     // 0x2CA Modifier Letter Acute Accent, Mandarin Chinese 2nd Tone
     // 0x2CB Modifier Letter Grave Access, Mandarin Chinese 4th Tone 
