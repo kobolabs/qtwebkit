@@ -78,6 +78,11 @@ void SimpleFontData::platformInit()
          return;
     }
 
+    if (platformData().orientation() == Vertical && !isTextOrientationFallback())
+        m_hasVerticalGlyphs = m_platformData.rawFont().hasVerticalGlyphs();
+    else
+        m_hasVerticalGlyphs = false;
+
     QRawFont rawFont(m_platformData.rawFont());
     float descent = rawFont.descent();
     float ascent = rawFont.ascent();

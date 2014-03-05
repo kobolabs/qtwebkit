@@ -63,13 +63,13 @@ static QRawFont rawFontForCharacters(const QString& string, const QRawFont& font
     return glyphs.rawFont();
 }
 
-PassRefPtr<SimpleFontData> FontCache::systemFallbackForCharacters(const FontDescription&, const SimpleFontData* originalFontData, bool, const UChar* characters, int length)
+PassRefPtr<SimpleFontData> FontCache::systemFallbackForCharacters(const FontDescription& description, const SimpleFontData* originalFontData, bool, const UChar* characters, int length)
 {
     QString qstring = QString::fromRawData(reinterpret_cast<const QChar*>(characters), length);
     QRawFont computedFont = rawFontForCharacters(qstring, originalFontData->getQtRawFont());
     if (!computedFont.isValid())
         return 0;
-    FontPlatformData alternateFont(computedFont);
+    FontPlatformData alternateFont(computedFont, description.orientation());
     return getCachedFontData(&alternateFont, DoNotRetain);
 }
 

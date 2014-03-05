@@ -56,10 +56,11 @@ static inline bool isEmptyValue(const float size, const bool bold, const bool ob
     return !bold && !oblique && size == 0.f;
 }
 
-FontPlatformData::FontPlatformData(float size, bool bold, bool oblique)
+FontPlatformData::FontPlatformData(float size, bool bold, bool oblique, FontOrientation orientation)
 {
+    m_data = NULL;
     if (!isEmptyValue(size, bold, oblique))
-        m_data = adoptRef(new FontPlatformDataPrivate(size, bold, oblique));
+        m_data = adoptRef(new FontPlatformDataPrivate(size, bold, oblique, orientation));
 }
 
 FontPlatformData::FontPlatformData(const FontDescription& description, const AtomicString& familyName, int wordSpacing, int letterSpacing)
@@ -98,7 +99,23 @@ FontPlatformData::FontPlatformData(const FontDescription& description, const Ato
     // m_data->size if a font size of zero is requested and pixelSize()
     // otherwise.
     m_data->size = (!requestedSize) ? requestedSize : font.pixelSize();
+    m_data->orientation = description.orientation();
     m_data->rawFont = QRawFont::fromFont(font, QFontDatabase::Any);
+}
+
+FontPlatformData::FontPlatformData(const FontPlatformData& src)
+{
+    if (!src.m_data) {
+        return;
+    }
+
+    m_data = adoptRef(new FontPlatformDataPrivate());
+    m_data->rawFont = src.m_data->rawFont;
+    m_data->size = src.m_data->size;
+    m_data->bold = src.m_data->bold;
+    m_data->oblique = src.m_data->oblique;
+    m_data->orientation = src.m_data->orientation;
+    m_data->isDeletedValue = src.m_data->isDeletedValue;
 }
 
 FontPlatformData::FontPlatformData(const FontPlatformData& other, float size)
@@ -109,6 +126,7 @@ FontPlatformData::FontPlatformData(const FontPlatformData& other, float size)
     m_data->oblique = other.m_data->oblique;
     m_data->rawFont.setPixelSize(size);
     m_data->size = m_data->rawFont.pixelSize();
+    m_data->orientation = m_data->orientation;
 }
 
 bool FontPlatformData::operator==(const FontPlatformData& other) const
@@ -122,6 +140,7 @@ bool FontPlatformData::operator==(const FontPlatformData& other) const
     const bool equals = (m_data->size == other.m_data->size
                          && m_data->bold == other.m_data->bold
                          && m_data->oblique == other.m_data->oblique
+                         && m_data->orientation == other.m_data->orientation
                          && m_data->rawFont == other.m_data->rawFont);
     return equals;
 }
@@ -134,7 +153,8 @@ unsigned FontPlatformData::hash() const
         return 1;
     return qHash(m_data->rawFont.familyName()) ^ qHash(m_data->rawFont.style())
             ^ qHash(m_data->rawFont.weight())
-            ^ qHash(*reinterpret_cast<quint32*>(&m_data->size));
+            ^ qHash(*reinterpret_cast<quint32*>(&m_data->size)
+            ^ qHash(m_data->orientation));
 }
 
 #ifndef NDEBUG
