@@ -31,11 +31,11 @@
 
 namespace WebCore {
 
-FontPlatformData FontCustomPlatformData::fontPlatformData(int size, bool bold, bool italic, FontOrientation, FontWidthVariant, FontRenderingMode)
+FontPlatformData FontCustomPlatformData::fontPlatformData(int size, bool bold, bool italic, FontOrientation orientation, FontWidthVariant, FontRenderingMode)
 {
     Q_ASSERT(m_rawFont.isValid());
     m_rawFont.setPixelSize(qreal(size));
-    return FontPlatformData(m_rawFont);
+    return FontPlatformData(m_rawFont, orientation);
 }
 
 FontCustomPlatformData* createFontCustomPlatformData(SharedBuffer* buffer)

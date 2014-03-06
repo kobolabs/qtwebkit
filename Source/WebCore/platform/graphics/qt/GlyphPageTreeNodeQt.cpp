@@ -23,6 +23,7 @@
 #include "config.h"
 #include "GlyphPageTreeNode.h"
 
+#include "Font.h"
 #include "SimpleFontData.h"
 #include <QFontMetricsF>
 #include <QTextLayout>
@@ -34,8 +35,26 @@ bool GlyphPage::fill(unsigned offset, unsigned length, UChar* buffer, unsigned b
     QRawFont rawFont = fontData->platformData().rawFont();
     QString qstring = QString::fromRawData(reinterpret_cast<const QChar*>(buffer), static_cast<int>(bufferLength));
     QVector<quint32> indexes = rawFont.glyphIndexesForString(qstring);
+    quint32 *glyphs = indexes.data();
 
     bool haveGlyphs = false;
+    bool lookVariants = false;
+
+    if (fontData->hasVerticalGlyphs()) {
+#if ENABLE(EPUB3)
+        lookVariants = true;
+#else
+        for (unsigned i = 0; i < length; ++i) {
+           if (!Font::isCJKIdeograph(buffer[i])) {
+                lookVariants = true;
+                break;
+            }
+        }
+#endif
+    }
+
+    if (lookVariants)
+        rawFont.substituteWithVerticalVariants(glyphs, indexes.size());
 
     for (unsigned i = 0; i < length; ++i) {
         Glyph glyph = (i < indexes.size()) ? indexes.at(i) : 0;

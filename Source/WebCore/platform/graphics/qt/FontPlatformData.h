@@ -41,12 +41,14 @@ public:
         : size(0)
         , bold(false)
         , oblique(false)
+        , orientation(Horizontal)
         , isDeletedValue(false)
     { }
-    FontPlatformDataPrivate(const float size, const bool bold, const bool oblique)
+    FontPlatformDataPrivate(const float size, const bool bold, const bool oblique, FontOrientation orientation = Horizontal)
         : size(size)
         , bold(bold)
         , oblique(oblique)
+        , orientation(orientation)
         , isDeletedValue(false)
     {
 // This is necessary for SVG Fonts, which are only supported when using QRawFont.
@@ -63,6 +65,7 @@ public:
         , size(rawFont.pixelSize())
         , bold(rawFont.weight() >= QFont::Bold)
         , oblique(false)
+        , orientation(Horizontal)
         , isDeletedValue(false)
     { }
 
@@ -74,18 +77,22 @@ public:
     float size;
     bool bold : 1;
     bool oblique : 1;
+    FontOrientation orientation;
     bool isDeletedValue : 1;
 };
 
 class FontPlatformData {
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    FontPlatformData(float size, bool bold, bool oblique);
+    FontPlatformData(float size, bool bold, bool oblique, FontOrientation = Horizontal);
     FontPlatformData(const FontDescription&, const AtomicString& familyName, int wordSpacing = 0, int letterSpacing = 0);
+    FontPlatformData(const FontPlatformData& src);
     FontPlatformData(const FontPlatformData&, float size);
-    FontPlatformData(const QRawFont& rawFont)
+    FontPlatformData(const QRawFont& rawFont, FontOrientation orientation)
         : m_data(adoptRef(new FontPlatformDataPrivate(rawFont)))
-    { }
+    {
+        m_data->orientation = orientation;
+    }
     FontPlatformData(WTF::HashTableDeletedValueType)
         : m_data(adoptRef(new FontPlatformDataPrivate()))
     {
@@ -115,8 +122,17 @@ public:
         return m_data->size;
     }
 
-    FontOrientation orientation() const { return Horizontal; } // FIXME: Implement.
-    void setOrientation(FontOrientation) { } // FIXME: Implement.
+    FontOrientation orientation() const
+    {
+        Q_ASSERT(m_data != reinterpret_cast<FontPlatformDataPrivate*>(-1));
+        if (m_data)
+            return m_data->orientation;
+        return Horizontal;
+    }
+    void setOrientation(FontOrientation orientation)
+    {
+        m_data->orientation = orientation;
+    }
 
     unsigned hash() const;
 
