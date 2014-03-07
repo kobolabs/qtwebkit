@@ -395,6 +395,7 @@ public:
     void selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
+    static QString userAgentForUrl(const QUrl& url);
 
 Q_SIGNALS:
     void loadStarted();
@@ -443,7 +444,6 @@ protected:
     virtual bool javaScriptPrompt(QWebFrame *originatingFrame, const QString& msg, const QString& defaultValue, QString* result);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 
-    static QString userAgentForUrl(const QUrl& url);
 
 private:
     Q_PRIVATE_SLOT(d, void _q_onLoadProgressChanged(int))
