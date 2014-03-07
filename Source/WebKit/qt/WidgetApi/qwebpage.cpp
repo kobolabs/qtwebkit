@@ -3147,11 +3147,10 @@ QWebPluginFactory *QWebPage::pluginFactory() const
     \li %AppVersion% expands to QCoreApplication::applicationName()/QCoreApplication::applicationVersion() if they're set; otherwise defaulting to Qt and the current Qt version.
     \endlist
 */
-QString QWebPage::userAgentForUrl(const QUrl&) const
+QString QWebPage::userAgentForUrl(const QUrl&)
 {
     return QWebPageAdapter::defaultUserAgentString();
 }
-
 
 /*!
     Returns the total number of bytes that were received from the network to render the current page,
