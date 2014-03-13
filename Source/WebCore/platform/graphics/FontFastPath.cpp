@@ -192,10 +192,15 @@ void Font::drawGlyphBuffer(GraphicsContext* context, const TextRun& run, const G
 
     // Draw each contiguous run of glyphs that use the same font data.
     const SimpleFontData* fontData = glyphBuffer.fontDataAt(0);
+    bool isVertical = !(fontData->platformData().orientation() == Horizontal || fontData->brokenIdeographFontData() || fontData->hasVerticalGlyphs());
     FloatSize offset = glyphBuffer.offsetAt(0);
     FloatPoint startPoint(point.x(), point.y() - glyphBuffer.initialAdvance().height());
-    float nextX = startPoint.x() + glyphBuffer.advanceAt(0).width();
-    float nextY = startPoint.y() + glyphBuffer.advanceAt(0).height();
+    float nextX = startPoint.x();
+    if (isVertical) {
+        nextX += glyphBuffer.advanceAt(0).height(); // Use the Y advance for unrotated glyphs
+    } else {
+        nextX += glyphBuffer.advanceAt(0).width();
+    }
     int lastFrom = 0;
     int nextGlyph = 1;
 #if ENABLE(SVG_FONTS)
@@ -204,7 +209,7 @@ void Font::drawGlyphBuffer(GraphicsContext* context, const TextRun& run, const G
     while (nextGlyph < glyphBuffer.size()) {
         const SimpleFontData* nextFontData = glyphBuffer.fontDataAt(nextGlyph);
         FloatSize nextOffset = glyphBuffer.offsetAt(nextGlyph);
-
+        bool nextIsVertical = !(nextFontData->platformData().orientation() == Horizontal || nextFontData->brokenIdeographFontData() || nextFontData->hasVerticalGlyphs());
         if (nextFontData != fontData || nextOffset != offset) {
 #if ENABLE(SVG_FONTS)
             if (renderingContext && fontData->isSVGFont())
@@ -217,10 +222,12 @@ void Font::drawGlyphBuffer(GraphicsContext* context, const TextRun& run, const G
             fontData = nextFontData;
             offset = nextOffset;
             startPoint.setX(nextX);
-            startPoint.setY(nextY);
         }
-        nextX += glyphBuffer.advanceAt(nextGlyph).width();
-        nextY += glyphBuffer.advanceAt(nextGlyph).height();
+        if (nextIsVertical) {
+            nextX += glyphBuffer.advanceAt(nextGlyph).height(); // Use the Y advance for unrotated glyphs
+        } else {
+            nextX += glyphBuffer.advanceAt(nextGlyph).width();
+        }
         nextGlyph++;
     }
 
