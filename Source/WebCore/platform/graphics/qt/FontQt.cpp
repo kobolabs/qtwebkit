@@ -297,16 +297,21 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
     glyphIsCJKOrSymbol.reserve(numGlyphs);
     const QRawFont& font(fontData->getQtRawFont());
 
+    float descent = fontData->fontMetrics().floatDescent();
     float width = 0;
 
     for (int i = 0; i < numGlyphs; ++i) {
         Glyph glyph = glyphBuffer.glyphAt(from + i);
         float advance = glyphBuffer.advanceAt(from + i).width();
-        bool isCJKOrSymbol = glyphBuffer.glyphIsCJKOrSymbolAt(from + i);
         if (!glyph)
             continue;
+
         glyphIndexes.append(glyph);
-        positions.append(QPointF(width, 0));
+        bool isCJKOrSymbol = glyphBuffer.glyphIsCJKOrSymbolAt(from + i);
+        bool isVerticalRun = (m_fontDescription.orientation() == Vertical && isCJKOrSymbol);
+        // use the edge of the text rect as the origin for unrotated CJK characters instead of the baseline
+        QPointF glyphOrigin = isVerticalRun ? QPointF(width - descent, descent) : QPointF(width, 0);
+        positions.append(glyphOrigin);
         glyphIsCJKOrSymbol.append(isCJKOrSymbol);
         width += advance;
     }

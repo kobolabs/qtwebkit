@@ -55,7 +55,10 @@ float SimpleFontData::platformWidthForGlyph(Glyph glyph) const
     glyphIndexes.append(glyph);
     QVector<QPointF> advances = platformData().rawFont().advancesForGlyphIndexes(glyphIndexes);
     ASSERT(!advances.isEmpty());
-    return advances.at(0).x();
+    if (platformData().orientation() == Horizontal || m_isBrokenIdeographFallback || !m_hasVerticalGlyphs) {
+        return advances.at(0).x();
+    }
+    return advances.at(0).y();
 }
 
 PassRefPtr<SimpleFontData> SimpleFontData::platformCreateScaledFontData(const FontDescription& fontDescription, float scaleFactor) const
