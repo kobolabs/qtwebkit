@@ -7,19 +7,11 @@
 
 # All external modules should include WTF headers by prefixing with "wtf" (#include <wtf/some/thing.h>).
 INCLUDEPATH += $$PWD
-
-mac {
-    # Mac OS does ship libicu but not the associated header files.
-    # Therefore WebKit provides adequate header files.
-    INCLUDEPATH += $${ROOT_WEBKIT_DIR}/Source/WTF/icu
-    LIBS += -licucore
-} else {
-    contains(QT_CONFIG,icu) {
+contains(QT_CONFIG,icu) {
         win32: LIBS += -licuin -licuuc -licudt
         else:!contains(QT_CONFIG,no-pkg-config):packagesExist("icu-i18n"): PKGCONFIG *= icu-i18n
         else:android: LIBS += -licui18n -licuuc
         else: LIBS += -licui18n -licuuc -licudata
-    }
 }
 
 use?(GLIB) {
