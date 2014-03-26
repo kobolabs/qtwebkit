@@ -472,6 +472,8 @@ public:
     bool allowsShapeInsideInfoSharing() const { return !isInline() && !isFloating(); }
 #endif
 
+    bool getFirstChar(UChar*);
+
 protected:
     virtual void willBeDestroyed();
 
