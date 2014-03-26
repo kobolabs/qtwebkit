@@ -54,7 +54,7 @@ bool Font::primaryFontHasGlyphForCharacter(UChar32 character) const
 
 // FIXME: This function may not work if the emphasis mark uses a complex script, but none of the
 // standard emphasis marks do so.
-bool Font::getEmphasisMarkGlyphData(const AtomicString& mark, GlyphData& glyphData) const
+bool Font::getEmphasisMarkGlyphData(const AtomicString& mark, GlyphData& glyphData, bool* isCJKOrSymbol) const
 {
     if (mark.isEmpty())
         return false;
@@ -76,6 +76,9 @@ bool Font::getEmphasisMarkGlyphData(const AtomicString& mark, GlyphData& glyphDa
     }
 
     glyphData = glyphDataForCharacter(character, false, EmphasisMarkVariant);
+    if (isCJKOrSymbol) {
+        *isCJKOrSymbol = Font::isCJKIdeographOrSymbol(character);
+    }
     return true;
 }
 
@@ -252,7 +255,8 @@ void Font::drawEmphasisMarks(GraphicsContext* context, const TextRun& run, const
     FontCachePurgePreventer purgePreventer;
     
     GlyphData markGlyphData;
-    if (!getEmphasisMarkGlyphData(mark, markGlyphData))
+    bool isCJKOrSymbol;
+    if (!getEmphasisMarkGlyphData(mark, markGlyphData, &isCJKOrSymbol))
         return;
 
     const SimpleFontData* markFontData = markGlyphData.fontData;
@@ -270,10 +274,18 @@ void Font::drawEmphasisMarks(GraphicsContext* context, const TextRun& run, const
     for (int i = 0; i + 1 < glyphBuffer.size(); ++i) {
         float middleOfNextGlyph = offsetToMiddleOfGlyphAtIndex(glyphBuffer, i + 1);
         float advance = glyphBuffer.advanceAt(i).width() - middleOfLastGlyph + middleOfNextGlyph;
-        markBuffer.add(glyphBuffer.glyphAt(i) ? markGlyph : spaceGlyph, markFontData, advance);
+        if (glyphBuffer.glyphAt(i)) {
+            markBuffer.add(markGlyph, markFontData, advance, 0, isCJKOrSymbol);
+        } else {
+            markBuffer.add(spaceGlyph, markFontData, advance, 0, false);
+        }
         middleOfLastGlyph = middleOfNextGlyph;
     }
-    markBuffer.add(glyphBuffer.glyphAt(glyphBuffer.size() - 1) ? markGlyph : spaceGlyph, markFontData, 0);
+    if (glyphBuffer.glyphAt(glyphBuffer.size() - 1)) {
+        markBuffer.add(markGlyph, markFontData, 0, 0, isCJKOrSymbol);
+    } else {
+        markBuffer.add(spaceGlyph, markFontData, 0, 0, false);
+    }
 
     drawGlyphBuffer(context, run, markBuffer, startPoint);
 }
