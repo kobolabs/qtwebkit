@@ -2869,7 +2869,7 @@ static inline void commitLineBreakAtCurrentWidth(LineWidth& width, InlineIterato
     lBreak.moveTo(object, offset, nextBreak);
 }
 
-static bool textBeginsWithBreakablePosition(RenderObject* next)
+static bool textBeginsWithBreakablePosition(RenderObject* next, RenderObject* current)
 {
     ASSERT(next->isText());
     RenderText* nextText = toRenderText(next);
@@ -2878,10 +2878,25 @@ static bool textBeginsWithBreakablePosition(RenderObject* next)
     if (!nextText->textLength())
         return false;
     UChar c = nextText->characterAt(0);
-    return c == ' ' || c == '\t' || (c == '\n' && !nextText->preservesNewline());
+    if (c == ' ' || c == '\t' || (c == '\n' && !nextText->preservesNewline())) {
+        return true;
+    }
+    if (current->isReplaced() && !isNonStarterCharacter(c)) {
+        return true;
+    }
+    return false;
 }
 
-static bool canBreakAtThisPosition(bool autoWrap, LineWidth& width, InlineIterator& lBreak, RenderObject* next, const InlineIterator& current, EWhiteSpace currWS, bool currentCharacterIsSpace, bool autoWrapWasEverTrueOnLine)
+static bool blockHasNonBreakableStart(RenderBlock* block)
+{
+    UChar c;
+    if (block->getFirstChar(&c)) {
+        return isNonStarterCharacter(c);
+    }
+    return false;
+}
+
+static bool canBreakAtThisPosition(bool autoWrap, LineWidth& width, InlineIterator& lBreak, RenderObject* next, const InlineIterator& current, EWhiteSpace currWS, bool currentCharacterIsSpace, bool autoWrapWasEverTrueOnLine, bool allowImagesToBreak)
 {
     // If we are no-wrap and have found a line-breaking opportunity already then we should take it.
     if (width.committedWidth() && !width.fitsOnLine(currentCharacterIsSpace) && currWS == NOWRAP)
@@ -2895,11 +2910,19 @@ static bool canBreakAtThisPosition(bool autoWrap, LineWidth& width, InlineIterat
     if (autoWrap && currentCharacterIsSpace)
         return true;
 
-    bool nextIsText = (next && (current.m_obj->isText() || isEmptyInline(current.m_obj)) && next->isText() && !next->isBR() && (autoWrap || next->style()->autoWrap()));
-    if (!nextIsText)
-        return autoWrap;
+    bool nextIsText = (next && (current.m_obj->isText() || current.m_obj->isRubyRun() || isEmptyInline(current.m_obj) || current.m_obj->isInlineBlockOrInlineTable() || (current.m_obj->isImage() && allowImagesToBreak)) && next->isText() && !next->isBR() && (autoWrap || next->style()->autoWrap()));
+    if (!nextIsText) {
+        if (!autoWrap) {
+            return false;
+        }
+        // Check that the next block is able to become a line start.
+        if (next && next->isInlineBlockOrInlineTable() && blockHasNonBreakableStart(toRenderBlock(next))) {
+            return false;
+        }
+        return true;
+    }
 
-    bool canBreakHere = !currentCharacterIsSpace && textBeginsWithBreakablePosition(next);
+    bool canBreakHere = !currentCharacterIsSpace && textBeginsWithBreakablePosition(next, current.m_obj);
 
     // See if attempting to fit below floats creates more available width on the line.
     if (!width.fitsOnLine() && !width.committedWidth())
@@ -2911,6 +2934,32 @@ static bool canBreakAtThisPosition(bool autoWrap, LineWidth& width, InlineIterat
         commitLineBreakAtCurrentWidth(width, lBreak, next);
 
     return canBreakHere;
+}
+
+static bool isRubyRunAncestor(RenderObject *r)
+{
+    r = r->parent();
+    while (r) {
+        if (r->isRubyRun()) {
+            return true;
+        }
+        r = r->parent();
+    }
+    return false;
+}
+
+static bool endsWithNonEndingCharacter(RenderObject* r)
+{
+    // Don't permit open brackets at the end of a line.
+    if (!r->isText()) {
+        return false;
+    }
+    RenderText* text = toRenderText(r);
+    if (text->textLength() == 0) {
+        return false;
+    }
+    UChar c = text->characters()[text->textLength() - 1];
+    return isNonEndingCharacter(c);
 }
 
 InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& resolver, LineInfo& lineInfo, RenderTextInfo& renderTextInfo, FloatingObject* lastFloatFromPreviousLine, unsigned consecutiveHyphenatedLines, WordMeasurements& wordMeasurements)
@@ -2962,6 +3011,12 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
     RenderStyle* blockStyle = m_block->style();
     bool allowImagesToBreak = !m_block->document()->inQuirksMode() || !m_block->isTableCell() || !blockStyle->logicalWidth().isIntrinsicOrAuto();
 
+    // FIXME: CSS3 Ruby 3.4 Ruby box and line breaking says
+    // "we have added ruby annotations should not cause a line breaking opportunity"
+    // We ignore the limitaion and always add line breaking opprtunity.
+    // http://www.w3.org/TR/2011/WD-css3-ruby-20110630/#ruby-line-breaking
+    const bool isInRubyRun = isRubyRunAncestor(current.m_obj);
+
     EWhiteSpace currWS = blockStyle->whiteSpace();
     EWhiteSpace lastWS = currWS;
     while (current.m_obj) {
@@ -2973,7 +3028,7 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
         currWS = current.m_obj->isReplaced() ? current.m_obj->parent()->style()->whiteSpace() : currentStyle->whiteSpace();
         lastWS = last->isReplaced() ? last->parent()->style()->whiteSpace() : last->style()->whiteSpace();
 
-        bool autoWrap = RenderStyle::autoWrap(currWS);
+        bool autoWrap = (!isInRubyRun && RenderStyle::autoWrap(currWS));
         autoWrapWasEverTrueOnLine = autoWrapWasEverTrueOnLine || autoWrap;
 
 #if ENABLE(SVG)
@@ -2983,6 +3038,7 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
 #endif
 
         bool collapseWhiteSpace = RenderStyle::collapseWhiteSpace(currWS);
+        bool canStart = true;
 
         if (current.m_obj->isBR()) {
             if (width.fitsOnLine()) {
@@ -3090,9 +3146,16 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
             if (atStart)
                 width.updateAvailableWidth(replacedBox->logicalHeight());
 
+            if (replacedBox->isInlineBlockOrInlineTable()) {
+                RenderBlock* block = toRenderBlock(replacedBox);
+                canStart = !blockHasNonBreakableStart(block);
+            }
+
             // Break on replaced elements if either has normal white-space.
-            if ((autoWrap || RenderStyle::autoWrap(lastWS)) && (!current.m_obj->isImage() || allowImagesToBreak))
+            bool lastAutoWrap = (!isInRubyRun && RenderStyle::autoWrap(lastWS));
+            if (canStart && (autoWrap || lastAutoWrap) && (!current.m_obj->isImage() || allowImagesToBreak) && !endsWithNonEndingCharacter(last)) {
                 commitLineBreakAtCurrentWidth(width, lBreak, current.m_obj);
+            }
 
             if (ignoringSpaces)
                 stopIgnoringSpaces(lineMidpointState, InlineIterator(0, current.m_obj, 0));
@@ -3452,8 +3515,8 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
         } else
             ASSERT_NOT_REACHED();
 
-        bool canBreakHere = canBreakAtThisPosition(autoWrap, width, lBreak, next, current, currWS, currentCharacterIsSpace, autoWrapWasEverTrueOnLine);
-        if (canBreakHere && !width.fitsOnLine(ignoringSpaces)) {
+        bool canBreakHere = canBreakAtThisPosition(autoWrap, width, lBreak, next, current, currWS, currentCharacterIsSpace, autoWrapWasEverTrueOnLine, allowImagesToBreak);
+        if (canBreakHere && canStart && !width.fitsOnLine(ignoringSpaces)) {
             // if we have floats, try to get below them.
             if (currentCharacterIsSpace && !ignoringSpaces && currentStyle->collapseWhiteSpace())
                 trailingObjects.clear();
@@ -3476,7 +3539,7 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
 
         if (!current.m_obj->isFloatingOrOutOfFlowPositioned()) {
             last = current.m_obj;
-            if (last->isReplaced() && autoWrap && (!last->isImage() || allowImagesToBreak) && (!last->isListMarker() || toRenderListMarker(last)->isInside()))
+            if (last->isReplaced() && autoWrap && !last->isRubyRun() && !last->isInlineBlockOrInlineTable() && !last->isImage() && (!last->isListMarker() || toRenderListMarker(last)->isInside()))
                 commitLineBreakAtCurrentWidth(width, lBreak, next);
         }
 
@@ -3489,7 +3552,7 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
         atStart = false;
     }
 
-    if (width.fitsOnLine(true) || lastWS == NOWRAP)
+    if (width.fitsOnLine(true) || lastWS == NOWRAP || isInRubyRun)
         lBreak.clear();
 
  end:

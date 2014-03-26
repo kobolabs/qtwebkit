@@ -248,6 +248,22 @@ RenderBlock* RenderBlock::createAnonymous(Document* document)
     return renderer;
 }
 
+bool RenderBlock::getFirstChar(UChar* c)
+{
+    if (!childrenInline() || !firstChild())
+        return false;
+
+    for (InlineWalker walker(this); !walker.atEnd(); walker.advance()) {
+        RenderObject* o = walker.current();
+        if (o->isText()) {
+            RenderText* t = toRenderText(o);
+            *c = t->characters()[0];
+            return true;
+        }
+    }
+    return false;
+}
+
 void RenderBlock::willBeDestroyed()
 {
     // Mark as being destroyed to avoid trouble with merges in removeChild().
