@@ -235,13 +235,14 @@ static inline std::pair<GlyphData, GlyphPage*> glyphDataAndPageForNonCJKCharacte
         GlyphPage* verticalRightPage = verticalRightNode->page();
         if (verticalRightPage) {
             GlyphData verticalRightData = verticalRightPage->glyphDataForCharacter(character);
+            // The glyphs are identical, meaning that we should just use the horizontal glyph.
+            if (verticalRightData.fontData)
+                return std::make_pair(verticalRightData, verticalRightPage);
+
             // If the glyphs are distinct, we will make the assumption that the font has a vertical-right glyph baked
             // into it.
             if (data.glyph != verticalRightData.glyph)
                 return std::make_pair(data, page);
-            // The glyphs are identical, meaning that we should just use the horizontal glyph.
-            if (verticalRightData.fontData)
-                return std::make_pair(verticalRightData, verticalRightPage);
         }
     }
     return std::make_pair(data, page);
