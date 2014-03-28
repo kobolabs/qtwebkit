@@ -848,11 +848,6 @@ bool ContainerNode::getUpperLeftCorner(FloatPoint& point) const
     RenderObject* o = renderer();
     RenderObject* p = o;
 
-    if (!o->isInline() || o->isReplaced()) {
-        point = o->localToAbsolute(FloatPoint(), UseTransforms);
-        return true;
-    }
-
     // find the next text/image child, to get a position
     while (o) {
         p = o;
@@ -883,7 +878,7 @@ bool ContainerNode::getUpperLeftCorner(FloatPoint& point) const
         } else if ((o->isText() && !o->isBR()) || o->isReplaced()) {
             point = FloatPoint();
             if (o->isText() && toRenderText(o)->firstTextBox()) {
-                point.move(toRenderText(o)->linesBoundingBox().x(), toRenderText(o)->firstTextBox()->root()->lineTop());
+                point.move(toRenderText(o)->linesBoundingBox().x(), toRenderText(o)->linesBoundingBox().y());
             } else if (o->isBox()) {
                 RenderBox* box = toRenderBox(o);
                 point.moveBy(box->location());
@@ -963,7 +958,19 @@ LayoutRect ContainerNode::boundingBox() const
             lowerRight = upperLeft;
         else
             upperLeft = lowerRight;
-    } 
+    }
+
+    using std::min;
+
+    const int left = min(upperLeft.x(), lowerRight.x());
+    const int right = max(upperLeft.x(), lowerRight.x());
+    upperLeft.setX(left);
+    lowerRight.setX(right);
+
+    const int upper = min(upperLeft.y(), lowerRight.y());
+    const int lower = max(upperLeft.y(), lowerRight.y());
+    upperLeft.setY(upper);
+    lowerRight.setY(lower);
 
     return enclosingLayoutRect(FloatRect(upperLeft, lowerRight.expandedTo(upperLeft) - upperLeft));
 }
