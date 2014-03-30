@@ -32,6 +32,62 @@
 
 namespace WebCore {
 
+#if OS(MAC_OS_X)
+
+static QString macVersionForUAString()
+{
+    static QString version;
+    if (version.isEmpty()) {
+        const char *ver;
+        switch (QSysInfo::MacintoshVersion) {
+            case QSysInfo::MV_10_0:
+                ver = "10_0";
+                break;
+            case QSysInfo::MV_10_1:
+                ver = "10_1";
+                break;
+            case QSysInfo::MV_10_2:
+                ver = "10_2";
+                break;
+            case QSysInfo::MV_10_3:
+                ver = "10_3";
+                break;
+            case QSysInfo::MV_10_4:
+                ver = "10_4";
+                break;
+            case QSysInfo::MV_10_5:
+                ver = "10_5";
+                break;
+            case QSysInfo::MV_10_6:
+                ver = "10_6";
+                break;
+            case QSysInfo::MV_10_7:
+                ver = "10_7";
+                break;
+            case QSysInfo::MV_10_8:
+                ver = "10_8";
+                break;
+            case QSysInfo::MV_10_9:
+                ver = "10_9";
+                break;
+            default:
+                ver = "Unknown";
+                break;
+        }
+
+        version = QString::fromLatin1("%1 %2").arg(
+#if CPU(X86) || CPU(X86_64)
+             "Intel Mac OS X",
+#else
+             "PPC Mac OS X",
+#endif
+             ver);
+    }
+    return version;
+}
+
+#endif
+
 /*!
     This function is called when a user agent for HTTP requests is needed.
 
@@ -97,12 +153,7 @@ String UserAgentQt::standardUserAgent(const String &applicationNameForUserAgent,
 #elif OS(WINDOWS)
             windowsVersionForUAString().latin1().data()
 #elif OS(MAC_OS_X)
-#if CPU(X86) || CPU(X86_64)
-            "Intel Mac OS X"
-#else
-            "PPC Mac OS X"
-#endif
-
+            macVersionForUAString().toLatin1().data()
 #elif OS(FREEBSD)
             "FreeBSD"
 #elif OS(HURD)
