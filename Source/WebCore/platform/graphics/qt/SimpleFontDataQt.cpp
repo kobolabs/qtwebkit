@@ -46,14 +46,20 @@ bool SimpleFontData::containsCharacters(const UChar* characters, int length) con
     return true;
 }
 
-float SimpleFontData::platformWidthForGlyph(Glyph glyph) const
+float SimpleFontData::platformWidthForGlyph(Glyph glyph, bool isVertical) const
 {
     if (!glyph || !platformData().size())
         return 0;
 
     QVector<quint32> glyphIndexes;
     glyphIndexes.append(glyph);
-    QVector<QPointF> advances = platformData().rawFont().advancesForGlyphIndexes(glyphIndexes);
+    QVector<QPointF> advances;
+    if (isVertical) {
+        static const bool isCJKOrSymbol = true; // this is already taken into account if isVertical is true down this path
+        advances = platformData().rawFont().verticalAdvancesForGlyphIndexes(glyphIndexes, &isCJKOrSymbol);
+    } else {
+        advances = platformData().rawFont().advancesForGlyphIndexes(glyphIndexes);
+    }
     ASSERT(!advances.isEmpty());
     return advances.at(0).x();
 }

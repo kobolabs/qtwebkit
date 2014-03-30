@@ -142,9 +142,9 @@ public:
     void setAvgCharWidth(float avgCharWidth) { m_avgCharWidth = avgCharWidth; }
 
     FloatRect boundsForGlyph(Glyph) const;
-    float widthForGlyph(Glyph glyph) const;
+    float widthForGlyph(Glyph glyph, bool isVertical = false) const;
     FloatRect platformBoundsForGlyph(Glyph) const;
-    float platformWidthForGlyph(Glyph) const;
+    float platformWidthForGlyph(Glyph, bool isVertical) const;
 
     float spaceWidth() const { return m_spaceWidth; }
     float adjustedSpaceWidth() const { return m_adjustedSpaceWidth; }
@@ -197,21 +197,28 @@ public:
     bool canRenderCombiningCharacterSequence(const UChar*, size_t) const;
 #endif
 
-    bool applyTransforms(GlyphBufferGlyph* glyphs, GlyphBufferAdvance* advances, size_t glyphCount, TypesettingFeatures typesettingFeatures) const
+    bool applyTransforms(GlyphBufferGlyph* glyphs, GlyphBufferAdvance* advances, size_t glyphCount, TypesettingFeatures typesettingFeatures, bool* isCJKOrSymbol, bool isVertical) const
     {
         if (isSVGFont())
             return false;
 #if PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED > 1080
+        UNUSED_PARAM(isCJKOrSymbol);
+        UNUSED_PARAM(isVertical);
         wkCTFontTransformOptions options = (typesettingFeatures & Kerning ? wkCTFontTransformApplyPositioning : 0) | (typesettingFeatures & Ligatures ? wkCTFontTransformApplyShaping : 0);
         return wkCTFontTransformGlyphs(m_platformData.ctFont(), glyphs, reinterpret_cast<CGSize*>(advances), glyphCount, options);
 #elif PLATFORM(QT) && QT_VERSION >= 0x050100
         QRawFont::LayoutFlags flags = (typesettingFeatures & Kerning) ? QRawFont::KernedAdvances : QRawFont::SeparateAdvances;
+        if (isVertical) {
+            return m_platformData.rawFont().verticalAdvancesForGlyphIndexes(glyphs, advances, glyphCount, isCJKOrSymbol, flags);
+        }
         return m_platformData.rawFont().advancesForGlyphIndexes(glyphs, advances, glyphCount, flags);
 #else
         UNUSED_PARAM(glyphs);
         UNUSED_PARAM(advances);
         UNUSED_PARAM(glyphCount);
         UNUSED_PARAM(typesettingFeatures);
+        UNUSED_PARAM(isCJKOrSymbol);
+        UNUSED_PARAM(isVertical);
         return false;
 #endif
     }
@@ -347,7 +354,7 @@ ALWAYS_INLINE FloatRect SimpleFontData::boundsForGlyph(Glyph glyph) const
     return bounds;
 }
 
-ALWAYS_INLINE float SimpleFontData::widthForGlyph(Glyph glyph) const
+ALWAYS_INLINE float SimpleFontData::widthForGlyph(Glyph glyph, bool isVertical) const
 {
     if (isZeroWidthSpaceGlyph(glyph))
         return 0;
@@ -367,7 +374,7 @@ ALWAYS_INLINE float SimpleFontData::widthForGlyph(Glyph glyph) const
 #endif
 #endif
     else
-        width = platformWidthForGlyph(glyph);
+        width = platformWidthForGlyph(glyph, isVertical);
 
     m_glyphToWidthMap.setMetricsForGlyph(glyph, width);
     return width;

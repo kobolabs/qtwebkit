@@ -102,7 +102,7 @@ public:
 
 typedef Vector<pair<int, OriginalAdvancesForCharacterTreatedAsSpace>, 64> CharactersTreatedAsSpace;
 
-static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int& lastGlyphCount, const SimpleFontData* fontData, WidthIterator& iterator, TypesettingFeatures typesettingFeatures, CharactersTreatedAsSpace& charactersTreatedAsSpace)
+static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int& lastGlyphCount, const SimpleFontData* fontData, WidthIterator& iterator, TypesettingFeatures typesettingFeatures, CharactersTreatedAsSpace& charactersTreatedAsSpace, bool isVertical)
 {
     ASSERT(typesettingFeatures & (Kerning | Ligatures));
 
@@ -130,7 +130,7 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
             iterator.run().renderingContext()->applySVGKerning(fontData, iterator, glyphBuffer, lastGlyphCount);
     } else
 #endif
-        fontData->applyTransforms(glyphBuffer->glyphs(lastGlyphCount), advances + lastGlyphCount, glyphBufferSize - lastGlyphCount, typesettingFeatures);
+        fontData->applyTransforms(glyphBuffer->glyphs(lastGlyphCount), advances + lastGlyphCount, glyphBufferSize - lastGlyphCount, typesettingFeatures, glyphBuffer->glyphIsCJKOrSymbol(lastGlyphCount), isVertical);
 
     if (!ltr)
         glyphBuffer->reverse(lastGlyphCount, glyphBufferSize - lastGlyphCount);
@@ -167,6 +167,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
     const SimpleFontData* primaryFont = m_font->primaryFont();
     const SimpleFontData* lastFontData = primaryFont;
     int lastGlyphCount = glyphBuffer ? glyphBuffer->size() : 0;
+    bool isVertical = (m_font->fontDescription().orientation() == Vertical);
 
     UChar32 character = 0;
     unsigned clusterLength = 0;
@@ -186,7 +187,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         if (character == '\t' && m_run.allowTabs())
             width = m_font->tabWidth(*fontData, m_run.tabSize(), m_run.xPos() + m_runWidthSoFar + widthSinceLastRounding);
         else {
-            width = fontData->widthForGlyph(glyph);
+            width = fontData->widthForGlyph(glyph, (isVertical && isCJKOrSymbol));
 
 #if ENABLE(SVG)
             // SVG uses horizontalGlyphStretch(), when textLength is used to stretch/squeeze text.
@@ -203,7 +204,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
         if (fontData != lastFontData && width) {
             if (shouldApplyFontTransforms()) {
-                m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace);
+                m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace, isVertical);
                 lastGlyphCount = glyphBuffer->size(); // applyFontTransforms doesn't update when there had been only one glyph.
             }
 
@@ -325,7 +326,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
     }
 
     if (shouldApplyFontTransforms())
-        m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace);
+        m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace, isVertical);
 
     unsigned consumedCharacters = textIterator.currentCharacter() - m_currentCharacter;
     m_currentCharacter = textIterator.currentCharacter();
