@@ -249,7 +249,7 @@ QPixmap* prescaleImageIfRequired(QPainter* painter, QPixmap* image, QPixmap* buf
 
     QRectF transformedDst = transform.mapRect(destRect);
     // Only prescale if downscaling to 0.8x or less
-    if ((transformedDst.width() <= (srcRect->width() * 0.80)) && (transformedDst.height() <= (srcRect->height() * 0.80)))
+    if ((transformedDst.width() >= (srcRect->width() * 0.80)) && (transformedDst.height() >= (srcRect->height() * 0.80)))
         return image;
 
     // This may not work right with subpixel positions, but that can not currently happen.
