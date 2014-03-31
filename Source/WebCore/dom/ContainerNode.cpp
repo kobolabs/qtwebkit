@@ -848,6 +848,11 @@ bool ContainerNode::getUpperLeftCorner(FloatPoint& point) const
     RenderObject* o = renderer();
     RenderObject* p = o;
 
+    if (!o->isInline() || o->isReplaced()) {
+        point = o->localToAbsolute(FloatPoint(), UseTransforms);
+        return true;
+    }
+
     // find the next text/image child, to get a position
     while (o) {
         p = o;
