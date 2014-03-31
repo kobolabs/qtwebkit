@@ -119,7 +119,7 @@ void RenderCombineText::combineText()
             Font compressedFont = Font(description, style()->font().letterSpacing(), style()->font().wordSpacing());
             compressedFont.update(fontSelector);
             float runWidth = compressedFont.width(run);
-            if (runWidth <= emWidth) {
+            if (i == WTF_ARRAY_LENGTH(widthVariants) - 1 || runWidth <= emWidth) {
                 m_combinedTextWidth = runWidth;
                 m_isCombined = true;
 
