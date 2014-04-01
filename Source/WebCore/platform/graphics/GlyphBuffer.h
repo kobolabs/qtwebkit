@@ -101,6 +101,7 @@ public:
         m_glyphs.clear();
         m_advances.clear();
         m_glyphIsCJKOrSymbol.clear();
+        m_expansions.clear();
 #if PLATFORM(WIN)
         m_offsets.clear();
 #endif
@@ -109,9 +110,11 @@ public:
     GlyphBufferGlyph* glyphs(int from) { return m_glyphs.data() + from; }
     GlyphBufferAdvance* advances(int from) { return m_advances.data() + from; }
     bool* glyphIsCJKOrSymbol(int from) { return m_glyphIsCJKOrSymbol.data() + from; }
+    float* expansions(int from) { return m_expansions.data() + from; }
     const GlyphBufferGlyph* glyphs(int from) const { return m_glyphs.data() + from; }
     const GlyphBufferAdvance* advances(int from) const { return m_advances.data() + from; }
     const bool* glyphIsCJKOrSymbol(int from) const { return m_glyphIsCJKOrSymbol.data() + from; }
+    const float* expansions(int from) const { return m_expansions.data() + from; }
 
     const SimpleFontData* fontDataAt(int index) const { return m_fontData[index]; }
 
@@ -147,6 +150,11 @@ public:
         return m_glyphIsCJKOrSymbol[index];
     }
 
+    bool expansionsAt(int index) const
+    {
+        return m_expansions[index];
+    }
+
     void add(const GlyphBuffer* glyphBuffer, int from, int len)
     {
         m_glyphs.append(glyphBuffer->glyphs(from), len);
@@ -156,9 +164,10 @@ public:
         m_offsets.append(glyphBuffer->m_offsets.data() + from, len);
 #endif
         m_glyphIsCJKOrSymbol.append(glyphBuffer->glyphIsCJKOrSymbol(from), len);
+        m_expansions.append(glyphBuffer->expansions(from), len);
     }
 
-    void add(Glyph glyph, const SimpleFontData* font, float width, const FloatSize* offset = 0, bool glyphIsCJKOrSymbol = false)
+    void add(Glyph glyph, const SimpleFontData* font, float width, const FloatSize* offset = 0, bool glyphIsCJKOrSymbol = false, float expansion = 0)
     {
         m_fontData.append(font);
 
@@ -188,10 +197,11 @@ public:
         UNUSED_PARAM(offset);
 #endif
         m_glyphIsCJKOrSymbol.append(glyphIsCJKOrSymbol);
+        m_expansions.append(expansion);
     }
     
 #if !USE(WINGDI)
-    void add(Glyph glyph, const SimpleFontData* font, GlyphBufferAdvance advance, bool glyphIsCJKOrSymbol = false)
+    void add(Glyph glyph, const SimpleFontData* font, GlyphBufferAdvance advance, bool glyphIsCJKOrSymbol = false, float expansion = 0)
     {
         m_fontData.append(font);
 #if USE(CAIRO)
@@ -204,6 +214,7 @@ public:
 
         m_advances.append(advance);
         m_glyphIsCJKOrSymbol.append(glyphIsCJKOrSymbol);
+        m_expansions.append(expansion);
     }
 #endif
 
@@ -246,6 +257,7 @@ private:
     Vector<GlyphBufferGlyph, 2048> m_glyphs;
     Vector<GlyphBufferAdvance, 2048> m_advances;
     Vector<bool, 2048> m_glyphIsCJKOrSymbol;
+    Vector<float, 2048> m_expansions;
     GlyphBufferAdvance m_initialAdvance;
 #if PLATFORM(WIN)
     Vector<FloatSize, 2048> m_offsets;
