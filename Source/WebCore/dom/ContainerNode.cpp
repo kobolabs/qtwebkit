@@ -873,11 +873,6 @@ bool ContainerNode::getUpperLeftCorner(FloatPoint& point) const
         }
         ASSERT(o);
 
-        if (!o->isInline() || o->isReplaced()) {
-            point = o->localToAbsolute(FloatPoint(), UseTransforms);
-            return true;
-        }
-
         if (p->node() && p->node() == this && o->isText() && !o->isBR() && !toRenderText(o)->firstTextBox()) {
             // do nothing - skip unrendered whitespace that is a child or next sibling of the anchor
         } else if ((o->isText() && !o->isBR()) || o->isReplaced()) {
