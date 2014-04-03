@@ -130,7 +130,7 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
             iterator.run().renderingContext()->applySVGKerning(fontData, iterator, glyphBuffer, lastGlyphCount);
     } else
 #endif
-        fontData->applyTransforms(glyphBuffer->glyphs(lastGlyphCount), advances + lastGlyphCount, glyphBufferSize - lastGlyphCount, typesettingFeatures, glyphBuffer->glyphIsCJKOrSymbol(lastGlyphCount), isVertical, glyphBuffer->expansions(lastGlyphCount));
+        fontData->applyTransforms(glyphBuffer->glyphs(lastGlyphCount), advances + lastGlyphCount, glyphBufferSize - lastGlyphCount, typesettingFeatures, glyphBuffer->glyphIsCJKOrSymbol(lastGlyphCount), isVertical);
 
     if (!ltr)
         glyphBuffer->reverse(lastGlyphCount, glyphBufferSize - lastGlyphCount);
@@ -184,7 +184,6 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
         // Now that we have a glyph and font data, get its width.
         float width;
-        float expansion = 0;
         if (character == '\t' && m_run.allowTabs())
             width = m_font->tabWidth(*fontData, m_run.tabSize(), m_run.xPos() + m_runWidthSoFar + widthSinceLastRounding);
         else {
@@ -254,8 +253,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                     if (m_run.allowsTrailingExpansion() || (m_run.ltr() && textIterator.currentCharacter() + advanceLength < static_cast<size_t>(m_run.length()))
                         || (m_run.rtl() && textIterator.currentCharacter())) {
                         m_expansion -= m_expansionPerOpportunity;
-                        expansion = !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
-                        width += expansion;
+                        width += !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
                         m_isAfterExpansion = true;
                     }
                 } else
@@ -314,7 +312,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         }
 
         if (glyphBuffer) {
-            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isCJKOrSymbol, expansion);
+            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isCJKOrSymbol);
             m_characterIndexOfGlyph.append(currentCharacterIndex);
         }
 
