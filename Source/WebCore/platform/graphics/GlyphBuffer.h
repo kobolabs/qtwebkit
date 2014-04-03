@@ -220,6 +220,12 @@ public:
         lastAdvance.setWidth(lastAdvance.width() + width);
     }
 
+    void expandAdvanceAtIndex(int index, float width)
+    {
+        GlyphBufferAdvance& advanceAtIndex = m_advances[index];
+        advanceAtIndex.setWidth(advanceAtIndex.width() + width);
+    }
+
 private:
     void swap(int index1, int index2)
     {
