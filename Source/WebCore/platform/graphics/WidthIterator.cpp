@@ -101,8 +101,10 @@ public:
 };
 
 typedef Vector<pair<int, OriginalAdvancesForCharacterTreatedAsSpace>, 64> CharactersTreatedAsSpace;
+typedef Vector<pair<int, float>, 64> ExpansionsForCharacters;
+typedef Vector<pair<int, float>, 64> PreserveAdvancesForCharacters;
 
-static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int& lastGlyphCount, const SimpleFontData* fontData, WidthIterator& iterator, TypesettingFeatures typesettingFeatures, CharactersTreatedAsSpace& charactersTreatedAsSpace, bool isVertical)
+static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int& lastGlyphCount, const SimpleFontData* fontData, WidthIterator& iterator, TypesettingFeatures typesettingFeatures, CharactersTreatedAsSpace& charactersTreatedAsSpace, PreserveAdvancesForCharacters preserveAdvancesForCharacters, ExpansionsForCharacters expansionsForCharacters, bool isVertical)
 {
     ASSERT(typesettingFeatures & (Kerning | Ligatures));
 
@@ -130,7 +132,7 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
             iterator.run().renderingContext()->applySVGKerning(fontData, iterator, glyphBuffer, lastGlyphCount);
     } else
 #endif
-        fontData->applyTransforms(glyphBuffer->glyphs(lastGlyphCount), advances + lastGlyphCount, glyphBufferSize - lastGlyphCount, typesettingFeatures, glyphBuffer->glyphIsCJKOrSymbol(lastGlyphCount), isVertical, glyphBuffer->expansions(lastGlyphCount));
+        fontData->applyTransforms(glyphBuffer->glyphs(lastGlyphCount), advances + lastGlyphCount, glyphBufferSize - lastGlyphCount, typesettingFeatures, glyphBuffer->glyphIsCJKOrSymbol(lastGlyphCount), isVertical);
 
     if (!ltr)
         glyphBuffer->reverse(lastGlyphCount, glyphBufferSize - lastGlyphCount);
@@ -143,6 +145,20 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
         glyphBuffer->advances(spaceOffset)->setWidth(originalAdvances.advanceAtCharacter);
     }
     charactersTreatedAsSpace.clear();
+
+    for (size_t i = 0; i < preserveAdvancesForCharacters.size(); ++i) {
+        int spaceOffset = preserveAdvancesForCharacters[i].first;
+        int advance = preserveAdvancesForCharacters[i].second;
+        glyphBuffer->advances(spaceOffset)->setWidth(advance);
+    }
+    preserveAdvancesForCharacters.clear();
+
+    for (size_t i = 0; i < expansionsForCharacters.size(); ++i) {
+        int spaceOffset = expansionsForCharacters[i].first;
+        float expansion = expansionsForCharacters[i].second;
+        glyphBuffer->expandAdvanceAtIndex(spaceOffset, expansion);
+    }
+    expansionsForCharacters.clear();
 
     for (int i = lastGlyphCount; i < glyphBufferSize; ++i)
         widthDifference += advances[i].width();
@@ -172,6 +188,8 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
     UChar32 character = 0;
     unsigned clusterLength = 0;
     CharactersTreatedAsSpace charactersTreatedAsSpace;
+    PreserveAdvancesForCharacters preserveAdvancesForCharacters;
+    ExpansionsForCharacters expansionsForCharacters;
     while (textIterator.consume(character, clusterLength)) {
         unsigned advanceLength = clusterLength;
         int currentCharacterIndex = textIterator.currentCharacter();
@@ -184,7 +202,6 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
         // Now that we have a glyph and font data, get its width.
         float width;
-        float expansion = 0;
         if (character == '\t' && m_run.allowTabs())
             width = m_font->tabWidth(*fontData, m_run.tabSize(), m_run.xPos() + m_runWidthSoFar + widthSinceLastRounding);
         else {
@@ -205,7 +222,8 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
         if (fontData != lastFontData && width) {
             if (shouldApplyFontTransforms()) {
-                m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace, isVertical);
+                m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace,
+                                                       preserveAdvancesForCharacters, expansionsForCharacters, isVertical);
                 lastGlyphCount = glyphBuffer->size(); // applyFontTransforms doesn't update when there had been only one glyph.
             }
 
@@ -241,10 +259,18 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                         m_runWidthSoFar += expansionAtThisOpportunity;
                         if (glyphBuffer) {
                             if (glyphBuffer->isEmpty()) {
-                                if (m_forTextEmphasis)
+                                if (m_forTextEmphasis) {
+                                    if (shouldApplyFontTransforms()) {
+                                        preserveAdvancesForCharacters.append(make_pair(glyphBuffer->size(), m_expansionPerOpportunity));
+                                    }
                                     glyphBuffer->add(fontData->zeroWidthSpaceGlyph(), fontData, m_expansionPerOpportunity, 0, isCJKOrSymbol);
-                                else
+                                }
+                                else {
+                                    if (shouldApplyFontTransforms()) {
+                                        preserveAdvancesForCharacters.append(make_pair(glyphBuffer->size(), expansionAtThisOpportunity));
+                                    }
                                     glyphBuffer->add(fontData->spaceGlyph(), fontData, expansionAtThisOpportunity, 0, isCJKOrSymbol);
+                                }
                                 m_characterIndexOfGlyph.append(currentCharacterIndex);
                             } else
                                 glyphBuffer->expandLastAdvance(expansionAtThisOpportunity);
@@ -254,8 +280,11 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                     if (m_run.allowsTrailingExpansion() || (m_run.ltr() && textIterator.currentCharacter() + advanceLength < static_cast<size_t>(m_run.length()))
                         || (m_run.rtl() && textIterator.currentCharacter())) {
                         m_expansion -= m_expansionPerOpportunity;
-                        expansion = !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
+                        float expansion = !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
                         width += expansion;
+                        if (shouldApplyFontTransforms()) {
+                            expansionsForCharacters.append(make_pair(glyphBuffer->size(), expansion));
+                        }
                         m_isAfterExpansion = true;
                     }
                 } else
@@ -314,7 +343,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         }
 
         if (glyphBuffer) {
-            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isCJKOrSymbol, expansion);
+            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isCJKOrSymbol);
             m_characterIndexOfGlyph.append(currentCharacterIndex);
         }
 
@@ -328,7 +357,8 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
     }
 
     if (shouldApplyFontTransforms())
-        m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace, isVertical);
+        m_runWidthSoFar += applyFontTransforms(glyphBuffer, m_run.ltr(), lastGlyphCount, lastFontData, *this, m_typesettingFeatures, charactersTreatedAsSpace,
+                                               preserveAdvancesForCharacters, expansionsForCharacters, isVertical);
 
     unsigned consumedCharacters = textIterator.currentCharacter() - m_currentCharacter;
     m_currentCharacter = textIterator.currentCharacter();
