@@ -54,20 +54,9 @@ namespace WebCore {
 */
 String UserAgentQt::standardUserAgent(const String &applicationNameForUserAgent, unsigned int webkitMajorVersion, unsigned int webkitMinorVersion)
 {
-    static bool hasOverride = false;
     static QString ua;
 
-    if (hasOverride) {
-        return ua;
-    }
-
     if (ua.isNull()) {
-        ua = QString::fromUtf8(qgetenv("QT_USER_AGENT_OVERRIDE"));
-
-        if (!ua.isEmpty()) {
-            hasOverride = true;
-            return ua;
-        }
 
         ua = QLatin1String("Mozilla/5.0 (%1%2%3) AppleWebKit/%4 (KHTML, like Gecko) %99 Safari/%5");
 
