@@ -138,16 +138,20 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
         glyphBuffer->reverse(lastGlyphCount, glyphBufferSize - lastGlyphCount);
 
     for (size_t i = 0; i < preserveAdvancesForCharacters.size(); ++i) {
-        int spaceOffset = preserveAdvancesForCharacters[i].first;
-        int advance = preserveAdvancesForCharacters[i].second;
-        glyphBuffer->advances(spaceOffset)->setWidth(advance);
+        int offset = preserveAdvancesForCharacters[i].first;
+        if (offset >= lastGlyphCount) {
+            int advance = preserveAdvancesForCharacters[i].second;
+            glyphBuffer->advances(offset)->setWidth(advance);
+        }
     }
     preserveAdvancesForCharacters.clear();
 
     for (size_t i = 0; i < expansionsForCharacters.size(); ++i) {
-        int spaceOffset = expansionsForCharacters[i].first;
-        float expansion = expansionsForCharacters[i].second;
-        glyphBuffer->expandAdvanceAtIndex(spaceOffset, expansion);
+        int offset = expansionsForCharacters[i].first;
+        if (offset >= lastGlyphCount) {
+            float expansion = expansionsForCharacters[i].second;
+            glyphBuffer->expandAdvanceAtIndex(offset, expansion);
+        }
     }
     expansionsForCharacters.clear();
 
