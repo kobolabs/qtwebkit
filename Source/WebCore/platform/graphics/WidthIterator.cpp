@@ -104,7 +104,7 @@ typedef Vector<pair<int, OriginalAdvancesForCharacterTreatedAsSpace>, 64> Charac
 typedef Vector<pair<int, float>, 64> ExpansionsForCharacters;
 typedef Vector<pair<int, float>, 64> PreserveAdvancesForCharacters;
 
-static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int& lastGlyphCount, const SimpleFontData* fontData, WidthIterator& iterator, TypesettingFeatures typesettingFeatures, CharactersTreatedAsSpace& charactersTreatedAsSpace, PreserveAdvancesForCharacters preserveAdvancesForCharacters, ExpansionsForCharacters expansionsForCharacters, bool isVertical)
+static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int& lastGlyphCount, const SimpleFontData* fontData, WidthIterator& iterator, TypesettingFeatures typesettingFeatures, CharactersTreatedAsSpace& charactersTreatedAsSpace, PreserveAdvancesForCharacters& preserveAdvancesForCharacters, ExpansionsForCharacters& expansionsForCharacters, bool isVertical)
 {
     ASSERT(typesettingFeatures & (Kerning | Ligatures));
 
@@ -137,15 +137,6 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
     if (!ltr)
         glyphBuffer->reverse(lastGlyphCount, glyphBufferSize - lastGlyphCount);
 
-    for (size_t i = 0; i < charactersTreatedAsSpace.size(); ++i) {
-        int spaceOffset = charactersTreatedAsSpace[i].first;
-        const OriginalAdvancesForCharacterTreatedAsSpace& originalAdvances = charactersTreatedAsSpace[i].second;
-        if (spaceOffset && !originalAdvances.characterIsSpace)
-            glyphBuffer->advances(spaceOffset - 1)->setWidth(originalAdvances.advanceBeforeCharacter);
-        glyphBuffer->advances(spaceOffset)->setWidth(originalAdvances.advanceAtCharacter);
-    }
-    charactersTreatedAsSpace.clear();
-
     for (size_t i = 0; i < preserveAdvancesForCharacters.size(); ++i) {
         int spaceOffset = preserveAdvancesForCharacters[i].first;
         int advance = preserveAdvancesForCharacters[i].second;
@@ -159,6 +150,15 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
         glyphBuffer->expandAdvanceAtIndex(spaceOffset, expansion);
     }
     expansionsForCharacters.clear();
+
+    for (size_t i = 0; i < charactersTreatedAsSpace.size(); ++i) {
+        int spaceOffset = charactersTreatedAsSpace[i].first;
+        const OriginalAdvancesForCharacterTreatedAsSpace& originalAdvances = charactersTreatedAsSpace[i].second;
+        if (spaceOffset && !originalAdvances.characterIsSpace)
+            glyphBuffer->advances(spaceOffset - 1)->setWidth(originalAdvances.advanceBeforeCharacter);
+        glyphBuffer->advances(spaceOffset)->setWidth(originalAdvances.advanceAtCharacter);
+    }
+    charactersTreatedAsSpace.clear();
 
     for (int i = lastGlyphCount; i < glyphBufferSize; ++i)
         widthDifference += advances[i].width();
