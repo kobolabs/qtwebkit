@@ -109,6 +109,7 @@ public:
     virtual void attach(const AttachContext& = AttachContext()) OVERRIDE;
     virtual void detach(const AttachContext& = AttachContext()) OVERRIDE;
     virtual LayoutRect boundingBox() const OVERRIDE;
+    virtual LayoutRect fullBoundingBox() const OVERRIDE;
     virtual void scheduleSetNeedsStyleRecalc(StyleChangeType = FullStyleChange) OVERRIDE FINAL;
 
     // -----------------------------------------------------------------------------

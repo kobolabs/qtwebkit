@@ -85,6 +85,7 @@ public:
     void setFocus();
 
     QRect geometry() const;
+    QRect fullGeometry() const;
 
     QString tagName() const;
     QString prefix() const;

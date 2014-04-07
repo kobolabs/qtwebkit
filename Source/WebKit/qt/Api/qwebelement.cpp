@@ -539,7 +539,7 @@ void QWebElement::setFocus()
 }
 
 /*!
-    Returns the geometry of this element, relative to its containing frame.
+    Returns part of the geometry of this element, relative to its containing frame.
 
     \sa tagName()
 */
@@ -548,6 +548,19 @@ QRect QWebElement::geometry() const
     if (!m_element)
         return QRect();
     return m_element->pixelSnappedBoundingBox();
+}
+
+/*!
+    Returns the proper geometry of this element, relative to its containing frame.
+    This runs muchs slower than ::geometry for complex elements, as it iterates through all the contained rendering objects.
+
+    \sa tagName()
+*/
+QRect QWebElement::fullGeometry() const
+{
+    if (!m_element)
+        return QRect();
+    return m_element->pixelSnappedFullBoundingBox();
 }
 
 /*!
