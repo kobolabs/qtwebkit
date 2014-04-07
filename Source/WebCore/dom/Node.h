@@ -406,6 +406,8 @@ public:
 
     virtual LayoutRect boundingBox() const;
     IntRect pixelSnappedBoundingBox() const { return pixelSnappedIntRect(boundingBox()); }
+    virtual LayoutRect fullBoundingBox() const;
+    IntRect pixelSnappedFullBoundingBox() const { return pixelSnappedIntRect(fullBoundingBox()); }
     LayoutRect renderRect(bool* isReplaced);
     IntRect pixelSnappedRenderRect(bool* isReplaced) { return pixelSnappedIntRect(renderRect(isReplaced)); }
 

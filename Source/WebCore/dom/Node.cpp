@@ -757,6 +757,13 @@ LayoutRect Node::boundingBox() const
         return renderer()->absoluteBoundingBoxRect();
     return LayoutRect();
 }
+
+LayoutRect Node::fullBoundingBox() const
+{
+    if (renderer())
+        return renderer()->absoluteBoundingBoxRect();
+    return LayoutRect();
+}
     
 LayoutRect Node::renderRect(bool* isReplaced)
 {    

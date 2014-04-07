@@ -980,6 +980,56 @@ LayoutRect ContainerNode::boundingBox() const
     return enclosingLayoutRect(FloatRect(upperLeft, lowerRight.expandedTo(upperLeft) - upperLeft));
 }
 
+LayoutRect ContainerNode::fullBoundingBox() const
+{
+    if (!renderer())
+        return LayoutRect();
+    LayoutRect res;
+    RenderObject* o = renderer();
+    RenderObject* p = o;
+    // iterate through all the children to include them in a box
+    bool found = false;
+    while (o) {
+        p = o;
+        if (o->firstChild())
+            o = o->firstChild();
+        else if (o->nextSibling())
+            o = o->nextSibling();
+        else {
+            RenderObject* next = 0;
+            while (!next && o->parent() && o->parent() != renderer()) {
+                o = o->parent();
+                next = o->nextSibling();
+            }
+            o = next;
+            if (!o)
+                break;
+        }
+        ASSERT(o);
+        if (p->node() && p->node() == this && o->isText() && !o->isBR() && !toRenderText(o)->firstTextBox()) {
+            // do nothing - skip unrendered whitespace that is a child or next sibling of the anchor
+        } else if ((o->isText() && !o->isBR()) || o->isReplaced()) {
+            LayoutRect rect;
+            if (o->isText() && toRenderText(o)->firstTextBox()) {
+                rect = enclosingLayoutRect(toRenderText(o)->linesBoundingBox());
+            } else if (o->isBox()) {
+                RenderBox* box = toRenderBox(o);
+                rect = box->frameRect();
+            }
+            FloatPoint p = o->container()->localToAbsolute(FloatPoint(rect.location()), UseTransforms);
+            rect.setLocation(LayoutPoint(p.x(), p.y()));
+            if (!found) {
+                found = true;
+                res = rect;
+            }
+            else {
+                res = unionRect(res, rect);
+            }
+        }
+    }
+    return res;
+}
+
 unsigned ContainerNode::childNodeCount() const
 {
     unsigned count = 0;
