@@ -71,11 +71,12 @@ WidthIterator::WidthIterator(const Font* font, const TextRun& run, HashSet<const
     m_characterIndexOfGlyph.reserveInitialCapacity(m_run.length());
 }
 
-GlyphData WidthIterator::glyphDataForCharacter(UChar32 character, bool mirror, int currentCharacter, unsigned& advanceLength)
+GlyphData WidthIterator::glyphDataForCharacter(UChar32 character, bool mirror, int currentCharacter, unsigned& advanceLength, bool& isUpright)
 {
     ASSERT(m_font);
 
 #if ENABLE(SVG_FONTS)
+    UNUSED_PARAM(isUpright);
     if (TextRun::RenderingContext* renderingContext = m_run.renderingContext())
         return renderingContext->glyphDataForCharacter(*m_font, m_run, *this, character, mirror, currentCharacter, advanceLength);
 #else
@@ -83,7 +84,7 @@ GlyphData WidthIterator::glyphDataForCharacter(UChar32 character, bool mirror, i
     UNUSED_PARAM(advanceLength);
 #endif
 
-    return m_font->glyphDataForCharacter(character, mirror);
+    return m_font->glyphDataForCharacter(character, mirror, isUpright);
 }
 
 struct OriginalAdvancesForCharacterTreatedAsSpace {
@@ -197,9 +198,11 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
     while (textIterator.consume(character, clusterLength)) {
         unsigned advanceLength = clusterLength;
         int currentCharacterIndex = textIterator.currentCharacter();
-        const GlyphData& glyphData = glyphDataForCharacter(character, rtl, currentCharacterIndex, advanceLength);
+        bool isUpright = false;
+        const GlyphData& glyphData = glyphDataForCharacter(character, rtl, currentCharacterIndex, advanceLength, isUpright);
         Glyph glyph = glyphData.glyph;
         bool isCJKOrSymbol = Font::isCJKIdeographOrSymbol(character);
+        isUpright = (isCJKOrSymbol || isUpright);
         const SimpleFontData* fontData = glyphData.fontData;
 
         ASSERT(fontData);
@@ -209,7 +212,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         if (character == '\t' && m_run.allowTabs())
             width = m_font->tabWidth(*fontData, m_run.tabSize(), m_run.xPos() + m_runWidthSoFar + widthSinceLastRounding);
         else {
-            width = fontData->widthForGlyph(glyph, (isVertical && isCJKOrSymbol));
+            width = fontData->widthForGlyph(glyph, (isVertical && isUpright));
 
 #if ENABLE(SVG)
             // SVG uses horizontalGlyphStretch(), when textLength is used to stretch/squeeze text.
@@ -267,13 +270,13 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                                     if (shouldApplyFontTransforms()) {
                                         preserveAdvancesForCharacters.append(make_pair(glyphBuffer->size(), m_expansionPerOpportunity));
                                     }
-                                    glyphBuffer->add(fontData->zeroWidthSpaceGlyph(), fontData, m_expansionPerOpportunity, 0, isCJKOrSymbol);
+                                    glyphBuffer->add(fontData->zeroWidthSpaceGlyph(), fontData, m_expansionPerOpportunity, 0, isUpright);
                                 }
                                 else {
                                     if (shouldApplyFontTransforms()) {
                                         preserveAdvancesForCharacters.append(make_pair(glyphBuffer->size(), expansionAtThisOpportunity));
                                     }
-                                    glyphBuffer->add(fontData->spaceGlyph(), fontData, expansionAtThisOpportunity, 0, isCJKOrSymbol);
+                                    glyphBuffer->add(fontData->spaceGlyph(), fontData, expansionAtThisOpportunity, 0, isUpright);
                                 }
                                 m_characterIndexOfGlyph.append(currentCharacterIndex);
                             } else
@@ -347,7 +350,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         }
 
         if (glyphBuffer) {
-            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isCJKOrSymbol);
+            glyphBuffer->add(glyph, fontData, (rtl ? oldWidth + lastRoundingWidth : width), 0, isUpright);
             m_characterIndexOfGlyph.append(currentCharacterIndex);
         }
 

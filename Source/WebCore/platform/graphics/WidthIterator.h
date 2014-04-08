@@ -91,7 +91,7 @@ public:
 #endif
 
 private:
-    GlyphData glyphDataForCharacter(UChar32, bool mirror, int currentCharacter, unsigned& advanceLength);
+    GlyphData glyphDataForCharacter(UChar32, bool mirror, int currentCharacter, unsigned& advanceLength, bool& isUpright);
     template <typename TextIterator>
     inline unsigned advanceInternal(TextIterator&, GlyphBuffer*);
 

@@ -214,7 +214,8 @@ GlyphData SVGTextRunRenderingContext::glyphDataForCharacter(const Font& font, co
     const SimpleFontData* primaryFont = font.primaryFont();
     ASSERT(primaryFont);
 
-    pair<GlyphData, GlyphPage*> pair = font.glyphDataAndPageForCharacter(character, mirror, AutoVariant);
+    bool isUpright = false;
+    pair<GlyphData, GlyphPage*> pair = font.glyphDataAndPageForCharacter(character, mirror, AutoVariant, isUpright);
     GlyphData glyphData = pair.first;
 
     // Check if we have the missing glyph data, in which case we can just return.

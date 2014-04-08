@@ -71,7 +71,7 @@ public:
 
     bool isForPlatformFont() const { return m_isForPlatformFont; }
 
-    std::pair<GlyphData, GlyphPage*> glyphDataAndPageForCharacter(const FontDescription&, UChar32, bool mirror, FontDataVariant) const;
+    std::pair<GlyphData, GlyphPage*> glyphDataAndPageForCharacter(const FontDescription&, UChar32, bool mirror, FontDataVariant, bool& isUpright) const;
     
     bool isFixedPitch(const FontDescription&) const;
     void determinePitch(const FontDescription&) const;
