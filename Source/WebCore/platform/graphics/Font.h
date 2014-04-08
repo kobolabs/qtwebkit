@@ -151,16 +151,22 @@ public:
 
     const SimpleFontData* primaryFont() const;
     const FontData* fontDataAt(unsigned) const;
+    GlyphData glyphDataForCharacter(UChar32 c, bool mirror, bool& isUpright, FontDataVariant variant = AutoVariant) const
+    {
+        return glyphDataAndPageForCharacter(c, mirror, variant, isUpright).first;
+    }
+
     GlyphData glyphDataForCharacter(UChar32 c, bool mirror, FontDataVariant variant = AutoVariant) const
     {
-        return glyphDataAndPageForCharacter(c, mirror, variant).first;
+        bool isUpright = false;
+        return glyphDataAndPageForCharacter(c, mirror, variant, isUpright).first;
     }
 #if PLATFORM(MAC)
     const SimpleFontData* fontDataForCombiningCharacterSequence(const UChar*, size_t length, FontDataVariant) const;
 #endif
-    std::pair<GlyphData, GlyphPage*> glyphDataAndPageForCharacter(UChar32 c, bool mirror, FontDataVariant variant) const
+    std::pair<GlyphData, GlyphPage*> glyphDataAndPageForCharacter(UChar32 c, bool mirror, FontDataVariant variant, bool& isUpright) const
     {
-        return m_glyphs->glyphDataAndPageForCharacter(m_fontDescription, c, mirror, variant);
+        return m_glyphs->glyphDataAndPageForCharacter(m_fontDescription, c, mirror, variant, isUpright);
     }
     bool primaryFontHasGlyphForCharacter(UChar32) const;
 
