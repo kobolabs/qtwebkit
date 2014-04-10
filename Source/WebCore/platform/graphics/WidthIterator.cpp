@@ -190,19 +190,31 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
     int lastGlyphCount = glyphBuffer ? glyphBuffer->size() : 0;
     bool isVertical = (m_font->fontDescription().orientation() == Vertical);
 
+    UChar32 prevCharacter = 0;
     UChar32 character = 0;
-    unsigned clusterLength = 0;
+    UChar32 nextCharacter = 0;
+    unsigned advanceLength = 0;
+    unsigned nextAdvanceLength = 0;
+    bool hasCurrentCharacter = textIterator.consume(character, advanceLength);
+    int currentCharacterIndex = textIterator.currentCharacter();
+    bool hasNextCharacter = false;
+    int nextCharacterIndex;
+    if (hasCurrentCharacter) {
+        textIterator.advance(advanceLength);
+        hasNextCharacter = textIterator.consume(nextCharacter, nextAdvanceLength);
+        if (hasNextCharacter)
+            nextCharacterIndex = textIterator.currentCharacter();
+        else
+            nextCharacter = 0;
+    }
     CharactersTreatedAsSpace charactersTreatedAsSpace;
     PreserveAdvancesForCharacters preserveAdvancesForCharacters;
     ExpansionsForCharacters expansionsForCharacters;
-    while (textIterator.consume(character, clusterLength)) {
-        unsigned advanceLength = clusterLength;
-        int currentCharacterIndex = textIterator.currentCharacter();
+    while (hasCurrentCharacter) {
         bool isUpright = false;
         const GlyphData& glyphData = glyphDataForCharacter(character, rtl, currentCharacterIndex, advanceLength, isUpright);
         Glyph glyph = glyphData.glyph;
-        bool isCJKOrSymbol = Font::isCJKIdeographOrSymbol(character);
-        isUpright = (isCJKOrSymbol || isUpright);
+        isUpright = (isUpright || Font::isCJKIdeographOrSymbol(character));
         const SimpleFontData* fontData = glyphData.fontData;
 
         ASSERT(fontData);
@@ -255,11 +267,11 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
             static bool expandAroundIdeographs = Font::canExpandAroundIdeographsInComplexText();
             bool treatAsSpace = Font::treatAsSpace(character);
-            if (treatAsSpace || (expandAroundIdeographs && isCJKOrSymbol)) {
+            if (treatAsSpace || (expandAroundIdeographs && Font::isInterIdeographExpansionTarget(character))) {
                 // Distribute the run's total expansion evenly over all expansion opportunities in the run.
                 if (m_expansion) {
                     float previousExpansion = m_expansion;
-                    if (!treatAsSpace && !m_isAfterExpansion) {
+                    if (!treatAsSpace && !m_isAfterExpansion && !Font::isUnbreakableCharactersPair(prevCharacter, character)) {
                         // Take the expansion opportunity before this ideograph.
                         m_expansion -= m_expansionPerOpportunity;
                         float expansionAtThisOpportunity = !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
@@ -284,22 +296,25 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                         }
                         previousExpansion = m_expansion;
                     }
-                    if (m_run.allowsTrailingExpansion() || (m_run.ltr() && textIterator.currentCharacter() + advanceLength < static_cast<size_t>(m_run.length()))
-                        || (m_run.rtl() && textIterator.currentCharacter())) {
-                        m_expansion -= m_expansionPerOpportunity;
-                        float expansion = !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
-                        width += expansion;
-                        if (shouldApplyFontTransforms()) {
-                            expansionsForCharacters.append(make_pair(glyphBuffer->size(), expansion));
+                    if (m_run.allowsTrailingExpansion() || (m_run.ltr() && currentCharacterIndex + advanceLength < static_cast<size_t>(m_run.length())) || (m_run.rtl() && currentCharacterIndex)) {
+                        if (Font::isUnbreakableCharactersPair(character, nextCharacter))
+                            m_isAfterExpansion = false;
+                        else {
+                            m_expansion -= m_expansionPerOpportunity;
+                            float expansion = !m_run.applyWordRounding() ? m_expansionPerOpportunity : roundf(previousExpansion) - roundf(m_expansion);
+                            width += expansion;
+                            if (shouldApplyFontTransforms()) {
+                                expansionsForCharacters.append(make_pair(glyphBuffer->size(), expansion));
+                            }
+                            m_isAfterExpansion = true;
                         }
-                        m_isAfterExpansion = true;
                     }
                 } else
                     m_isAfterExpansion = false;
 
                 // Account for word spacing.
                 // We apply additional space between "words" by adding width to the space character.
-                if (treatAsSpace && (character != '\t' || !m_run.allowTabs()) && (textIterator.currentCharacter() || character == noBreakSpace) && m_font->wordSpacing())
+                if (treatAsSpace && (character != '\t' || !m_run.allowTabs()) && (currentCharacterIndex || character == noBreakSpace) && m_font->wordSpacing())
                     width += m_font->wordSpacing();
             } else
                 m_isAfterExpansion = false;
@@ -311,7 +326,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
 
         if (m_accountForGlyphBounds) {
             bounds = fontData->boundsForGlyph(glyph);
-            if (!textIterator.currentCharacter())
+            if (!currentCharacterIndex)
                 m_firstGlyphOverflow = max<float>(0, -bounds.x());
         }
 
@@ -319,8 +334,6 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
             glyph = 0;
 
         // Advance past the character we just dealt with.
-        textIterator.advance(advanceLength);
-
         float oldWidth = width;
 
         // Force characters that are used to determine word boundaries for the rounding hack
@@ -338,8 +351,8 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         } else {
             // Check to see if the next character is a "rounding hack character", if so, adjust
             // width so that the total run width will be on an integer boundary.
-            if ((m_run.applyWordRounding() && textIterator.currentCharacter() < m_run.length() && Font::isRoundingHackCharacter(*(textIterator.characters())))
-                || (m_run.applyRunRounding() && textIterator.currentCharacter() >= m_run.length())) {
+            if ((m_run.applyWordRounding() && hasNextCharacter && Font::isRoundingHackCharacter(nextCharacter))
+                || (m_run.applyRunRounding() && !hasNextCharacter)) {
                 float totalWidth = widthSinceLastRounding + width;
                 widthSinceLastRounding = ceilf(totalWidth);
                 width += widthSinceLastRounding - totalWidth;
@@ -360,6 +373,20 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
             m_maxGlyphBoundingBoxY = max(m_maxGlyphBoundingBoxY, bounds.maxY());
             m_minGlyphBoundingBoxY = min(m_minGlyphBoundingBoxY, bounds.y());
             m_lastGlyphOverflow = max<float>(0, bounds.maxX() - width);
+        }
+
+        prevCharacter = character;
+        character = nextCharacter;
+        advanceLength = nextAdvanceLength;
+        hasCurrentCharacter = hasNextCharacter;
+        currentCharacterIndex = nextCharacterIndex;
+        if (hasCurrentCharacter) {
+            textIterator.advance(advanceLength);
+            hasNextCharacter = textIterator.consume(nextCharacter, nextAdvanceLength);
+            if (hasNextCharacter)
+                nextCharacterIndex = textIterator.currentCharacter();
+            else
+                nextCharacter = 0;
         }
     }
 
