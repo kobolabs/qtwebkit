@@ -217,6 +217,23 @@ static inline std::pair<GlyphData, GlyphPage*> glyphDataAndPageForNonCJKCharacte
 {
     if (orientation == NonCJKGlyphOrientationUpright || shouldIgnoreRotation(character)) {
         isUpright = true;
+#if ENABLE(EPUB3)
+        if (!data.fontData->hasVerticalGlyphs()) {
+            // Use the broken ideograph font data. The broken ideograph font will use the horizontal width of glyphs
+            // to make sure you get a square (even for broken glyphs like symbols used for punctuation).
+            RefPtr<SimpleFontData> brokenIdeographFontData = data.fontData->brokenIdeographFontData();
+            GlyphPageTreeNode* brokenIdeographNode = GlyphPageTreeNode::getRootChild(brokenIdeographFontData.get(), pageNumber);
+            GlyphPage* brokenIdeographPage = brokenIdeographNode->page();
+            if (brokenIdeographPage) {
+                GlyphData brokenIdeographData = brokenIdeographPage->glyphDataForCharacter(character);
+                if (brokenIdeographData.fontData)
+                    return std::make_pair(brokenIdeographData, brokenIdeographPage);
+            }
+
+            // Shouldn't be possible to even reach this point.
+            ASSERT_NOT_REACHED();
+        }
+#else
         RefPtr<SimpleFontData> uprightFontData = data.fontData->uprightOrientationFontData();
         GlyphPageTreeNode* uprightNode = GlyphPageTreeNode::getRootChild(uprightFontData.get(), pageNumber);
         GlyphPage* uprightPage = uprightNode->page();
@@ -230,6 +247,7 @@ static inline std::pair<GlyphData, GlyphPage*> glyphDataAndPageForNonCJKCharacte
             if (uprightData.fontData)
                 return std::make_pair(uprightData, uprightPage);
         }
+#endif
     } else if (orientation == NonCJKGlyphOrientationVerticalRight) {
         RefPtr<SimpleFontData> verticalRightFontData = data.fontData->verticalRightOrientationFontData();
         GlyphPageTreeNode* verticalRightNode = GlyphPageTreeNode::getRootChild(verticalRightFontData.get(), pageNumber);
