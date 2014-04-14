@@ -959,8 +959,8 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
     bool flippedVertical = false;
     bool isRubyBlock = false;
     bool horizontalInVerticalDoc = false;
-    int rubyRunBlockWidth = 0;
-    int verticalBlockLineHeight = 0;
+    float rubyRunBlockWidth = 0.0f;
+    float verticalBlockLineHeight = 0.0f;
     static float EXPANSION_SCALE = 1.48f;
 
     if (RenderBlock* block = o.containingBlock()) {
@@ -1008,10 +1008,10 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
             else if (o.isImage() && paBlock && grandPaBlock && imgRun) {
                 if ((grandPaBlock->x() == paBlock->x()) && ( grandPaBlock->y() == paBlock->y())) {
                     FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
-                    out.append(QRect(paOrigin.x() + paBlock->width() - block->width() + 1, block->y(), block->width(), block->height()));
+                    out.append(QRectF(paOrigin.x() + paBlock->width() - block->width() + 1, block->y(), block->width(), block->height()).toAlignedRect());
                 }
                 else {
-                    out.append(QRect(origin.x() + 1, origin.y(), block->width(), block->height()));
+                    out.append(QRectF(origin.x() + 1, origin.y(), block->width(), block->height()).toAlignedRect());
                 }
                 return;
             }
@@ -1027,15 +1027,9 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
             if (vertical) {
                 RenderObject* pa = o.parent();
                 RenderBlock* paBlock = NULL;
-                RenderObject* grandPa = NULL;
-                RenderObject* greatGrandPa = NULL;
                 verticalBlockLineHeight = block->lineHeight(true, VerticalLine);
                 if (pa) {
                     paBlock = pa->containingBlock();
-                    grandPa = pa->parent();
-                    if (grandPa) {
-                        greatGrandPa = grandPa->parent();
-                    }
                 }
 
                 if (pa && paBlock) {
@@ -1055,14 +1049,10 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
         if (!isVerticalWhitespaceText) {
             for (InlineTextBox* box = text.firstTextBox(); box; box = box->nextTextBox()) {
                 InlineTextBox& run = *box;
-                int dy = 0;
-                if (o.containingBlock()->isTableCell()) {
-                    dy = toRenderTableCell(o.containingBlock())->intrinsicPaddingBefore();
-                }
-                QRect r(run.x()+origin.x(), run.y()+origin.y(), run.width(), run.height());
+                QRectF r(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
                 if (flippedVertical) {
                     if (isRubyBlock) {
-                        r = QRect(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyRunBlockWidth, run.height());
+                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyRunBlockWidth, run.height());
                     }
                     else {
                         if (verticalBlockLineHeight < 1) {
@@ -1070,19 +1060,19 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                             verticalBlockLineHeight = run.width() * EXPANSION_SCALE;
                         }
                         else {
-                            verticalBlockLineHeight = qMin(verticalBlockLineHeight, int(run.width() * EXPANSION_SCALE));
+                            verticalBlockLineHeight = qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE);
                         }
-                        r = QRect(origin.x() - run.width() - run.x(), run.y() + origin.y(), verticalBlockLineHeight, run.height());
+                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), verticalBlockLineHeight, run.height());
                     }
                 }
                 else if (horizontalInVerticalDoc) {
-                    r = QRect(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
+                    r = QRectF(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
                 }
                 else if (isRubyBlock) {
-                    int newHeight = run.height() * EXPANSION_SCALE;
-                    r = QRect(r.x(), r.y() - (newHeight - run.height()), run.width(), newHeight);
+                    float newHeight = run.height() * EXPANSION_SCALE;
+                    r = QRectF(r.x(), r.y() - (newHeight - run.height()), run.width(), newHeight);
                 }
-                out.append(r);
+                out.append(r.toAlignedRect());
             }
         }
     }
