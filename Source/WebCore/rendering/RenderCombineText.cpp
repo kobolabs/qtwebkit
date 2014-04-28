@@ -73,6 +73,14 @@ void RenderCombineText::adjustTextOrigin(FloatPoint& textOrigin, const FloatRect
         textOrigin.move(boxRect.height() / 2 - ceilf(m_combinedTextWidth) / 2, style()->font().pixelSize());
 }
 
+FloatRect RenderCombineText::getTextRect(const FloatRect& boxRect) const
+{
+    if (!m_isCombined)
+        return boxRect;
+    float dx = boxRect.width() - m_combinedTextWidth;
+    return FloatRect(boxRect.x() + (dx / 2.0), boxRect.y(), m_combinedTextWidth, boxRect.height());
+}
+
 void RenderCombineText::getStringToRender(int start, String& string, int& length) const
 {
     ASSERT(start >= 0);

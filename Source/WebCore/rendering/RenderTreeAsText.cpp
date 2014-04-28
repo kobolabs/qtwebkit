@@ -36,6 +36,8 @@
 #include "InlineTextBox.h"
 #include "PrintContext.h"
 #include "RenderBR.h"
+#include "RenderCombineText.h"
+#include "RenderRubyText.h"
 #include "RenderDetailsMarker.h"
 #include "RenderFileUploadControl.h"
 #include "RenderInline.h"
@@ -1061,6 +1063,13 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                         }
                         else {
                             verticalBlockLineHeight = qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE);
+                        }
+                        RenderStyle* styleToUse = run.renderer()->style(run.isFirstLineStyle());
+                        RenderCombineText* combinedText = styleToUse->hasTextCombine() && run.textRenderer()->isCombineText() && toRenderCombineText(run.textRenderer())->isCombined() ? toRenderCombineText(run.textRenderer()) : 0;
+                        if (combinedText) {
+                            FloatRect textRect = combinedText->getTextRect(FloatRect(origin, LayoutSize(run.logicalWidth(), run.logicalHeight())));
+                            verticalBlockLineHeight = textRect.width();
+                            origin.setX(textRect.x());
                         }
                         r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), verticalBlockLineHeight, run.height());
                     }
