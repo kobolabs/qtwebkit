@@ -37,7 +37,6 @@
 #include "PrintContext.h"
 #include "RenderBR.h"
 #include "RenderCombineText.h"
-#include "RenderRubyText.h"
 #include "RenderDetailsMarker.h"
 #include "RenderFileUploadControl.h"
 #include "RenderInline.h"
@@ -966,11 +965,11 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
     static float EXPANSION_SCALE = 1.48f;
 
     if (RenderBlock* block = o.containingBlock()) {
-        if (dynamic_cast< RenderRubyText* > (block) ) {
+        if (block->isRubyText()) {
              // Ignore the ruby text block, since the ruby base block rect will be enlarged to cover the whole ruby run
              return;
         }
-        else if (dynamic_cast< RenderRubyBase* > (block) ) {
+        else if (block->isRubyBase()) {
             isRubyBlock = true;
         }
         origin = block->localToAbsolute(FloatPoint());
