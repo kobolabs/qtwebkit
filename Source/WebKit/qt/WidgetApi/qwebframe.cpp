@@ -939,9 +939,9 @@ bool QWebFrame::hasPendingStyleSheets() const
     return handle()->hasPendingStylesheets();
 }
 
-QList<QRect> QWebFrame::renderTreeRunRects(bool imgRun)
+QList<QRect> QWebFrame::renderTreeRunRects()
 {
-    return handle()->renderTreeRunRects(imgRun);
+    return handle()->renderTreeRunRects();
 }
 
 bool QWebFrame::selectionIntersectsElement(const QString &nodeName, const QString &className, const QString &retrievedAttribute, QString &id)
