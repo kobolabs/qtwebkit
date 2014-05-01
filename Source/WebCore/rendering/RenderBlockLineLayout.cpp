@@ -946,6 +946,13 @@ static inline void computeExpansionForJustifiedText(BidiRun* firstRun, BidiRun* 
                 InlineTextBox* textBox = toInlineTextBox(r->m_box);
                 int expansion = (availableLogicalWidth - totalLogicalWidth) * opportunitiesInRun / expansionOpportunityCount;
                 textBox->setExpansion(expansion);
+                if (r->m_object->isCombineText() && textBox->canHaveLeadingExpansion()) {
+                    // If this is tate-chu-yoko then it will be drawn horizontally and the
+                    // vertical leading expansion will be ignored. Instead, offset the paint
+                    // by the leading expansion amount.
+                    RenderCombineText* ct = toRenderCombineText(r->m_object);
+                    ct->setLeadingExpansion(expansion / opportunitiesInRun);
+                }
                 totalLogicalWidth += expansion;
             }
             expansionOpportunityCount -= opportunitiesInRun;

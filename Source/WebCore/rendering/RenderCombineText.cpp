@@ -31,6 +31,7 @@ const float textCombineMargin = 1.15f; // Allow em + 15% margin
 RenderCombineText::RenderCombineText(Node* node, PassRefPtr<StringImpl> string)
      : RenderText(node, string)
      , m_combinedTextWidth(0)
+     , m_leadingExpansion(0)
      , m_isCombined(false)
      , m_needsFontUpdate(false)
 {
@@ -70,7 +71,7 @@ float RenderCombineText::width(unsigned from, unsigned length, const Font& font,
 void RenderCombineText::adjustTextOrigin(FloatPoint& textOrigin, const FloatRect& boxRect) const
 {
     if (m_isCombined)
-        textOrigin.move(boxRect.height() / 2 - ceilf(m_combinedTextWidth) / 2, style()->font().pixelSize());
+        textOrigin.move(boxRect.height() / 2 - ceilf(m_combinedTextWidth) / 2, style()->font().pixelSize() + m_leadingExpansion);
 }
 
 float RenderCombineText::renderedTextWidth() const
@@ -145,6 +146,10 @@ void RenderCombineText::combineText()
         DEFINE_STATIC_LOCAL(String, objectReplacementCharacterString, (&objectReplacementCharacter, 1));
         RenderText::setTextInternal(objectReplacementCharacterString.impl());
     }
+}
+
+void RenderCombineText::setLeadingExpansion(int expansion) {
+    m_leadingExpansion = expansion;
 }
 
 } // namespace WebCore

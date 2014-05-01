@@ -37,6 +37,7 @@ public:
     bool isCombined() const { return m_isCombined; }
     float combinedTextWidth(const Font& font) const { return font.size(); }
     const Font& originalFont() const { return parent()->style()->font(); }
+    void setLeadingExpansion(int expansion);
 
 private:
     virtual bool isCombineText() const { return true; }
@@ -46,6 +47,7 @@ private:
     virtual void setTextInternal(PassRefPtr<StringImpl>);
 
     float m_combinedTextWidth;
+    int m_leadingExpansion;
     bool m_isCombined : 1;
     bool m_needsFontUpdate : 1;
 };
