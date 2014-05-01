@@ -1056,21 +1056,19 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                         r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyRunBlockWidth, run.height());
                     }
                     else {
-                        if (verticalBlockLineHeight < 1) {
-                            // Assume there is always a ruby block and scale up the original width (add padding), so that first text block of each page has roughly the same right-side margin
-                            verticalBlockLineHeight = run.width() * EXPANSION_SCALE;
-                        }
-                        else {
-                            verticalBlockLineHeight = qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE);
-                        }
                         RenderStyle* styleToUse = run.renderer()->style(run.isFirstLineStyle());
                         RenderCombineText* combinedText = styleToUse->hasTextCombine() && run.textRenderer()->isCombineText() && toRenderCombineText(run.textRenderer())->isCombined() ? toRenderCombineText(run.textRenderer()) : 0;
                         if (combinedText) {
-                            FloatRect textRect = combinedText->getTextRect(FloatRect(origin, LayoutSize(run.logicalWidth(), run.logicalHeight())));
-                            verticalBlockLineHeight = textRect.width();
-                            origin.setX(textRect.x());
+                            float dx = (combinedText->renderedTextWidth() - run.width()) / 2.0;
+                            r = QRectF(origin.x() - run.width() - run.x() - dx, run.y() + origin.y(), combinedText->renderedTextWidth(), run.height());
                         }
-                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), verticalBlockLineHeight, run.height());
+                        else if (verticalBlockLineHeight < 1) {
+                            // Assume there is always a ruby block and scale up the original width (add padding), so that first text block of each page has roughly the same right-side margin
+                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), run.width() * EXPANSION_SCALE, run.height());
+                        }
+                        else {
+                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE), run.height());
+                        }
                     }
                 }
                 else if (horizontalInVerticalDoc) {
