@@ -1009,16 +1009,16 @@ bool QWebFrameAdapter::hasPendingStylesheets() const
 }
 
 namespace WebCore {
-    QList<QRect> getRunRects(RenderView*, bool, bool);
+    QList<QRect> getRunRects(RenderView*, bool);
 }
 
-QList<QRect> QWebFrameAdapter::renderTreeRunRects(bool imgRun)
+QList<QRect> QWebFrameAdapter::renderTreeRunRects()
 {
     ASSERT(frame->view());
     if (frame->view() && frame->view()->layoutPending())
         frame->view()->layout();
     RenderView* o = frame->contentRenderer();
-    return WebCore::getRunRects(o, imgRun, documentElement().styleProperty(QString::fromLatin1("-epub-writing-mode"), QWebElement::ComputedStyle).startsWith(QString::fromLatin1("vertical")));
+    return WebCore::getRunRects(o, documentElement().styleProperty(QString::fromLatin1("-epub-writing-mode"), QWebElement::ComputedStyle).startsWith(QString::fromLatin1("vertical")));
 }
 
 static Element *findAncestorElement(Element *element, const QString &nodeName, const QString &className)

@@ -953,7 +953,7 @@ static bool containsOnlyUnicodeWhitespace(const RenderText& renderText)
     return true;
 }
 
-static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, bool imgRun, bool vertical/*, int indent*/)
+static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, bool vertical)
 {
     /* Figure out what the runs' positions are relative to. */
     FloatPoint origin;
@@ -1006,16 +1006,6 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                     rubyRunBlockWidth = block->width();
                 }
             }
-            else if (o.isImage() && paBlock && grandPaBlock && imgRun) {
-                if ((grandPaBlock->x() == paBlock->x()) && ( grandPaBlock->y() == paBlock->y())) {
-                    FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
-                    out.append(QRectF(paOrigin.x() + paBlock->width() - block->width() + 1, block->y(), block->width(), block->height()).toAlignedRect());
-                }
-                else {
-                    out.append(QRectF(origin.x() + 1, origin.y(), block->width(), block->height()).toAlignedRect());
-                }
-                return;
-            }
             else  if(o.isText() && pa && paBlock && pa->isTableCell()) {
                 FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
                 origin.setX(paOrigin.x() + paBlock->width() - block->x());
@@ -1044,7 +1034,7 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
         }
     }
 
-    if (o.isText() && !o.isBR() && !imgRun) {
+    if (o.isText() && !o.isBR()) {
         const RenderText& text = *toRenderText(&o);
         bool isVerticalWhitespaceText = (flippedVertical && containsOnlyUnicodeWhitespace(text));
         if (!isVerticalWhitespaceText) {
@@ -1087,11 +1077,11 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
         if (child->hasLayer()) {
             continue;
         }
-        getRunRectsRecursively(out, *child, imgRun, vertical);
+        getRunRectsRecursively(out, *child, vertical);
     }
 }
 
-static void getRunRectsForAllLayers(QList<QRect>& out, RenderLayer* l, bool imgRun, bool vertical)
+static void getRunRectsForAllLayers(QList<QRect>& out, RenderLayer* l, bool vertical)
 {
     /* heavily based on writeLayers, mostly without any understanding of what "layers" even are. */
     l->updateLayerListsIfNeeded();
@@ -1099,25 +1089,25 @@ static void getRunRectsForAllLayers(QList<QRect>& out, RenderLayer* l, bool imgR
     Vector<RenderLayer*>* negList = l->negZOrderList();
     if (negList) {
         for (unsigned i = 0; i != negList->size(); ++i)
-            getRunRectsForAllLayers(out, negList->at(i), imgRun, vertical);
+            getRunRectsForAllLayers(out, negList->at(i), vertical);
     }
 
-    getRunRectsRecursively(out, *l->renderer(), imgRun, vertical);
+    getRunRectsRecursively(out, *l->renderer(), vertical);
 
     Vector<RenderLayer*>* normalFlowList = l->normalFlowList();
     if (normalFlowList) {
         for (unsigned i = 0; i != normalFlowList->size(); ++i)
-            getRunRectsForAllLayers(out, normalFlowList->at(i), imgRun, vertical);
+            getRunRectsForAllLayers(out, normalFlowList->at(i), vertical);
     }
 
     Vector<RenderLayer*>* posList = l->posZOrderList();
     if (posList) {
         for (unsigned i = 0; i != posList->size(); ++i)
-            getRunRectsForAllLayers(out, posList->at(i), imgRun, vertical);
+            getRunRectsForAllLayers(out, posList->at(i), vertical);
     }
 }
 
-QList<QRect> getRunRects(RenderView* o, bool imgRun, bool vertical)
+QList<QRect> getRunRects(RenderView* o, bool vertical)
 {
     if (o->view()->frameView())
         o->view()->frameView()->layout();
@@ -1125,7 +1115,7 @@ QList<QRect> getRunRects(RenderView* o, bool imgRun, bool vertical)
     QList<QRect> out;
     if (o->hasLayer()) {
         RenderLayer *l = o->layer();
-        getRunRectsForAllLayers(out, l, imgRun, vertical);
+        getRunRectsForAllLayers(out, l, vertical);
     }
     return out;
 }
