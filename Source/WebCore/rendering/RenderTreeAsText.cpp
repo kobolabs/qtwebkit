@@ -960,39 +960,29 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
     bool flippedVertical = false;
     bool isRubyBlock = false;
     bool horizontalInVerticalDoc = false;
-    float rubyRunBlockWidth = 0.0f;
+    float rubyLogicalHeight = 0.0f;
     float verticalBlockLineHeight = 0.0f;
-    static float EXPANSION_SCALE = 1.48f;
+    static const float EXPANSION_SCALE = 1.48f;
 
     if (RenderBlock* block = o.containingBlock()) {
         if (block->isRubyText()) {
-             // Ignore the ruby text block, since the ruby base block rect will be enlarged to cover the whole ruby run
-             return;
+            // Ignore the ruby text block, since the ruby base block rect will be enlarged to cover the whole ruby run
+            return;
         }
         else if (block->isRubyBase()) {
             isRubyBlock = true;
+            rubyLogicalHeight = block->logicalHeight();
         }
         origin = block->localToAbsolute(FloatPoint());
         flippedVertical = !block->style()->isHorizontalWritingMode() && block->style()->isFlippedBlocksWritingMode();
         if (flippedVertical) {
             RenderObject* pa = o.parent();
-            RenderBlock* paBlock = NULL;
-            RenderObject* grandPa = NULL;
-            RenderBlock* grandPaBlock = NULL;
-            RenderObject* greatGrandPa = NULL;
-            RenderBlock* greatGrandPaBlock = NULL;
+            RenderBlock* paBlock = pa ? pa->containingBlock() : NULL;
+            RenderObject* grandPa = pa ? pa->parent() : NULL;
+            RenderBlock* grandPaBlock = grandPa ? grandPa->containingBlock() : NULL;
+            RenderObject* greatGrandPa = grandPa ? grandPa->parent() : NULL;
+            RenderBlock* greatGrandPaBlock = greatGrandPa ? greatGrandPa->containingBlock() : NULL;
             verticalBlockLineHeight = block->lineHeight(true, VerticalLine);
-            if (pa) {
-                paBlock = pa->containingBlock();
-                grandPa = pa->parent();
-                if (grandPa) {
-                    greatGrandPa = grandPa->parent();
-                    if (greatGrandPa) {
-                        grandPaBlock = grandPa->containingBlock();
-                        greatGrandPaBlock = greatGrandPa->containingBlock();
-                    }
-                }
-            }
             if (isRubyBlock) {
                 if (grandPaBlock && greatGrandPaBlock) {
                     FloatPoint greatGrandPaOrigin = greatGrandPaBlock->localToAbsolute(FloatPoint());
@@ -1003,10 +993,9 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                     else {
                         origin.setX(greatGrandPaOrigin.x() - paBlock->x());
                     }
-                    rubyRunBlockWidth = block->width();
                 }
             }
-            else  if(o.isText() && pa && paBlock && pa->isTableCell()) {
+            else if (o.isText() && paBlock && pa->isTableCell()) {
                 FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
                 origin.setX(paOrigin.x() + paBlock->width() - block->x());
             }
@@ -1014,21 +1003,16 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                 origin.setX(origin.x() + block->width());
             }
         }
-        else {
-            if (vertical) {
-                RenderObject* pa = o.parent();
-                RenderBlock* paBlock = NULL;
-                verticalBlockLineHeight = block->lineHeight(true, VerticalLine);
-                if (pa) {
-                    paBlock = pa->containingBlock();
-                }
+        else if (vertical) {
+            RenderObject* pa = o.parent();
+            RenderBlock* paBlock = pa ? pa->containingBlock() : NULL;
+            verticalBlockLineHeight = block->lineHeight(true, VerticalLine);
 
-                if (pa && paBlock) {
-                    horizontalInVerticalDoc = !paBlock->style()->isHorizontalWritingMode() && paBlock->style()->isFlippedBlocksWritingMode();
-                    if (horizontalInVerticalDoc) {
-                        FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
-                        origin.setX(paOrigin.x() + paBlock->width() - block->x() - block->width());
-                    }
+            if (paBlock) {
+                horizontalInVerticalDoc = !paBlock->style()->isHorizontalWritingMode() && paBlock->style()->isFlippedBlocksWritingMode();
+                if (horizontalInVerticalDoc) {
+                    FloatPoint paOrigin = paBlock->localToAbsolute(FloatPoint());
+                    origin.setX(paOrigin.x() + paBlock->width() - block->x() - block->width());
                 }
             }
         }
@@ -1039,11 +1023,11 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
         bool isVerticalWhitespaceText = (flippedVertical && containsOnlyUnicodeWhitespace(text));
         if (!isVerticalWhitespaceText) {
             for (InlineTextBox* box = text.firstTextBox(); box; box = box->nextTextBox()) {
-                InlineTextBox& run = *box;
+                const InlineTextBox& run = *box;
                 QRectF r(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
                 if (flippedVertical) {
                     if (isRubyBlock) {
-                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyRunBlockWidth, run.height());
+                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyLogicalHeight, run.height());
                     }
                     else {
                         RenderStyle* styleToUse = run.renderer()->style(run.isFirstLineStyle());
@@ -1065,8 +1049,7 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                     r = QRectF(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
                 }
                 else if (isRubyBlock) {
-                    float newHeight = run.height() * EXPANSION_SCALE;
-                    r = QRectF(r.x(), r.y() - (newHeight - run.height()), run.width(), newHeight);
+                    r = QRectF(r.x(), r.y() - (rubyLogicalHeight - run.height()), run.width(), rubyLogicalHeight);
                 }
                 out.append(r.toAlignedRect());
             }
