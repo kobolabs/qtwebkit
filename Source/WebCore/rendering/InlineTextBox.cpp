@@ -1236,8 +1236,9 @@ void InlineTextBox::paintDecoration(GraphicsContext* context, const FloatPoint& 
                     context->drawLineForText(FloatPoint(localOrigin.x(), localOrigin.y() + underlineOffset + doubleOffset), width, isPrinting);
             }
 #else
-            // Leave one pixel of white between the baseline and the underline.
-            context->drawLineForText(FloatPoint(localOrigin.x(), localOrigin.y() + baseline + 1), width, isPrinting);
+            // Leave one pixel of white between the baseline and the underline, but use descent for Vertical text
+            int underlineOffset = styleToUse->textOrientation() == TextOrientationVerticalRight ? styleToUse->fontMetrics().descent() : 1;
+            context->drawLineForText(FloatPoint(localOrigin.x(), localOrigin.y() + baseline + underlineOffset), width, isPrinting);
 #endif // CSS3_TEXT
         }
         if (deco & TextDecorationOverline) {
