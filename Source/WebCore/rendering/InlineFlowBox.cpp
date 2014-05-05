@@ -448,7 +448,8 @@ bool InlineFlowBox::requiresIdeographicBaseline(const GlyphOverflowAndFallbackFo
         return false;
     
     if (renderer()->style(isFirstLineStyle())->fontDescription().nonCJKGlyphOrientation() == NonCJKGlyphOrientationUpright
-        || renderer()->style(isFirstLineStyle())->font().primaryFont()->hasVerticalGlyphs())
+        || renderer()->style(isFirstLineStyle())->font().primaryFont()->hasVerticalGlyphs()
+        || renderer()->style(isFirstLineStyle())->textOrientation() == TextOrientationSideways)
         return true;
 
     for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
