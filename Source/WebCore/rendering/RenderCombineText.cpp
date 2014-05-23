@@ -119,13 +119,13 @@ void RenderCombineText::combineText()
         shouldUpdateFont = style()->setFontDescription(description); // Need to change font orientation to horizontal.
     else {
         // Need to try compressed glyphs.
-        static const FontWidthVariant widthVariants[] = { HalfWidth, ThirdWidth, QuarterWidth };
-        for (size_t i = 0 ; i < WTF_ARRAY_LENGTH(widthVariants) ; ++i) {
-            description.setWidthVariant(widthVariants[i]);
+        float fontSize = description.computedSize();
+        for (size_t i = fontSize; i >= 0; --i) {
+            description.setComputedSize(i);
             Font compressedFont = Font(description, style()->font().letterSpacing(), style()->font().wordSpacing());
             compressedFont.update(fontSelector);
             float runWidth = compressedFont.width(run);
-            if (i == WTF_ARRAY_LENGTH(widthVariants) - 1 || runWidth <= emWidth) {
+            if (runWidth <= emWidth) {
                 m_combinedTextWidth = runWidth;
                 m_isCombined = true;
 
