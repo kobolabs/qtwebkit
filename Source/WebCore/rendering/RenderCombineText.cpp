@@ -120,7 +120,7 @@ void RenderCombineText::combineText()
     else {
         // Need to try compressed glyphs.
         float fontSize = description.computedSize();
-        for (size_t i = fontSize; i >= 0; --i) {
+        for (int i = fontSize; i >= 0; --i) {
             description.setComputedSize(i);
             Font compressedFont = Font(description, style()->font().letterSpacing(), style()->font().wordSpacing());
             compressedFont.update(fontSelector);
