@@ -31,7 +31,7 @@ public:
     RenderCombineText(Node*, PassRefPtr<StringImpl>);
 
     void combineText();
-    void adjustTextOrigin(FloatPoint& textOrigin, const FloatRect& boxRect) const;
+    void adjustTextOrigin(FloatPoint& textOrigin, const FloatRect& boxRect, const bool isFirstLine = false) const;
     float renderedTextWidth() const;
     void getStringToRender(int, String& string, int& length) const;
     bool isCombined() const { return m_isCombined; }
