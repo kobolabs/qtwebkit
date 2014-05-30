@@ -674,7 +674,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     FloatPoint textOrigin = FloatPoint(boxOrigin.x(), boxOrigin.y() + font.fontMetrics().ascent());
 
     if (combinedText)
-        combinedText->adjustTextOrigin(textOrigin, boxRect);
+        combinedText->adjustTextOrigin(textOrigin, boxRect, boxRect.y() < 0 /* a kind of hack not make combine text at top get cut off in some case when font computed size is not equal to font size */);
 
     // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection
     // and composition underlines.
