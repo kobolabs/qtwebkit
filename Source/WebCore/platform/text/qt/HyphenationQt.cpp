@@ -23,16 +23,22 @@ static QHash<AtomicString, bool> availableDictionaries;
 
 static QString dictionaryPathForLocale(const AtomicString& localeIdentifier)
 {
+    QString path = QString::fromLatin1("%1/hyphenDicts").arg(QCoreApplication::applicationDirPath());
+    if (!QFile::exists(path)) {
+        path = QString::fromLatin1("%1/../Resources/hyphenDicts").arg(QCoreApplication::applicationDirPath());
+        if (!QFile::exists(path)) {
+            path = QString::fromLatin1("/usr/share/hyphen");
+            if (!QFile::exists(path)) {
+                return QString::null;
+            }
+        }
+    }
     QString locale(reinterpret_cast<const QChar *>(localeIdentifier.characters()), localeIdentifier.length());
-    QString dictionaryPath = QString::fromLatin1("/usr/share/hyphen/hyph_%1.dic").arg(locale);
+    QString dictionaryPath = QString::fromLatin1("%1/hyph_%2.dic").arg(path).arg(locale);
     if (QFile::exists(dictionaryPath)) {
         return dictionaryPath;
     }
-    dictionaryPath = QString::fromLatin1("%1/hyphenDicts/hyph_%2.dic").arg(QCoreApplication::applicationDirPath()).arg(locale);
-    if (QFile::exists(dictionaryPath)) {
-        return dictionaryPath;
-    }
-    dictionaryPath = QString::fromLatin1("%1/hyphenDicts/hyph_%2.dic").arg(QCoreApplication::applicationDirPath()).arg(locale.left(2));
+    dictionaryPath = QString::fromLatin1("%1/hyph_%2.dic").arg(path).arg(locale.left(2));
     if (QFile::exists(dictionaryPath)) {
         return dictionaryPath;
     }
