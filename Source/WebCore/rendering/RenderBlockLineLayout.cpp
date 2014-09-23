@@ -3026,7 +3026,9 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
 
     EWhiteSpace currWS = blockStyle->whiteSpace();
     EWhiteSpace lastWS = currWS;
+    bool hadUncommittedWidthBeforeCurrent = false;
     while (current.m_obj) {
+        hadUncommittedWidthBeforeCurrent = !!width.uncommittedWidth();
         RenderStyle* currentStyle = current.m_obj->style();
         RenderObject* next = bidiNextSkippingEmptyInlines(m_block, current.m_obj);
         if (next && next->parent() && !next->parent()->isDescendantOf(current.m_obj->parent()))
@@ -3586,7 +3588,7 @@ InlineIterator RenderBlock::LineBreaker::nextSegmentBreak(InlineBidiResolver& re
             // make sure we consume at least one char/object.
             if (lBreak == resolver.position())
                 lBreak.increment();
-        } else if (!width.committedWidth() && (!current.m_obj || !current.m_obj->isBR()) && !current.m_pos) {
+        } else if (!current.m_pos && !width.committedWidth() && width.uncommittedWidth() && !hadUncommittedWidthBeforeCurrent) {
             // Do not push the current object to the next line, when this line has some content, but it is still considered empty.
             // Empty inline elements like <span></span> can produce such lines and now we just ignore these break opportunities
             // at the start of a line, if no width has been committed yet.
