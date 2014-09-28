@@ -331,7 +331,7 @@
 #endif
 
 #if !defined(ENABLE_CSS3_TEXT)
-#define ENABLE_CSS3_TEXT 0
+#define ENABLE_CSS3_TEXT 1
 #endif
 
 #if !defined(ENABLE_CSS_BOX_DECORATION_BREAK)
@@ -343,11 +343,11 @@
 #endif
 
 #if !defined(ENABLE_CSS_COMPOSITING)
-#define ENABLE_CSS_COMPOSITING 0
+#define ENABLE_CSS_COMPOSITING 1
 #endif
 
 #if !defined(ENABLE_CSS_FILTERS)
-#define ENABLE_CSS_FILTERS 0
+#define ENABLE_CSS_FILTERS 1
 #endif
 
 #if !defined(ENABLE_CSS_IMAGE_ORIENTATION)
@@ -355,7 +355,7 @@
 #endif
 
 #if !defined(ENABLE_CSS_IMAGE_RESOLUTION)
-#define ENABLE_CSS_IMAGE_RESOLUTION 0
+#define ENABLE_CSS_IMAGE_RESOLUTION 1
 #endif
 
 #if !defined(ENABLE_CSS_IMAGE_SET)
@@ -375,7 +375,7 @@
 #endif
 
 #if !defined(ENABLE_CSS_VARIABLES)
-#define ENABLE_CSS_VARIABLES 0
+#define ENABLE_CSS_VARIABLES 1
 #endif
 
 #if !defined(ENABLE_CUSTOM_SCHEME_HANDLER)
@@ -727,7 +727,7 @@
 #endif
 
 #if !defined(ENABLE_SUBPIXEL_LAYOUT)
-#define ENABLE_SUBPIXEL_LAYOUT 0
+#define ENABLE_SUBPIXEL_LAYOUT 1
 #endif
 
 #if !defined(ENABLE_SVG)
@@ -745,7 +745,7 @@
 #endif
 
 #if !defined(ENABLE_TEXT_AUTOSIZING)
-#define ENABLE_TEXT_AUTOSIZING 0
+#define ENABLE_TEXT_AUTOSIZING 1
 #endif
 
 #if !defined(ENABLE_TEXT_CARET)
