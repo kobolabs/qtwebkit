@@ -3234,6 +3234,12 @@ QPair<QRect, QRect> QWebPage::selectionEndPoints()
     return handle()->selectionEndPoints();
 }
 
+QVector<QRect> QWebPage::selectionTextRects()
+{
+    d->createMainFrame();
+    return handle()->selectionTextRects();
+}
+
 /*!
     \since 4.8
     \fn void QWebPage::viewportChangeRequested()

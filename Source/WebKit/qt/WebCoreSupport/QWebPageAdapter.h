@@ -377,6 +377,7 @@ public:
     void selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
+    QVector<QRect> selectionTextRects();
 
 private:
     QNetworkAccessManager *networkManager;
