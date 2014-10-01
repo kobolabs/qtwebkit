@@ -395,6 +395,7 @@ public:
     void selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
+    QVector<QRect> selectionTextRects();
     static QString userAgentForUrl(const QUrl& url);
 
 Q_SIGNALS:

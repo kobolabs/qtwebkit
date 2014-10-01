@@ -1729,3 +1729,22 @@ QPair<QRect, QRect> QWebPageAdapter::selectionEndPoints()
 
     return QPair<QRect, QRect>(startQRect3,endQRect3);
 }
+
+QVector<QRect> QWebPageAdapter::selectionTextRects()
+{
+    VisibleSelection selection = page->focusController()->focusedOrMainFrame()->selection()->selection();
+    PassRefPtr<Range> range = selection.firstRange();
+    Vector<IntRect> rects;
+    if (range.get() != NULL) {
+        range.get()->textRects(rects, true);
+    }
+    if (rects.size() == 0) {
+        return QVector<QRect>();
+    }
+    QVector<QRect> selectionTextRects;
+    const size_t n = rects.size();
+    for (size_t i = 0; i < n; ++i) {
+        selectionTextRects.append(QRect(rects[i].x(), rects[i].y(), rects[i].width(), rects[i].height()));
+    }
+    return selectionTextRects;
+}
