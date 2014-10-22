@@ -173,7 +173,7 @@ void ImageLoader::updateFromElement()
 
     AtomicString attr = m_element->imageSourceURL();
 
-    if (attr == m_failedLoadURL)
+    if (!m_failedLoadURL.isEmpty() && attr == m_failedLoadURL)
         return;
 
     // Do not load any image if the 'src' attribute is missing or if it is
@@ -212,8 +212,9 @@ void ImageLoader::updateFromElement()
             clearFailedLoadURL();
     } else if (!attr.isNull()) {
         // Fire an error event if the url is empty.
-        // FIXME: Should we fire this event asynchronoulsy via errorEventSender()?
-        m_element->dispatchEvent(Event::create(eventNames().errorEvent, false, false));
+        m_failedLoadURL = attr;
+        m_hasPendingErrorEvent = true;
+        errorEventSender().dispatchEventSoon(this);
     }
     
     CachedImage* oldImage = m_image.get();
@@ -254,7 +255,10 @@ void ImageLoader::updateFromElement()
             // being queued to fire. Ensure this happens after beforeload is
             // dispatched.
             newImage->addClient(this);
+        } else {
+            updateRenderer();
         }
+
         if (oldImage)
             oldImage->removeClient(this);
     }

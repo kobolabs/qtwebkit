@@ -127,9 +127,9 @@ static inline float applyFontTransforms(GlyphBuffer* glyphBuffer, bool ltr, int&
 #if ENABLE(SVG_FONTS)
     // We need to handle transforms on SVG fonts internally, since they are rendered internally.
     if (fontData->isSVGFont()) {
-        ASSERT(iterator.run().renderingContext());
+        // SVG font fallbacks doesn't work properly and will not have a renderingContext. see: textRunNeedsRenderingContext()
         // SVG font ligatures are handled during glyph selection, only kerning remaining.
-        if (typesettingFeatures & Kerning)
+        if (iterator.run().renderingContext() && (typesettingFeatures & Kerning))
             iterator.run().renderingContext()->applySVGKerning(fontData, iterator, glyphBuffer, lastGlyphCount);
     } else
 #endif
@@ -320,7 +320,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
                 m_isAfterExpansion = false;
         }
 
-        if (shouldApplyFontTransforms() && glyphBuffer && Font::treatAsSpace(character))
+        if (shouldApplyFontTransforms() && glyphBuffer && (Font::treatAsSpace(character) || Font::treatAsZeroWidthSpace(character)))
             charactersTreatedAsSpace.append(make_pair(glyphBuffer->size(),
                 OriginalAdvancesForCharacterTreatedAsSpace(character == ' ', glyphBuffer->size() ? glyphBuffer->advanceAt(glyphBuffer->size() - 1).width() : 0, width)));
 
