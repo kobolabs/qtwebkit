@@ -1024,32 +1024,32 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
         if (!isVerticalWhitespaceText) {
             for (InlineTextBox* box = text.firstTextBox(); box; box = box->nextTextBox()) {
                 const InlineTextBox& run = *box;
-                QRectF r(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
+                QRectF r(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height() + 2);
                 if (flippedVertical) {
                     if (isRubyBlock) {
-                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyLogicalHeight, run.height());
+                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyLogicalHeight, run.height() + 2);
                     }
                     else {
                         RenderStyle* styleToUse = run.renderer()->style(run.isFirstLineStyle());
                         RenderCombineText* combinedText = styleToUse->hasTextCombine() && run.textRenderer()->isCombineText() && toRenderCombineText(run.textRenderer())->isCombined() ? toRenderCombineText(run.textRenderer()) : 0;
                         if (combinedText) {
                             float dx = (combinedText->renderedTextWidth() - run.width()) / 2.0;
-                            r = QRectF(origin.x() - run.width() - run.x() - dx, run.y() + origin.y(), combinedText->renderedTextWidth(), run.height());
+                            r = QRectF(origin.x() - run.width() - run.x() - dx, run.y() + origin.y(), combinedText->renderedTextWidth(), run.height() + 2);
                         }
                         else if (verticalBlockLineHeight < 1) {
                             // Assume there is always a ruby block and scale up the original width (add padding), so that first text block of each page has roughly the same right-side margin
-                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), run.width() * EXPANSION_SCALE, run.height());
+                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), run.width() * EXPANSION_SCALE, run.height() + 2);
                         }
                         else {
-                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE), run.height());
+                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE), run.height() + 2);
                         }
                     }
                 }
                 else if (horizontalInVerticalDoc) {
-                    r = QRectF(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height());
+                    r = QRectF(run.x() + origin.x(), run.y() + origin.y(), run.width(), run.height() + 2);
                 }
                 else if (isRubyBlock) {
-                    r = QRectF(r.x(), r.y() - (rubyLogicalHeight - run.height()), run.width(), rubyLogicalHeight);
+                    r = QRectF(r.x(), r.y() - (rubyLogicalHeight - run.height()), run.width(), rubyLogicalHeight + 2);
                 }
                 out.append(r.toAlignedRect());
             }
