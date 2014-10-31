@@ -77,7 +77,7 @@ Font::Font()
 {
 }
 
-Font::Font(const FontDescription& fd, short letterSpacing, short wordSpacing)
+Font::Font(const FontDescription& fd, float letterSpacing, float wordSpacing)
     : m_fontDescription(fd)
     , m_letterSpacing(letterSpacing)
     , m_wordSpacing(wordSpacing)
