@@ -436,7 +436,7 @@ Font::CodePath Font::codePath(const TextRun& run) const
     if (m_fontDescription.featureSettings() && m_fontDescription.featureSettings()->size() > 0)
         return Complex;
     
-    if (run.length() > 1 && !WidthIterator::supportsTypesettingFeatures(*this))
+    if (!WidthIterator::supportsTypesettingFeatures(*this))
         return Complex;
 
     if (!run.characterScanForCodePath())
