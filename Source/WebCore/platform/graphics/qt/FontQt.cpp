@@ -183,14 +183,15 @@ public:
     }
 
     TextLayout(RenderText* text, const Font& font, float xPos)
+        : m_font(font)
+        , m_run(constructTextRun(text, font, xPos))
     {
-        const TextRun run(constructTextRun(text, font, xPos));
-        const String sanitized = Font::normalizeSpaces(run.characters16(), run.length());
+        const String sanitized = Font::normalizeSpaces(m_run.characters16(), m_run.length());
         const QString string(sanitized);
         m_layout.setText(string);
-        m_layout.setRawFont(font.rawFont());
-        font.initFormatForTextLayout(&m_layout, run);
-        m_line = setupLayout(&m_layout, run);
+        m_layout.setRawFont(m_font.rawFont());
+        m_font.initFormatForTextLayout(&m_layout, m_run);
+        m_line = setupLayout(&m_layout, m_run);
     }
 
     float width(unsigned from, unsigned len, HashSet<const SimpleFontData*>* fallbackFonts)
@@ -198,7 +199,9 @@ public:
         Q_UNUSED(fallbackFonts);
         float x1 = m_line.cursorToX(from);
         float x2 = m_line.cursorToX(from + len);
-        float width = qAbs(x2 - x1);
+        float width = x2 - x1;
+        if (m_font.wordSpacing() && from && Font::treatAsSpace(m_run[from]))
+            width -= m_font.wordSpacing();
 
         return width;
     }
@@ -214,6 +217,8 @@ private:
         return run;
     }
 
+    Font m_font;
+    TextRun m_run;
     QTextLayout m_layout;
     QTextLine m_line;
 };
@@ -269,7 +274,7 @@ float Font::floatWidthForComplexText(const TextRun& run, HashSet<const SimpleFon
     QTextLine line = setupLayout(&layout, run);
     float x1 = line.cursorToX(0);
     float x2 = line.cursorToX(run.length());
-    float width = qAbs(x2 - x1);
+    float width = x2 - x1;
 
     return width + run.expansion();
 }
