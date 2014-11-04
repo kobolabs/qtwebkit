@@ -1028,7 +1028,7 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                 QRectF r(run.x() + origin.x(), run.y() + origin.y(), run.width(), run_height);
                 if (flippedVertical) {
                     if (isRubyBlock) {
-                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyLogicalHeight, run_height);
+                        r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), rubyLogicalHeight, run.height());
                     }
                     else {
                         RenderStyle* styleToUse = run.renderer()->style(run.isFirstLineStyle());
@@ -1039,10 +1039,10 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                         }
                         else if (verticalBlockLineHeight < 1) {
                             // Assume there is always a ruby block and scale up the original width (add padding), so that first text block of each page has roughly the same right-side margin
-                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), run.width() * EXPANSION_SCALE, run_height);
+                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), run.width() * EXPANSION_SCALE, run.height());
                         }
                         else {
-                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE), run_height);
+                            r = QRectF(origin.x() - run.width() - run.x(), run.y() + origin.y(), qMin(verticalBlockLineHeight, run.width() * EXPANSION_SCALE), run.height());
                         }
                     }
                 }
@@ -1050,7 +1050,7 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
                     r = QRectF(run.x() + origin.x(), run.y() + origin.y(), run.width(), run_height);
                 }
                 else if (isRubyBlock) {
-                    r = QRectF(r.x(), r.y() - (rubyLogicalHeight - run.height()), run.width(), qMin(rubyLogicalHeight * 1.1, rubyLogicalHeight + 5.0));
+                    r = QRectF(r.x(), r.y() - (rubyLogicalHeight - run.height()), run.width(), rubyLogicalHeight);
                 }
                 out.append(r.toAlignedRect());
             }
