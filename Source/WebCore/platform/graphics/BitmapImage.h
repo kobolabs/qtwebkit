@@ -163,6 +163,10 @@ public:
 
     virtual PassNativeImagePtr nativeImageForCurrentFrame() OVERRIDE;
 
+#if PLATFORM(QT)
+    QImage nativeQImageForCurrentFrame();
+#endif
+
     virtual bool currentFrameKnownToBeOpaque() OVERRIDE;
 
     ImageOrientation currentFrameOrientation();

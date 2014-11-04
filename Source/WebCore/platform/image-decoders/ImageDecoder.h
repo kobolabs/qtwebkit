@@ -109,6 +109,10 @@ namespace WebCore {
         // FrameData::clear()).
         PassNativeImagePtr asNewNativeImage() const;
 
+#if PLATFORM(QT)
+        QImage asQImage() const;
+#endif
+
         bool hasAlpha() const;
         const IntRect& originalFrameRect() const { return m_originalFrameRect; }
         FrameStatus status() const { return m_status; }

@@ -147,6 +147,10 @@ public:
     // see comments on clear() above.
     PassNativeImagePtr createFrameAtIndex(size_t);
 
+#if PLATFORM(QT)
+    QImage createQImageAtIndex(size_t index);
+#endif
+
     float frameDurationAtIndex(size_t) const;
     bool frameHasAlphaAtIndex(size_t) const; // Whether or not the frame actually used any alpha.
     bool frameIsCompleteAtIndex(size_t) const; // Whether or not the frame is completely decoded.
