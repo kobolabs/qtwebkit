@@ -277,6 +277,17 @@ PassNativeImagePtr ImageFrame::asNewNativeImage() const
     return new QPixmap(QPixmap::fromImage(img).copy());
 }
 
+QImage ImageFrame::asQImage() const
+{
+    QImage::Format format;
+    if (m_hasAlpha)
+        format = m_premultiplyAlpha ?  QImage::Format_ARGB32_Premultiplied : QImage::Format_ARGB32;
+    else
+        format = QImage::Format_RGB32;
+    QImage img(reinterpret_cast<uchar*>(m_bytes), m_size.width(), m_size.height(), sizeof(PixelData) * m_size.width(), format);
+    return img;
+}
+
 }
 
 // vim: ts=4 sw=4 et

@@ -155,6 +155,25 @@ PassNativeImagePtr ImageSource::createFrameAtIndex(size_t index)
     return buffer->asNewNativeImage();
 }
 
+#if PLATFORM(QT)
+QImage ImageSource::createQImageAtIndex(size_t index)
+{
+    if (!m_decoder)
+        return QImage();
+
+    ImageFrame* buffer = m_decoder->frameBufferAtIndex(index);
+    if (!buffer || buffer->status() == ImageFrame::FrameEmpty)
+        return QImage();
+
+    // Zero-height images can cause problems for some ports.  If we have an
+    // empty image dimension, just bail.
+    if (size().isEmpty())
+        return QImage();
+
+    return buffer->asQImage();
+}
+#endif
+
 float ImageSource::frameDurationAtIndex(size_t index) const
 {
     if (!m_decoder)

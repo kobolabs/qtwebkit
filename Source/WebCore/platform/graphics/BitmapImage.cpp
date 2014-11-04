@@ -322,6 +322,13 @@ PassNativeImagePtr BitmapImage::nativeImageForCurrentFrame()
     return frameAtIndex(currentFrame());
 }
 
+#if PLATFORM(QT)
+QImage BitmapImage::nativeQImageForCurrentFrame()
+{
+    return m_source.createQImageAtIndex(currentFrame());
+}
+#endif
+
 bool BitmapImage::frameHasAlphaAtIndex(size_t index)
 {
     if (m_frames.size() <= index)

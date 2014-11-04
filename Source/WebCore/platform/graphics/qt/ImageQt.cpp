@@ -274,6 +274,38 @@ QPixmap* prescaleImageIfRequired(QPainter* painter, QPixmap* image, QPixmap* buf
     return buffer;
 }
 
+bool isPrescaleRequired(QPainter* painter, const QRectF& destRect, const QRectF& srcRect)
+{
+        ASSERT(painter);
+        if (!(painter->renderHints() & QPainter::SmoothPixmapTransform)) {
+            return false;
+        }
+
+        QTransform transform = painter->combinedTransform();
+
+        // Prescaling transforms that does more than scale or translate is not supported.
+        if (transform.type() > QTransform::TxScale) {
+            return false;
+        }
+
+        QRectF transformedDst = transform.mapRect(destRect);
+        // Only prescale if downscaling to 0.5x or less
+        if (!(painter->renderHints() & QPainter::ForcedSmoothTransform) && (transformedDst.width() >= (srcRect.width() * 0.50)) && (transformedDst.height() >= (srcRect.height() * 0.50))) {
+            return false;
+        }
+        return true;
+}
+
+QPixmap prescaleImage(QPainter* painter, QImage image, const QRectF& destRect, QRectF* srcRect)
+{
+    ASSERT(painter);
+    QTransform transform = painter->combinedTransform();
+    QRectF transformedDst = transform.mapRect(destRect);
+    QSize scaledSize = transformedDst.size().toSize();
+    *srcRect = QRectF(QPointF(), scaledSize);
+    return QPixmap::fromScaledImage(image, scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);;
+}
+
 // Drawing Routines
 void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     const FloatRect& src, ColorSpace styleColorSpace, CompositeOperator op, BlendMode blendMode)
@@ -286,26 +318,31 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     if (normalizedSrc.isEmpty() || normalizedDst.isEmpty())
         return;
 
-    QPixmap* image = nativeImageForCurrentFrame();
+    QPixmap* image = nullptr;
+    QPixmap* imageFromQImage = nullptr;
+    if (isPrescaleRequired(ctxt->platformContext(), normalizedDst, normalizedSrc)) {
+        imageFromQImage = new QPixmap(prescaleImage(ctxt->platformContext(), nativeQImageForCurrentFrame(), normalizedDst, &normalizedSrc));
+        image = imageFromQImage;
+    }
+    else {
+        image = nativeImageForCurrentFrame();
+
+        if (mayFillWithSolidColor()) {
+            fillWithSolidColor(ctxt, normalizedDst, solidColor(), styleColorSpace, op);
+            return;
+        }
+    }
     if (!image)
         return;
-
-    if (mayFillWithSolidColor()) {
-        fillWithSolidColor(ctxt, normalizedDst, solidColor(), styleColorSpace, op);
-        return;
-    }
 
 #if ENABLE(IMAGE_DECODER_DOWN_SAMPLING)
     normalizedSrc = adjustSourceRectForDownSampling(normalizedSrc, image->size());
 #endif
 
-    QPixmap prescaledBuffer;
-    image = prescaleImageIfRequired(ctxt->platformContext(), image, &prescaledBuffer, normalizedDst, &normalizedSrc);
-
     CompositeOperator previousOperator = ctxt->compositeOperation();
     BlendMode previousBlendMode = ctxt->blendModeOperation();
     ctxt->setCompositeOperation(!image->hasAlpha() && op == CompositeSourceOver && blendMode == BlendModeNormal ? CompositeCopy : op, blendMode);
- 
+
     QPixmap resizedImage;
     const int maxResize = qMin(128 * 128, static_cast<int>(normalizedSrc.width()) * static_cast<int>(normalizedSrc.height()));
     const int resizeWidth = static_cast<int>(normalizedDst.width());
@@ -333,6 +370,8 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
 
     if (imageObserver())
         imageObserver()->didDraw(this);
+
+    delete imageFromQImage;
 }
 
 void BitmapImage::checkForSolidColor()
