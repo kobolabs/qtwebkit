@@ -284,7 +284,7 @@ private:
 
     virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const OVERRIDE;
     virtual int firstLineBoxBaseline() const OVERRIDE;
-    virtual int inlineBlockBaseline(LineDirectionMode) const OVERRIDE;
+    virtual int inlineBlockBaseline(LineDirectionMode, FontBaseline baselineType = AlphabeticBaseline) const OVERRIDE;
 
     RenderTableCol* slowColElement(unsigned col, bool* startEdge, bool* endEdge) const;
 

@@ -545,8 +545,8 @@ protected:
     virtual void computePreferredLogicalWidths() OVERRIDE;
 
     virtual int firstLineBoxBaseline() const;
-    virtual int inlineBlockBaseline(LineDirectionMode) const OVERRIDE;
-    int lastLineBoxBaseline(LineDirectionMode) const;
+    virtual int inlineBlockBaseline(LineDirectionMode, FontBaseline baselineType = AlphabeticBaseline) const OVERRIDE;
+    int lastLineBoxBaseline(LineDirectionMode, FontBaseline baselineType = AlphabeticBaseline) const;
 
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&);
 

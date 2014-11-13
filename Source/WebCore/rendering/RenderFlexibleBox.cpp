@@ -288,7 +288,7 @@ int RenderFlexibleBox::firstLineBoxBaseline() const
     return baseline + baselineChild->logicalTop();
 }
 
-int RenderFlexibleBox::inlineBlockBaseline(LineDirectionMode direction) const
+int RenderFlexibleBox::inlineBlockBaseline(LineDirectionMode direction, FontBaseline baselineType) const
 {
     int baseline = firstLineBoxBaseline();
     if (baseline != -1)
