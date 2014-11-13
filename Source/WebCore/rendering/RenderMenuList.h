@@ -122,7 +122,7 @@ private:
         return RenderBlock::baselinePosition(baseline, firstLine, direction, position);
     }
     virtual int firstLineBoxBaseline() const OVERRIDE { return RenderBlock::firstLineBoxBaseline(); }
-    virtual int inlineBlockBaseline(LineDirectionMode direction) const OVERRIDE { return RenderBlock::inlineBlockBaseline(direction); }
+    virtual int inlineBlockBaseline(LineDirectionMode direction, FontBaseline baselineType = AlphabeticBaseline) const OVERRIDE { return RenderBlock::inlineBlockBaseline(direction); }
 
     void getItemBackgroundColor(unsigned listIndex, Color&, bool& itemHasCustomBackgroundColor) const;
 

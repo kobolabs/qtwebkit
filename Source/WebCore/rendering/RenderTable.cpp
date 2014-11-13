@@ -1328,7 +1328,7 @@ int RenderTable::baselinePosition(FontBaseline baselineType, bool firstLine, Lin
     return RenderBox::baselinePosition(baselineType, firstLine, direction, linePositionMode);
 }
 
-int RenderTable::inlineBlockBaseline(LineDirectionMode) const
+int RenderTable::inlineBlockBaseline(LineDirectionMode, FontBaseline baselineType) const
 {
     // Tables are skipped when computing an inline-block's baseline.
     return -1;

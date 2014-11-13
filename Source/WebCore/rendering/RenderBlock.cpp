@@ -6580,7 +6580,7 @@ int RenderBlock::baselinePosition(FontBaseline baselineType, bool firstLine, Lin
         bool ignoreBaseline = (layer() && (layer()->marquee() || (direction == HorizontalLine ? (layer()->verticalScrollbar() || layer()->scrollYOffset() != 0)
             : (layer()->horizontalScrollbar() || layer()->scrollXOffset() != 0)))) || (isWritingModeRoot() && !isRubyRun());
         
-        int baselinePos = ignoreBaseline ? -1 : inlineBlockBaseline(direction);
+        int baselinePos = ignoreBaseline ? -1 : inlineBlockBaseline(direction, baselineType);
         
         LayoutUnit bottomOfContent = direction == HorizontalLine ? borderTop() + paddingTop() + contentHeight() : borderRight() + paddingRight() + contentWidth();
         if (baselinePos != -1 && baselinePos <= bottomOfContent)
@@ -6617,12 +6617,12 @@ int RenderBlock::firstLineBoxBaseline() const
     return -1;
 }
 
-int RenderBlock::inlineBlockBaseline(LineDirectionMode direction) const
+int RenderBlock::inlineBlockBaseline(LineDirectionMode direction, FontBaseline baselineType) const
 {
-    return lastLineBoxBaseline(direction);
+    return lastLineBoxBaseline(direction, baselineType);
 }
 
-int RenderBlock::lastLineBoxBaseline(LineDirectionMode lineDirection) const
+int RenderBlock::lastLineBoxBaseline(LineDirectionMode lineDirection, FontBaseline baselineType) const
 {
     if (!isBlockFlow() || (isWritingModeRoot() && !isRubyRun()))
         return -1;
@@ -6635,14 +6635,14 @@ int RenderBlock::lastLineBoxBaseline(LineDirectionMode lineDirection) const
                  + (lineDirection == HorizontalLine ? borderTop() + paddingTop() : borderRight() + paddingRight());
         }
         if (lastLineBox())
-            return lastLineBox()->logicalTop() + style(lastLineBox() == firstLineBox())->fontMetrics().ascent(lastRootBox()->baselineType());
+            return lastLineBox()->logicalTop() + style(lastLineBox() == firstLineBox())->fontMetrics().ascent(baselineType);
         return -1;
     } else {
         bool haveNormalFlowChild = false;
         for (RenderBox* curr = lastChildBox(); curr; curr = curr->previousSiblingBox()) {
             if (!curr->isFloatingOrOutOfFlowPositioned()) {
                 haveNormalFlowChild = true;
-                int result = curr->inlineBlockBaseline(lineDirection);
+                int result = curr->inlineBlockBaseline(lineDirection, baselineType);
                 if (result != -1)
                     return curr->logicalTop() + result; // Translate to our coordinate space.
             }
