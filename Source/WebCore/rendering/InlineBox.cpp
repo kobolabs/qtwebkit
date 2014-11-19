@@ -356,8 +356,10 @@ FloatPoint InlineBox::locationIncludingFlipping()
     RenderBlock* block = root()->block();
     if (block->style()->isHorizontalWritingMode())
         return FloatPoint(x(), block->height() - height() - y());
-    else
-        return FloatPoint(block->width() - width() - x(), y());
+    else {
+        RenderStyle* styleToUse = renderer()->style(isFirstLineStyle());
+        return FloatPoint(block->width() - width() - x() + styleToUse->font().fontMetrics().descent() + root()->width() / 2 - styleToUse->font().fontMetrics().ascent(IdeographicBaseline), y());
+    }
 }
 
 void InlineBox::flipForWritingMode(FloatRect& rect)
