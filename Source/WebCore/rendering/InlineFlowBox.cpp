@@ -674,6 +674,12 @@ void InlineFlowBox::placeBoxesInBlockDirection(LayoutUnit top, LayoutUnit maxHei
             newLogicalTopIncludingMargins = newLogicalTop;
             LayoutUnit overSideMargin = curr->isHorizontal() ? box->marginTop() : box->marginRight();
             LayoutUnit underSideMargin = curr->isHorizontal() ? box->marginBottom() : box->marginLeft();
+            RootInlineBox* rootBox = root();
+            const FontMetrics& fontMetrics = rootBox->renderer()->style(isFirstLineStyle())->fontMetrics();
+            int fontHeight = fontMetrics.ascent() + fontMetrics.descent();
+            if (curr->renderer()->isImage() && curr->logicalHeight() <= fontHeight) { /* supposed to be gaiji(Japanese) */
+                newLogicalTop += curr->baselinePosition(baselineType) - fontMetrics.ascent() + int((fontHeight - boxHeight) / 2);
+            }
             newLogicalTop += overSideMargin;
             boxHeightIncludingMargins += overSideMargin + underSideMargin;
         }
