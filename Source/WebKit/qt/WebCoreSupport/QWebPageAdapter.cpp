@@ -217,6 +217,8 @@ QWebPageAdapter::QWebPageAdapter()
     , m_totalBytes(0)
     , m_bytesReceived()
     , networkManager(0)
+    , m_deviceOrientationClient(0)
+    , m_deviceMotionClient(0)
 {
     WebCore::initializeWebCoreQt();
 }
@@ -249,18 +251,19 @@ void QWebPageAdapter::initializeWebCorePage()
 
 #if ENABLE(DEVICE_ORIENTATION)
     if (useMock) {
-        DeviceOrientationClientMock* mockOrientationClient = new DeviceOrientationClientMock;
-        WebCore::provideDeviceOrientationTo(page, mockOrientationClient);
-
-        DeviceMotionClientMock* mockMotionClient= new DeviceMotionClientMock;
-        WebCore::provideDeviceMotionTo(page, mockMotionClient);
+        m_deviceOrientationClient = new DeviceOrientationClientMock;
+        m_deviceMotionClient = new DeviceMotionClientMock;
     }
 #if HAVE(QTSENSORS)
     else {
-        WebCore::provideDeviceOrientationTo(page, new DeviceOrientationClientQt);
-        WebCore::provideDeviceMotionTo(page, new DeviceMotionClientQt);
+        m_deviceOrientationClient =  new DeviceOrientationClientQt;
+        m_deviceMotionClient = new DeviceMotionClientQt;
     }
 #endif
+    if (m_deviceOrientationClient)
+        WebCore::provideDeviceOrientationTo(page, m_deviceOrientationClient);
+    if (m_deviceMotionClient)
+        WebCore::provideDeviceMotionTo(page, m_deviceMotionClient);
 #endif
 
     // By default each page is put into their own unique page group, which affects popup windows
@@ -290,6 +293,10 @@ QWebPageAdapter::~QWebPageAdapter()
 
 #if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
     NotificationPresenterClientQt::notificationPresenter()->removeClient();
+#endif
+#if ENABLE(DEVICE_ORIENTATION)
+    delete m_deviceMotionClient;
+    delete m_deviceOrientationClient;
 #endif
 }
 
