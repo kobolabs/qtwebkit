@@ -274,7 +274,7 @@ PassNativeImagePtr ImageFrame::asNewNativeImage() const
 
     QImage img(reinterpret_cast<uchar*>(m_bytes), m_size.width(), m_size.height(), sizeof(PixelData) * m_size.width(), format);
 
-    return new QPixmap(QPixmap::fromImage(img).copy());
+    return new QPixmap(QPixmap::fromImage(img));
 }
 
 QImage ImageFrame::asQImage() const
