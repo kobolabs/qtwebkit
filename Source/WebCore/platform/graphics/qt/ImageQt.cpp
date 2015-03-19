@@ -364,6 +364,13 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
         }
     }
 
+    const QPainter::RenderHints hints = ctxt->platformContext()->renderHints();
+    if (!(hints & QPainter::SmoothPixmapTransform) && (hints & QPainter::Dithering)) {
+        QImage i = resize ? resizedImage.toImage() : image->toImage();
+        resize = true;
+        resizedImage = QPixmap::fromImage(i.convertToFormat(QImage::Format_Mono, Qt::MonoOnly | Qt::DiffuseDither));
+    }
+
     ctxt->platformContext()->drawPixmap(normalizedDst, resize ? resizedImage : *image, normalizedSrc);
 
     ctxt->setCompositeOperation(previousOperator, previousBlendMode);
