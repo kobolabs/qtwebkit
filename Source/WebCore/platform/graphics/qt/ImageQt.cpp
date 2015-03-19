@@ -368,7 +368,7 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     if (!(hints & QPainter::SmoothPixmapTransform) && (hints & QPainter::Dithering)) {
         QImage i = resize ? resizedImage.toImage() : image->toImage();
         resize = true;
-        resizedImage = QPixmap::fromImage(i.convertToFormat(QImage::Format_Mono, Qt::MonoOnly | Qt::DiffuseDither));
+        resizedImage = QPixmap::fromImage(i.convertToFormat(QImage::Format_Mono, Qt::MonoOnly | Qt::OrderedDither));
     }
 
     ctxt->platformContext()->drawPixmap(normalizedDst, resize ? resizedImage : *image, normalizedSrc);
