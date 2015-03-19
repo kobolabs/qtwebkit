@@ -123,8 +123,7 @@ namespace WebCore {
         InterpolationNone,
         InterpolationLow,
         InterpolationMedium,
-        InterpolationHigh,
-        InterpolationHighWithDither
+        InterpolationHigh
     };
 
     struct GraphicsContextState {
