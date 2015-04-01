@@ -508,11 +508,6 @@ static inline AffineTransform rotation(const FloatRect& boxRect, RotationDirecti
     return clockwise ? AffineTransform(0, 1, -1, 0, boxRect.x() + boxRect.maxY(), boxRect.maxY() - boxRect.x())
         : AffineTransform(0, -1, 1, 0, boxRect.x() - boxRect.maxY(), boxRect.x() + boxRect.maxY());
 }
-static inline AffineTransform rotation_with_offset(const FloatRect& boxRect, RotationDirection clockwise, int offset)
-{
-    return clockwise ? AffineTransform(0, 1, -1, 0, boxRect.x() + boxRect.maxY() - offset, boxRect.maxY() - boxRect.x())
-        : AffineTransform(0, -1, 1, 0, boxRect.x() - boxRect.maxY(), boxRect.x() + boxRect.maxY() - offset);
-}
 
 void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /*lineTop*/, LayoutUnit /*lineBottom*/)
 {
@@ -573,10 +568,8 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     RenderCombineText* combinedText = styleToUse->hasTextCombine() && textRenderer()->isCombineText() && toRenderCombineText(textRenderer())->isCombined() ? toRenderCombineText(textRenderer()) : 0;
 
     bool shouldRotate = !isHorizontal() && !combinedText;
-    RootInlineBox* rootBox = root();
-    const FontMetrics& fontMetrics = rootBox->renderer()->style(isFirstLineStyle())->fontMetrics();
     if (shouldRotate)
-        context->concatCTM(rotation_with_offset(boxRect, Clockwise, styleToUse->font().fontMetrics().descent() - fontMetrics.descent()));
+        context->concatCTM(rotation(boxRect, Clockwise));
 
     // Determine whether or not we have composition underlines to draw.
     bool containsComposition = renderer()->node() && renderer()->frame()->editor().compositionNode() == renderer()->node();
@@ -848,7 +841,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     }
     
     if (shouldRotate)
-        context->concatCTM(rotation_with_offset(boxRect, Counterclockwise, styleToUse->font().fontMetrics().descent() - fontMetrics.descent()));
+        context->concatCTM(rotation(boxRect, Counterclockwise));
 }
 
 void InlineTextBox::selectionStartEnd(int& sPos, int& ePos)

@@ -190,7 +190,7 @@ public:
     void placeBoxesInBlockDirection(LayoutUnit logicalTop, LayoutUnit maxHeight, int maxAscent, bool strictMode, LayoutUnit& lineTop, LayoutUnit& lineBottom, bool& setLineTop,
                                     LayoutUnit& lineTopIncludingMargins, LayoutUnit& lineBottomIncludingMargins, bool& hasAnnotationsBefore, bool& hasAnnotationsAfter, FontBaseline);
     void flipLinesInBlockDirection(LayoutUnit lineTop, LayoutUnit lineBottom);
-    bool requiresIdeographicBaseline(const GlyphOverflowAndFallbackFontsMap&) const;
+    FontBaseline dominantBaseline() const;
 
     LayoutUnit computeOverAnnotationAdjustment(LayoutUnit allowedPosition) const;
     LayoutUnit computeUnderAnnotationAdjustment(LayoutUnit allowedPosition) const;
