@@ -63,6 +63,9 @@ namespace WebCore {
     class DOMWrapperWorld;
     class DocumentLoader;
     class Element;
+#if ENABLE(EPUB3)
+    class EpubReadingSystem;
+#endif
     class FormState;
     class Frame;
     class FrameLoader;
@@ -353,6 +356,10 @@ namespace WebCore {
 
         // FIXME (bug 116233): We need to get rid of EmptyFrameLoaderClient completely, then this will no longer be needed.
         virtual bool isEmptyFrameLoaderClient() { return false; }
+
+#if ENABLE(EPUB3)
+        virtual bool populateEpubReadingSystem(EpubReadingSystem*) { return false; }
+#endif
     };
 
 } // namespace WebCore

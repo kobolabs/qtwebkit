@@ -1,0 +1,10 @@
+[
+    NoInterfaceObject,
+    Conditional=EPUB3,
+    ImplementationLacksVTable
+] interface EpubReadingSystem {
+    readonly attribute DOMString name;
+    readonly attribute DOMString version;
+    readonly attribute DOMString layoutStyle;
+};
+

@@ -168,6 +168,11 @@ enable?(GAMEPAD) {
         $$SOURCE_DIR/Modules/gamepad
 }
 
+enable?(EPUB3) {
+    INCLUDEPATH += \
+        $$SOURCE_DIR/Modules/epub3
+}
+
 use?(GLIB) {
     PKGCONFIG *= glib-2.0 gio-2.0
 }

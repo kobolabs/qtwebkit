@@ -659,6 +659,12 @@ enable?(GAMEPAD) {
     $$PWD/Modules/gamepad/NavigatorGamepad.idl
 }
 
+enable?(EPUB3) {
+  IDL_BINDINGS += \
+    $$PWD/Modules/epub3/EpubReadingSystem.idl \
+    $$PWD/Modules/epub3/NavigatorEpubReadingSystem.idl
+}
+
 enable?(VIDEO_TRACK) {
   IDL_BINDINGS += \
     $$PWD/html/track/AudioTrack.idl \
