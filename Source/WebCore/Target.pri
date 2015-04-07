@@ -3276,6 +3276,16 @@ enable?(QUOTA) {
     }
 }
 
+enable?(EPUB3) {
+    HEADERS += \
+        Modules/epub3/EpubReadingSystem.h\
+        Modules/epub3/NavigatorEpubReadingSystem.h
+
+    SOURCES += \
+        Modules/epub3/EpubReadingSystem.cpp \
+        Modules/epub3/NavigatorEpubReadingSystem.cpp
+}
+
 enable?(GAMEPAD) {
     HEADERS += \
         Modules/gamepad/Gamepad.h\

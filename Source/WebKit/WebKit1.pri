@@ -12,6 +12,8 @@ INCLUDEPATH += \
     $$SOURCE_DIR/qt/WebCoreSupport \
     $$ROOT_WEBKIT_DIR/Source/WTF/wtf/qt
 
+enable?(EPUB3): INCLUDEPATH += $$ROOT_WEBKIT_DIR/Source/Modules/epub3
+
 have?(qtsensors):if(enable?(DEVICE_ORIENTATION)|enable?(ORIENTATION_EVENTS)): QT += sensors
 
 have?(qtpositioning):enable?(GEOLOCATION): QT += positioning

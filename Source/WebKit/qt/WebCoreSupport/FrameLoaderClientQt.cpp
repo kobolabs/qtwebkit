@@ -36,6 +36,9 @@
 #include "CSSComputedStyleDeclaration.h"
 #include "CSSPropertyNames.h"
 #include "DocumentLoader.h"
+#if ENABLE(EPUB3)
+#include "EpubReadingSystem.h"
+#endif
 #include "EventHandler.h"
 #include "FormState.h"
 #include "FrameLoadRequest.h"
@@ -1609,6 +1612,17 @@ void FrameLoaderClientQt::emitLoadFinished(bool ok)
 
     m_webFrame->emitLoadFinished(wasOriginatingLoad, ok);
 }
+
+#if ENABLE(EPUB3)
+bool FrameLoaderClientQt::populateEpubReadingSystem(EpubReadingSystem* system)
+{
+    QObject *o = m_webFrame->handle();
+    system->name(o->property("EPUB_READING_SYSTEM_NAME").toString());
+    system->version(o->property("EPUB_READING_SYSTEM_VERSION").toString());
+    system->layoutStyle(o->property("EPUB_READING_SYSTEM_LAYOUT_STYLE").toString());
+    return true;
+}
+#endif
 
 }
 

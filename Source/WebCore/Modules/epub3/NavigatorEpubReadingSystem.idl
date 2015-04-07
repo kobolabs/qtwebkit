@@ -1,0 +1,6 @@
+[
+    Conditional=EPUB3,
+] partial interface Navigator {
+    readonly attribute EpubReadingSystem epubReadingSystem;
+};
+

@@ -246,6 +246,10 @@ public:
     static bool dumpHistoryCallbacks;
     static QMap<QString, QString> URLsToRedirect;
 
+#if ENABLE(EPUB3)
+    virtual bool populateEpubReadingSystem(EpubReadingSystem* system);
+#endif
+
 private Q_SLOTS:
     void onIconLoadedForPageURL(const QString&);
 
