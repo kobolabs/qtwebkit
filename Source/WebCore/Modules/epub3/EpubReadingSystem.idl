@@ -6,5 +6,6 @@
     readonly attribute DOMString name;
     readonly attribute DOMString version;
     readonly attribute DOMString layoutStyle;
+    boolean hasFeature(DOMString feature, optional DOMString version);
 };
 

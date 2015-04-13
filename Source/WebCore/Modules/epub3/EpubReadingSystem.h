@@ -3,8 +3,10 @@
 
 #if ENABLE(EPUB3)
 
+#include <wtf/HashSet.h>
 #include <wtf/RefCounted.h>
 #include <wtf/Vector.h>
+#include <wtf/text/StringHash.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
@@ -25,11 +27,15 @@ public:
 
     const String& layoutStyle() const { return m_layoutStyle; }
     void layoutStyle(const String& layoutStyle) { m_layoutStyle = layoutStyle; }
+
+    void setFeature(const String& feature);
+    bool hasFeature(const String& feature, const String& version = "");
 private:
     EpubReadingSystem();
     String m_name;
     String m_version;
     String m_layoutStyle;
+    HashSet<String> m_features;
 };
 
 } // namespace WebCore

@@ -1620,6 +1620,10 @@ bool FrameLoaderClientQt::populateEpubReadingSystem(EpubReadingSystem* system)
     system->name(o->property("EPUB_READING_SYSTEM_NAME").toString());
     system->version(o->property("EPUB_READING_SYSTEM_VERSION").toString());
     system->layoutStyle(o->property("EPUB_READING_SYSTEM_LAYOUT_STYLE").toString());
+    QList<QVariant> features = o->property("EPUB_READING_SYSTEM_FEATURES").toList();
+    foreach (const QVariant &feature, features) {
+        system->setFeature(feature.toString());
+    }
     return true;
 }
 #endif
