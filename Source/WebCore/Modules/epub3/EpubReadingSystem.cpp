@@ -15,6 +15,16 @@ EpubReadingSystem::~EpubReadingSystem()
 {
 }
 
+void EpubReadingSystem::setFeature(const String& feature)
+{
+    m_features.add(feature);
+}
+
+bool EpubReadingSystem::hasFeature(const String& feature, const String&)
+{
+    return m_features.contains(feature);
+}
+
 } // namespace WebCore
 
 #endif // ENABLE(EPUB3)
