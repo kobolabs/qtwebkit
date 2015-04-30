@@ -437,7 +437,11 @@ Font::CodePath Font::codePath(const TextRun& run) const
         return Complex;
     
     if (!WidthIterator::supportsTypesettingFeatures(*this))
+	  if (this->letterSpacing() && m_fontDescription.orientation() == Vertical) {
+		return Simple; // just a temporarily fix here, because complex path cannot use substitute glyph yet which cause some Tr glyph can not be rotated correctly
+	  } else {
         return Complex;
+	  }
 
     if (!run.characterScanForCodePath())
         return Simple;
