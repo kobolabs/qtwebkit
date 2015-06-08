@@ -97,7 +97,7 @@ public:
     };
 #endif
 
-    ImageSource(AlphaOption alphaOption = AlphaPremultiplied, GammaAndColorProfileOption gammaAndColorProfileOption = GammaAndColorProfileApplied);
+    ImageSource(AlphaOption alphaOption = AlphaNotPremultiplied, GammaAndColorProfileOption gammaAndColorProfileOption = GammaAndColorProfileApplied);
     ~ImageSource();
 
     // Tells the ImageSource that the Image no longer cares about decoded frame

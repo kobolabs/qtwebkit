@@ -108,6 +108,7 @@ ImageDecoder* ImageDecoder::create(const SharedBuffer& data, ImageSource::AlphaO
     if (length < lengthOfLongestSignature)
         return 0;
 
+#if !defined(__ARM_NEON__)
     if (matchesGIFSignature(contents))
         return new GIFImageDecoder(alphaOption, gammaAndColorProfileOption);
 
@@ -131,6 +132,7 @@ ImageDecoder* ImageDecoder::create(const SharedBuffer& data, ImageSource::AlphaO
 
     if (matchesBMPSignature(contents))
         return new BMPImageDecoder(alphaOption, gammaAndColorProfileOption);
+#endif
 
 #if PLATFORM(QT)
     return new ImageDecoderQt(alphaOption, gammaAndColorProfileOption);
@@ -143,7 +145,7 @@ ImageFrame::ImageFrame()
     , m_status(FrameEmpty)
     , m_duration(0)
     , m_disposalMethod(DisposeNotSpecified)
-    , m_premultiplyAlpha(true)
+    , m_premultiplyAlpha(false)
 {
 } 
 
