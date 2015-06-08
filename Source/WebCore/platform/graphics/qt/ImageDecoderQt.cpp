@@ -39,6 +39,7 @@ ImageDecoderQt::ImageDecoderQt(ImageSource::AlphaOption alphaOption, ImageSource
     : ImageDecoder(alphaOption, gammaAndColorProfileOption)
     , m_repetitionCount(cAnimationNone)
 {
+    m_premultiplyAlpha = false;
 }
 
 ImageDecoderQt::~ImageDecoderQt()
