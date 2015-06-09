@@ -104,41 +104,38 @@ size_t lastHyphenLocation(const UChar* characters, size_t length, size_t beforeI
         }
     }
 
-    static QRegExp punctuation("[^A-Z0-9]", Qt::CaseInsensitive);
-    static QRegExp spaces("\\s+$");
-    QString s = QString::fromRawData(reinterpret_cast<const QChar *>(characters), length).replace(punctuation, " ").remove(spaces).toLower();
-    QByteArray c = s.simplified().toUtf8();
-    int leadingSpaces = length - c.length();
-
-    if (c.length() - c.lastIndexOf(" ") <= 5) {
+    static const int MAX_WORD_SIZE = 100;
+    static char hyphens[MAX_WORD_SIZE + 1];
+    static char hword[2 * MAX_WORD_SIZE + 1];
+    static QRegExp punctuation("[-`~!@#$%^&*()_—+=|:;<>«»,.?/{}\'\"\\\[\\]\\\\]");
+    QString s = QString::fromRawData(reinterpret_cast<const QChar *>(characters), length).replace(punctuation, " ").toLower();
+    if (s.simplified().length() < 5) {
         return 0;
     }
+    QByteArray c = s.toUtf8();
+    if (c.length() > MAX_WORD_SIZE) {
+       return 0;
+    }
 
-    char *hyphens = (char *) malloc(c.size() + 5);
-    char *hword = (char *) malloc(c.size() * 2);
-    memset(hyphens, 0, c.size() + 5);
-    memset(hword, 0, c.size() * 2);
+    memset(hyphens, 0, MAX_WORD_SIZE + 1);
+    memset(hword, 0, 2 * MAX_WORD_SIZE + 1);
 
     char **rep = NULL;
     int *pos = NULL;
     int *cut = NULL;
     int index = 0;
 
-    hnj_hyphen_hyphenate2(dict, c.constData(), c.size(), hyphens, hword, &rep, &pos, &cut);
-
-    for (int i = beforeIndex - 2 - leadingSpaces; i > 0; i--) {
-        if (hyphens[i] & 1) {
-            index = i + 1 + leadingSpaces;
-            break;
+    if (!hnj_hyphen_hyphenate2(dict, c.constData(), c.size(), hyphens, hword, &rep, &pos, &cut)) {
+        for (int i = beforeIndex - 2; i > 0; i--) {
+            if (hyphens[i] & 1) {
+                index = i + 1;
+                break;
+            }
         }
+        free(rep);
+        free(pos);
+        free(cut);
     }
-
-    free(rep);
-    free(pos);
-    free(cut);
-
-    free(hyphens);
-    free(hword);
 
     return index;
 }
