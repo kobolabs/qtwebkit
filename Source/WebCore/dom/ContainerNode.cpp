@@ -989,6 +989,10 @@ LayoutRect ContainerNode::fullBoundingBox() const
     RenderObject* p = o;
     // iterate through all the children to include them in a box
     bool found = false;
+    bool flippedVertical = false;
+    if (RenderBlock* block = o->containingBlock()) {
+        flippedVertical = !block->style()->isHorizontalWritingMode() && block->style()->isFlippedBlocksWritingMode();
+    }
     while (o) {
         p = o;
         if (o->firstChild())
@@ -1017,7 +1021,11 @@ LayoutRect ContainerNode::fullBoundingBox() const
                 rect = box->frameRect();
             }
             FloatPoint p = o->container()->localToAbsolute(FloatPoint(rect.location()), UseTransforms);
-            rect.setLocation(LayoutPoint(p.x(), p.y()));
+            if (flippedVertical) {
+                rect.setLocation(LayoutPoint(p.x() - rect.width(), p.y()));
+            } else {
+                rect.setLocation(LayoutPoint(p.x(), p.y()));
+            }
             if (!found) {
                 found = true;
                 res = rect;
