@@ -1643,8 +1643,6 @@ Color RenderObject::selectionBackgroundColor() const
             RefPtr<RenderStyle> pseudoStyle = getUncachedPseudoStyle(PseudoStyleRequest(SELECTION));
             if (pseudoStyle && pseudoStyle->visitedDependentColor(CSSPropertyBackgroundColor).isValid())
                 color = pseudoStyle->visitedDependentColor(CSSPropertyBackgroundColor).blendWithWhite();
-            else
-                color = frame()->selection()->isFocusedAndActive() ? theme()->activeSelectionBackgroundColor() : theme()->inactiveSelectionBackgroundColor();
         }
     }
 
