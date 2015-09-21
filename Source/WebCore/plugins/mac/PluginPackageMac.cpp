@@ -35,6 +35,7 @@
 #include "PluginDebug.h"
 #include "WebCoreNSStringExtras.h"
 #include <wtf/text/CString.h>
+#include <QFileInfo>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -245,6 +246,16 @@ bool PluginPackage::fetchInfo()
 
 bool PluginPackage::isPluginBlacklisted()
 {
+    const QLatin1String pluginBlacklist[] = {
+        QLatin1String("fbplugin")
+    };
+
+    QString baseName = QFileInfo(static_cast<QString>(m_path)).baseName();
+    for (unsigned i = 0; i < sizeof(pluginBlacklist) / sizeof(QLatin1String); ++i) {
+        if (baseName.startsWith(pluginBlacklist[i], Qt::CaseInsensitive))
+            return true;
+    }
+
     return false;
 }
 
@@ -253,6 +264,11 @@ bool PluginPackage::load()
     if (m_isLoaded) {
         m_loadCount++;
         return true;
+    }
+
+    if (isPluginBlacklisted()) {
+        LOG(Plugins, "%s blacklisted, not loaded", m_path.utf8().data());
+        return false;
     }
 
     WTF::RetainPtr<CFStringRef> path = m_path.createCFString();
