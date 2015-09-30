@@ -630,6 +630,19 @@ static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset
     return child ? child : object->nextInPreOrderAfterChildren();
 }
 
+static inline bool canBeSelectionLeafNotRuby(RenderObject* o) {
+    if (!o->canBeSelectionLeaf()) {
+        return false;
+    }
+    while (o) {
+        if (o->isRubyText()) {
+            return false;
+        }
+        o = o->parent();
+    }
+    return true;
+}
+
 IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
 {
     document()->updateStyleIfNeeded();
@@ -640,7 +653,7 @@ IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
     RenderObject* os = m_selectionStart;
     RenderObject* stop = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
     while (os && os != stop) {
-        if ((os->canBeSelectionLeaf() || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
+        if ((canBeSelectionLeafNotRuby(os) || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
             // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
             selectedObjects.set(os, adoptPtr(new RenderSelectionInfo(os, clipToVisibleContent)));
             RenderBlock* cb = os->containingBlock();
@@ -680,7 +693,7 @@ void RenderView::repaintSelection() const
 
     RenderObject* end = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
     for (RenderObject* o = m_selectionStart; o && o != end; o = o->nextInPreOrder()) {
-        if (!o->canBeSelectionLeaf() && o != m_selectionStart && o != m_selectionEnd)
+        if (!canBeSelectionLeafNotRuby(o) && o != m_selectionStart && o != m_selectionEnd)
             continue;
         if (o->selectionState() == SelectionNone)
             continue;
@@ -748,7 +761,7 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
     RenderObject* os = m_selectionStart;
     RenderObject* stop = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
     while (os && os != stop) {
-        if ((os->canBeSelectionLeaf() || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
+        if ((canBeSelectionLeafNotRuby(os) || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
             // Blocks are responsible for painting line gaps and margin gaps.  They must be examined as well.
             oldSelectedObjects.set(os, adoptPtr(new RenderSelectionInfo(os, true)));
             if (blockRepaintMode == RepaintNewXOROld) {
@@ -791,7 +804,7 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
     stop = rendererAfterPosition(end, endPos);
 
     while (o && o != stop) {
-        if (o != start && o != end && o->canBeSelectionLeaf())
+        if (o != start && o != end && canBeSelectionLeafNotRuby(o))
             o->setSelectionStateIfNeeded(SelectionInside);
         o = o->nextInPreOrder();
     }
@@ -803,7 +816,7 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
     // put them in the new objects list.
     o = start;
     while (o && o != stop) {
-        if ((o->canBeSelectionLeaf() || o == start || o == end) && o->selectionState() != SelectionNone) {
+        if ((canBeSelectionLeafNotRuby(o) || o == start || o == end) && o->selectionState() != SelectionNone) {
             newSelectedObjects.set(o, adoptPtr(new RenderSelectionInfo(o, true)));
             RenderBlock* cb = o->containingBlock();
             while (cb && !cb->isRenderView()) {
