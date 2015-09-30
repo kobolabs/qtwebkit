@@ -1070,6 +1070,19 @@ String Range::toString(ExceptionCode& ec) const
     Node* pastLast = pastLastNode();
     for (Node* n = firstNode(); n != pastLast; n = NodeTraversal::next(n)) {
         if (n->nodeType() == Node::TEXT_NODE || n->nodeType() == Node::CDATA_SECTION_NODE) {
+            String rt_str = String("rt");
+            ContainerNode *parentNode = n->parentNode();
+            ContainerNode *grandPaNode = n->parentNode()->parentNode();
+            ContainerNode *greatGradPaNode = grandPaNode ? grandPaNode->parentNode() : NULL;
+            if (parentNode->nodeName() == rt_str) {
+                continue;
+            }
+            if (grandPaNode && grandPaNode->nodeName() == rt_str) {
+                continue;
+            }
+            if (greatGradPaNode && greatGradPaNode->nodeName() == rt_str) {
+                continue;
+            }
             const String& data = static_cast<CharacterData*>(n)->data();
             int length = data.length();
             int start = (n == m_start.container()) ? min(max(0, m_start.offset()), length) : 0;
