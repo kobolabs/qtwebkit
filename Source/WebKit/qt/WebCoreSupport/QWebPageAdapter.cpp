@@ -237,7 +237,7 @@ void QWebPageAdapter::initializeWebCorePage()
     page = new Page(pageClients);
 
 #if ENABLE(GEOLOCATION)
-    if (useMock) {
+    if (true || useMock) {
         // In case running in DumpRenderTree mode set the controller to mock provider.
         GeolocationClientMock* mock = new GeolocationClientMock;
         WebCore::provideGeolocationTo(page, mock);
