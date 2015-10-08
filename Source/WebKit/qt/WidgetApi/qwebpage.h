@@ -444,7 +444,7 @@ protected:
     virtual bool javaScriptPrompt(QWebFrame *originatingFrame, const QString& msg, const QString& defaultValue, QString* result);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 
-    static QString userAgentForUrl(const QUrl& url);
+    virtual QString userAgentForUrl(const QUrl& url) const;
 
 private:
     Q_PRIVATE_SLOT(d, void _q_onLoadProgressChanged(int))
