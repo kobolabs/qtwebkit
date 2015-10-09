@@ -50,7 +50,6 @@ public:
 
     void provideGeolocationTo(Page*, GeolocationClient*);
 
-protected:
     virtual ~GeolocationClient() { }
 };
 

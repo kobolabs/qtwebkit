@@ -50,6 +50,7 @@ class ChromeClientQt;
 class DeviceOrientationClient;
 class DeviceMotionClient;
 class GeolocationClientQt;
+class GeolocationClient;
 class Page;
 class UndoStep;
 }
@@ -385,6 +386,7 @@ private:
     QNetworkAccessManager *networkManager;
     WebCore::DeviceOrientationClient* m_deviceOrientationClient;
     WebCore::DeviceMotionClient* m_deviceMotionClient;
+    WebCore::GeolocationClient* m_geolocationClient;
 
 public:
     static bool drtRun;
