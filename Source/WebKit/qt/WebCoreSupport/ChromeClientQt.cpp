@@ -611,7 +611,7 @@ void ChromeClientQt::setCursor(const Cursor& cursor)
     QWebPageClient* pageClient = platformPageClient();
     if (!pageClient)
         return;
-    pageClient->setCursor(*cursor.platformCursor());
+    pageClient->setCursor(cursor.platformCursor());
 #else
     UNUSED_PARAM(cursor);
 #endif

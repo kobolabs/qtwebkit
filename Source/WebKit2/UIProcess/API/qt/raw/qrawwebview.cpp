@@ -224,7 +224,7 @@ void QRawWebViewPrivate::didChangeContentsSize(const WebCore::IntSize& newSize)
 
 void QRawWebViewPrivate::setCursor(const WebCore::Cursor& cursor)
 {
-    m_client->viewRequestedCursorOverride(*cursor.platformCursor());
+    m_client->viewRequestedCursorOverride(cursor.platformCursor());
 }
 
 #if ENABLE(TOUCH_EVENTS)

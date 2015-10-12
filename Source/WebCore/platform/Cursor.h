@@ -83,7 +83,7 @@ namespace WebCore {
     typedef const char* PlatformCursor;
 #elif PLATFORM(QT) && !defined(QT_NO_CURSOR)
     // Do not need to be shared but need to be created dynamically via ensurePlatformCursor.
-    typedef QCursor* PlatformCursor;
+    typedef QCursor PlatformCursor;
 #elif PLATFORM(BLACKBERRY)
     typedef BlackBerry::Platform::BlackBerryCursor PlatformCursor;
 #else
@@ -147,7 +147,11 @@ namespace WebCore {
 #if USE(LAZY_NATIVE_CURSOR)
             // This is an invalid Cursor and should never actually get used.
             : m_type(static_cast<Type>(-1))
+#if PLATFORM(QT)
+            , m_platformCursor(QCursor())
+#else
             , m_platformCursor(0)
+#endif
 #else
             : m_platformCursor(0)
 #endif // USE(LAZY_NATIVE_CURSOR)
