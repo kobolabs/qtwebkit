@@ -154,7 +154,11 @@ Cursor::Cursor(Image* image, const IntPoint& hotSpot)
 #if ENABLE(MOUSE_CURSOR_SCALE)
     , m_imageScaleFactor(1)
 #endif
+#if PLATFORM(QT)
+    , m_platformCursor(QCursor())
+#else
     , m_platformCursor(0)
+#endif
 {
 }
 
@@ -164,7 +168,11 @@ Cursor::Cursor(Image* image, const IntPoint& hotSpot, float scale)
     , m_image(image)
     , m_hotSpot(determineHotSpot(image, hotSpot))
     , m_imageScaleFactor(scale)
+#if PLATFORM(QT)
+    , m_platformCursor(QCursor())
+#else
     , m_platformCursor(0)
+#endif
 {
 }
 #endif
@@ -174,7 +182,11 @@ Cursor::Cursor(Type type)
 #if ENABLE(MOUSE_CURSOR_SCALE)
     , m_imageScaleFactor(1)
 #endif
+#if PLATFORM(QT)
+    , m_platformCursor(QCursor())
+#else
     , m_platformCursor(0)
+#endif
 {
 }
 
