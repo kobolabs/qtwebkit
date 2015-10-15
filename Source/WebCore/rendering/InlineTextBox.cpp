@@ -920,7 +920,7 @@ void InlineTextBox::paintSelection(GraphicsContext* context, const FloatPoint& b
 
     context->clip(clipRect);
 
-    context->drawHighlightForText(font, textRun, localOrigin, selHeight, c, style->colorSpace(), sPos, ePos);
+    context->drawHighlightForText(font, textRun, localOrigin, selHeight, c, style->colorSpace(), sPos, ePos, root()->logicalHeight());
 }
 
 void InlineTextBox::paintCompositionBackground(GraphicsContext* context, const FloatPoint& boxOrigin, RenderStyle* style, const Font& font, int startPos, int endPos)
