@@ -464,7 +464,7 @@ void GraphicsContext::drawBidiText(const Font& font, const TextRun& run, const F
     bidiRuns.deleteRuns();
 }
 
-void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run, const FloatPoint& point, int h, const Color& backgroundColor, ColorSpace colorSpace, int from, int to)
+void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run, const FloatPoint& point, int h, const Color& backgroundColor, ColorSpace colorSpace, int from, int to, int logicalHeight)
 {
     if (paintingDisabled())
         return;
@@ -479,7 +479,11 @@ void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run,
         fillRect(rect, color, colorSpace);
     } else if (settings.value("selectionStyle", "underline") == "overline") {
         FloatRect rect(font.selectionRectForText(run, point, h, from, to));
-        rect.setY(rect.y());
+        if (logicalHeight > 0) {
+            rect.setY(rect.y() + rect.height() - logicalHeight);
+        } else {
+            rect.setY(rect.y());
+        }
         rect.setHeight(3);
         rect.setWidth(rect.width() - 1);
         Color color(0,0,0);
