@@ -238,10 +238,10 @@ void QWebPageAdapter::initializeWebCorePage()
     page = new Page(pageClients);
 
 #if ENABLE(GEOLOCATION)
+    GeolocationClientMock* mock = 0;
     if (true || useMock) {
         // In case running in DumpRenderTree mode set the controller to mock provider.
-        GeolocationClientMock* mock = new GeolocationClientMock;
-        mock->setController(WebCore::GeolocationController::from(page));
+        mock = new GeolocationClientMock;
         m_geolocationClient = mock;
     }
 #if HAVE(QTPOSITIONING)
@@ -269,6 +269,8 @@ void QWebPageAdapter::initializeWebCorePage()
 #if ENABLE(GEOLOCATION)
     if (m_geolocationClient)
         WebCore::provideGeolocationTo(page, m_geolocationClient);
+    if (mock)
+        mock->setController(WebCore::GeolocationController::from(page));
 #endif
 
     // By default each page is put into their own unique page group, which affects popup windows
