@@ -160,6 +160,7 @@ private:
     bool containedByReadOnly() const;
     int maxStartOffset() const;
     int maxEndOffset() const;
+    bool isInRtNode(Node*) const;
 
     enum ActionType { DELETE_CONTENTS, EXTRACT_CONTENTS, CLONE_CONTENTS };
     PassRefPtr<DocumentFragment> processContents(ActionType, ExceptionCode&);

@@ -222,6 +222,10 @@ void Range::setStart(PassRefPtr<Node> refNode, int offset, ExceptionCode& ec)
         return;
     }
 
+    if (isInRtNode(refNode.get())) {
+        return;
+    }
+
     bool didMoveDocument = false;
     if (refNode->document() != m_ownerDocument) {
         setDocument(refNode->document());
@@ -248,6 +252,10 @@ void Range::setEnd(PassRefPtr<Node> refNode, int offset, ExceptionCode& ec)
 
     if (!refNode) {
         ec = NOT_FOUND_ERR;
+        return;
+    }
+
+    if (isInRtNode(refNode.get())) {
         return;
     }
 
@@ -1070,17 +1078,7 @@ String Range::toString(ExceptionCode& ec) const
     Node* pastLast = pastLastNode();
     for (Node* n = firstNode(); n != pastLast; n = NodeTraversal::next(n)) {
         if (n->nodeType() == Node::TEXT_NODE || n->nodeType() == Node::CDATA_SECTION_NODE) {
-            String rt_str = String("rt");
-            ContainerNode *parentNode = n->parentNode();
-            ContainerNode *grandPaNode = n->parentNode()->parentNode();
-            ContainerNode *greatGradPaNode = grandPaNode ? grandPaNode->parentNode() : NULL;
-            if (parentNode->nodeName() == rt_str) {
-                continue;
-            }
-            if (grandPaNode && grandPaNode->nodeName() == rt_str) {
-                continue;
-            }
-            if (greatGradPaNode && greatGradPaNode->nodeName() == rt_str) {
+            if (isInRtNode(n)) {
                 continue;
             }
             const String& data = static_cast<CharacterData*>(n)->data();
@@ -1728,6 +1726,24 @@ int Range::maxEndOffset() const
     if (!m_end.container()->offsetInCharacters())
         return m_end.container()->childNodeCount();
     return m_end.container()->maxCharacterOffset();
+}
+
+bool Range::isInRtNode(Node* node) const
+{
+    String rt_str = String("rt");
+    ContainerNode *parentNode = node->parentNode();
+    ContainerNode *grandPaNode = node->parentNode()->parentNode();
+    ContainerNode *greatGradPaNode = grandPaNode ? grandPaNode->parentNode() : NULL;
+    if (parentNode->nodeName() == rt_str) {
+        return true;
+    }
+    if (grandPaNode && grandPaNode->nodeName() == rt_str) {
+        return true;
+    }
+    if (greatGradPaNode && greatGradPaNode->nodeName() == rt_str) {
+        return true;
+    }
+    return false;
 }
 
 static inline void boundaryNodeChildrenChanged(RangeBoundaryPoint& boundary, ContainerNode* container)
