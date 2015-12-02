@@ -267,6 +267,7 @@ private:
 
     KURL m_lastRequestedUrl;
     bool m_isOriginatingLoad;
+    bool m_isStopping;
 };
 
 }
