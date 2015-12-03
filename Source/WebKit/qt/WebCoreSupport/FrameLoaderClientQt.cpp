@@ -444,6 +444,7 @@ void FrameLoaderClientQt::dispatchDidStartProvisionalLoad()
         printf("%s - in didStartProvisionalLoadForFrame\n", qPrintable(drtPrintFrameUserGestureStatus(m_frame)));
 
     m_lastRequestedUrl = m_frame->loader()->activeDocumentLoader()->requestURL();
+    m_isStopping = false;
 
     if (!m_webFrame)
         return;
@@ -573,7 +574,7 @@ void FrameLoaderClientQt::postProgressStartedNotification()
 
 void FrameLoaderClientQt::postProgressEstimateChangedNotification()
 {
-    if (m_webFrame && m_frame->page())
+    if (m_webFrame && m_frame->page() && !m_isStopping)
         emit loadProgress(qRound(m_frame->page()->progress()->estimatedProgress() * 100));
 }
 
@@ -867,6 +868,7 @@ bool FrameLoaderClientQt::canCachePage() const
 
 void FrameLoaderClientQt::setMainDocumentError(WebCore::DocumentLoader* loader, const WebCore::ResourceError& error)
 {
+    m_isStopping = loader->isStopping();
     if (!m_pluginView)
         return;
     if (m_pluginView->isPluginView())
