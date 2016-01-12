@@ -46,5 +46,6 @@ QWEBKIT_EXPORT QString qWebKitVersion();
 QWEBKIT_EXPORT int qWebKitMajorVersion();
 QWEBKIT_EXPORT int qWebKitMinorVersion();
 QWEBKIT_EXPORT QString qWebKitEngineVersion();
+QWEBKIT_EXPORT QString qWebKitDefaultUserAgent();
 
 #endif // QWEBKITGLOBAL_H

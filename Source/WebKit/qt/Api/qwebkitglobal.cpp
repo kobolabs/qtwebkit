@@ -21,6 +21,7 @@
 #include "qwebkitglobal.h"
 #include "qwebkitengineversion.h"
 
+#include <QWebPageAdapter.h>
 #include <WebKitVersion.h>
 
 /*!
@@ -126,4 +127,9 @@ QString qWebKitEngineVersion()
 
 {
     return QString::fromLatin1(WEBKIT_ENGINE_VERSION);
+}
+
+QString qWebKitDefaultUserAgent()
+{
+    return QWebPageAdapter::defaultUserAgentString();
 }
