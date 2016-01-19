@@ -1584,7 +1584,7 @@ void Element::recalcStyle(StyleChange change)
         }
 
         if (RenderObject* renderer = this->renderer()) {
-            if (localChange != NoChange || pseudoStyleCacheIsInvalid(currentStyle.get(), newStyle.get()) || (change == Force && renderer->requiresForcedStyleRecalcPropagation()) || styleChangeType() == SyntheticStyleChange)
+            if (!currentStyle.get()->maxHeight().isUndefined() && (localChange != NoChange || pseudoStyleCacheIsInvalid(currentStyle.get(), newStyle.get()) || (change == Force && renderer->requiresForcedStyleRecalcPropagation()) || styleChangeType() == SyntheticStyleChange))
                 renderer->setAnimatableStyle(newStyle.get());
             else if (needsStyleRecalc()) {
                 // Although no change occurred, we use the new style so that the cousin style sharing code won't get
