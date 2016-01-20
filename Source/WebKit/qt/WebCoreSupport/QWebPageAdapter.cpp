@@ -572,7 +572,7 @@ void QWebPageAdapter::mouseTripleClickEvent(QMouseEvent *ev)
 void QWebPageAdapter::mouseReleaseEvent(QMouseEvent *ev)
 {
     WebCore::Frame* frame = mainFrameAdapter()->frame;
-    if (!frame->view())
+    if (!frame || !frame->view())
         return;
 
     bool accepted = false;
