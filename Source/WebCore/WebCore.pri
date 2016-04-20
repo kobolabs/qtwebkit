@@ -245,7 +245,8 @@ have?(sqlite3) {
     isEmpty(SQLITE3SRCDIR): SQLITE3SRCDIR = ../../../qtbase/src/3rdparty/sqlite/
     exists($${SQLITE3SRCDIR}/sqlite3.c) {
         INCLUDEPATH += $${SQLITE3SRCDIR}
-        DEFINES += SQLITE_CORE SQLITE_OMIT_LOAD_EXTENSION SQLITE_OMIT_COMPLETE
+        DEFINES += SQLITE_CORE SQLITE_OMIT_LOAD_EXTENSION SQLITE_OMIT_COMPLETE SQLITE_HAS_CODEC SQLITE_TEMP_STORE=2
+        !win32:LIBS += -lcrypto
     } else {
         INCLUDEPATH += $${SQLITE3SRCDIR}
         LIBS += -lsqlite3
