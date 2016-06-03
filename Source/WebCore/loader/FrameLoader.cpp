@@ -1688,7 +1688,8 @@ void FrameLoader::setState(FrameState newState)
 void FrameLoader::clearProvisionalLoad()
 {
     setProvisionalDocumentLoader(0);
-    m_progressTracker->progressCompleted();
+    if (m_progressTracker)
+        m_progressTracker->progressCompleted();
     setState(FrameStateComplete);
 }
 
