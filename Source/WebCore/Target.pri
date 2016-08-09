@@ -1759,7 +1759,7 @@ HEADERS += \
     editing/VisibleSelection.h \
     editing/VisibleUnits.h \
     editing/WrapContentsInDummySpanCommand.h \
-    epub/epubelement.h \
+    epub/epubElement.h \
     epub/EPubCaseElement.h \
     epub/EPubDefaultElement.h \
     epub/EPubSwitchElement.h \
