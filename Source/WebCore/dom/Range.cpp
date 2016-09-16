@@ -92,8 +92,9 @@ inline Range::Range(PassRefPtr<Document> ownerDocument, PassRefPtr<Node> startCo
 
     // Simply setting the containers and offsets directly would not do any of the checking
     // that setStart and setEnd do, so we call those functions.
-    setStart(startContainer, startOffset);
-    setEnd(endContainer, endOffset);
+    ExceptionCode ec = 0;
+    setStart(startContainer, startOffset, ec);
+    setEnd(endContainer, endOffset, ec);
 }
 
 PassRefPtr<Range> Range::create(PassRefPtr<Document> ownerDocument, PassRefPtr<Node> startContainer, int startOffset, PassRefPtr<Node> endContainer, int endOffset)
@@ -223,6 +224,7 @@ void Range::setStart(PassRefPtr<Node> refNode, int offset, ExceptionCode& ec)
     }
 
     if (isInRtNode(refNode.get())) {
+        ec = INVALID_STATE_ERR;
         return;
     }
 
@@ -256,6 +258,7 @@ void Range::setEnd(PassRefPtr<Node> refNode, int offset, ExceptionCode& ec)
     }
 
     if (isInRtNode(refNode.get())) {
+        ec = INVALID_STATE_ERR;
         return;
     }
 
@@ -1732,7 +1735,10 @@ bool Range::isInRtNode(Node* node) const
 {
     String rt_str = String("rt");
     ContainerNode *parentNode = node->parentNode();
-    ContainerNode *grandPaNode = node->parentNode()->parentNode();
+    if (!parentNode) {
+        return false;
+    }
+    ContainerNode *grandPaNode = parentNode->parentNode();
     ContainerNode *greatGradPaNode = grandPaNode ? grandPaNode->parentNode() : NULL;
     if (parentNode->nodeName() == rt_str) {
         return true;

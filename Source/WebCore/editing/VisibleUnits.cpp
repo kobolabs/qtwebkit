@@ -477,9 +477,11 @@ static VisiblePosition previousBoundary(const VisiblePosition& c, BoundarySearch
     }
 
     searchRange->setStart(start.deprecatedNode(), start.deprecatedEditingOffset(), ec);
+    if (ec)
+        return VisiblePosition();
+
     searchRange->setEnd(end.deprecatedNode(), end.deprecatedEditingOffset(), ec);
 
-    ASSERT(!ec);
     if (ec)
         return VisiblePosition();
 
@@ -513,6 +515,9 @@ static VisiblePosition previousBoundary(const VisiblePosition& c, BoundarySearch
         return VisiblePosition(it.atEnd() ? it.range()->startPosition() : pos, DOWNSTREAM);
 
     Node* node = it.range()->startContainer();
+    if (!node->parentNode()) {
+        return VisiblePosition();
+    }
     if ((node->isTextNode() && static_cast<int>(next) <= node->maxCharacterOffset()) || (node->renderer() && node->renderer()->isBR() && !next))
         // The next variable contains a usable index into a text node
         return VisiblePosition(createLegacyEditingPosition(node, next), DOWNSTREAM);

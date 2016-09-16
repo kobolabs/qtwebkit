@@ -1383,6 +1383,7 @@ CharacterIterator::CharacterIterator(const Range* r, TextIteratorBehavior behavi
 PassRefPtr<Range> CharacterIterator::range() const
 {
     RefPtr<Range> r = m_textIterator.range();
+    ExceptionCode ec = 0;
     if (!m_textIterator.atEnd()) {
         if (m_textIterator.length() <= 1) {
             ASSERT(m_runOffset == 0);
@@ -1390,8 +1391,8 @@ PassRefPtr<Range> CharacterIterator::range() const
             Node* n = r->startContainer();
             ASSERT(n == r->endContainer());
             int offset = r->startOffset() + m_runOffset;
-            r->setStart(n, offset, ASSERT_NO_EXCEPTION);
-            r->setEnd(n, offset + 1, ASSERT_NO_EXCEPTION);
+            r->setStart(n, offset, ec);
+            r->setEnd(n, offset + 1, ec);
         }
     }
     return r.release();
@@ -1489,8 +1490,9 @@ PassRefPtr<Range> BackwardsCharacterIterator::range() const
             Node* n = r->startContainer();
             ASSERT(n == r->endContainer());
             int offset = r->endOffset() - m_runOffset;
-            r->setStart(n, offset - 1, ASSERT_NO_EXCEPTION);
-            r->setEnd(n, offset, ASSERT_NO_EXCEPTION);
+            ExceptionCode ec = 0;
+            r->setStart(n, offset - 1, ec);
+            r->setEnd(n, offset, ec);
         }
     }
     return r.release();
@@ -2395,8 +2397,9 @@ PassRefPtr<Range> TextIterator::rangeFromLocationAndLength(ContainerNode* scope,
     if (rangeLocation == 0 && rangeLength == 0 && it.atEnd()) {
         textRunRange = it.range();
         
-        resultRange->setStart(textRunRange->startContainer(), 0, ASSERT_NO_EXCEPTION);
-        resultRange->setEnd(textRunRange->startContainer(), 0, ASSERT_NO_EXCEPTION);
+        ExceptionCode ec;
+        resultRange->setStart(textRunRange->startContainer(), 0, ec);
+        resultRange->setEnd(textRunRange->startContainer(), 0, ec);
         
         return resultRange.release();
     }
