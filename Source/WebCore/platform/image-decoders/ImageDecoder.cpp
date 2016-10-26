@@ -218,8 +218,8 @@ bool ImageFrame::setSize(int newWidth, int newHeight)
     m_backingStore.resize(backingStoreSize);
     m_bytes = m_backingStore.data();
     m_size = IntSize(newWidth, newHeight);
+    m_hasAlpha = true;
 
-    zeroFillPixelData();
     return true;
 }
 
