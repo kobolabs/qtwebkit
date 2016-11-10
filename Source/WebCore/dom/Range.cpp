@@ -1734,22 +1734,21 @@ int Range::maxEndOffset() const
 bool Range::isInRtNode(Node* node) const
 {
     String rt_str = String("rt");
-    ContainerNode *parentNode = node->parentNode();
-    if (!parentNode) {
-        return false;
+    int count = 0;
+    bool ret = false;
+
+    for (const Node* workNode = node; workNode; workNode = workNode->parentNode()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+        String s = workNode->nodeName();
+        if ((!s.isEmpty()) && s == rt_str) {
+            ret = true;
+            break;
+        }
     }
-    ContainerNode *grandPaNode = parentNode->parentNode();
-    ContainerNode *greatGradPaNode = grandPaNode ? grandPaNode->parentNode() : NULL;
-    if (parentNode->nodeName() == rt_str) {
-        return true;
-    }
-    if (grandPaNode && grandPaNode->nodeName() == rt_str) {
-        return true;
-    }
-    if (greatGradPaNode && greatGradPaNode->nodeName() == rt_str) {
-        return true;
-    }
-    return false;
+    return ret;
 }
 
 static inline void boundaryNodeChildrenChanged(RangeBoundaryPoint& boundary, ContainerNode* container)
