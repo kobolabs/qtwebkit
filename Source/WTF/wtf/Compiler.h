@@ -35,6 +35,14 @@
 /* COMPILER_QUIRK() - whether the compiler being used to build the project requires a given quirk. */
 #define COMPILER_QUIRK(WTF_COMPILER_QUIRK) (defined WTF_COMPILER_QUIRK_##WTF_COMPILER_QUIRK  && WTF_COMPILER_QUIRK_##WTF_COMPILER_QUIRK)
 
+/* COMPILER_HAS_CLANG_HEATURE() - whether the compiler supports a particular language or library feature. */
+/* http://clang.llvm.org/docs/LanguageExtensions.html#has-feature-and-has-extension */
+#ifdef __has_feature
+#define COMPILER_HAS_CLANG_FEATURE(x) __has_feature(x)
+#else
+#define COMPILER_HAS_CLANG_FEATURE(x) 0
+#endif
+
 /* ==== COMPILER() - the compiler being used to build the project ==== */
 
 /* COMPILER(CLANG) - Clang  */
@@ -183,6 +191,14 @@
 /* ABI */
 #if defined(__ARM_EABI__) || defined(__EABI__)
 #define WTF_COMPILER_SUPPORTS_EABI 1
+#endif
+
+#define ASAN_ENABLED COMPILER_HAS_CLANG_FEATURE(address_sanitizer)
+
+#if ASAN_ENABLED
+#define SUPPRESS_ASAN __attribute__((no_sanitize_address))
+#else
+#define SUPPRESS_ASAN
 #endif
 
 /* ==== Compiler features ==== */
