@@ -390,7 +390,10 @@ QString QWebPageAdapter::selectedText() const
 
 QString QWebPageAdapter::selectedHtml() const
 {
-    return page->focusController()->focusedOrMainFrame()->editor().selectedRange()->toHTML();
+    Frame* frame = page->focusController()->focusedOrMainFrame();
+    if (frame->selection()->selection().selectionType() == VisibleSelection::NoSelection)
+        return QString();
+    return frame->editor().selectedRange()->toHTML();
 }
 
 bool QWebPageAdapter::isContentEditable() const
