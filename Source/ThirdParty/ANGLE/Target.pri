@@ -151,5 +151,10 @@ include(DerivedSources.pri)
     QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-missing-noreturn -Wno-unused-function -Wno-reorder -Wno-error -Wno-unknown-pragmas -Wno-undef
 }
 
+clang {
+    QMAKE_CXXFLAGS -= -fsanitize=address,undefined
+    QMAKE_LFLAGS -= -fsanitize=address,undefined
+}
+
 # We do not need anything from Qt
 QT =
