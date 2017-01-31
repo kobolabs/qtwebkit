@@ -288,6 +288,10 @@ void QWebSettingsPrivate::apply()
         settings->setNeedsSiteSpecificQuirks(value);
 
         settings->setUsesPageCache(WebCore::pageCache()->capacity());
+
+        value = attributes.value(QWebSettings::ImageAnimationEnabled,
+                                 global->attributes.value(QWebSettings::ImageAnimationEnabled));
+        WebCore::RuntimeEnabledFeatures::setImageAnimationEnabled(value);
     } else {
         QList<QWebSettingsPrivate*> settings = *::allSettings();
         for (int i = 0; i < settings.count(); ++i)
@@ -556,6 +560,7 @@ QWebSettings::QWebSettings()
     d->attributes.insert(QWebSettings::ScrollAnimatorEnabled, false);
     d->attributes.insert(QWebSettings::CaretBrowsingEnabled, false);
     d->attributes.insert(QWebSettings::NotificationsEnabled, true);
+    d->attributes.insert(QWebSettings::ImageAnimationEnabled, true);
     d->offlineStorageDefaultQuota = 5 * 1024 * 1024;
     d->defaultTextEncoding = QLatin1String("iso-8859-1");
     d->thirdPartyCookiePolicy = AlwaysAllowThirdPartyCookies;

@@ -28,6 +28,7 @@
 
 #include "config.h"
 #include "ImageDecoderQt.h"
+#include "RuntimeEnabledFeatures.h"
 
 #include <QtCore/QBuffer>
 #include <QtCore/QByteArray>
@@ -87,7 +88,7 @@ bool ImageDecoderQt::isSizeAvailable()
 size_t ImageDecoderQt::frameCount()
 {
     if (m_frameBufferCache.isEmpty() && m_reader) {
-        if (m_reader->supportsAnimation()) {
+        if (m_reader->supportsAnimation() && RuntimeEnabledFeatures::imageAnimationEnabled()) {
             int imageCount = m_reader->imageCount();
 
             // Fixup for Qt decoders... imageCount() is wrong
@@ -111,7 +112,7 @@ size_t ImageDecoderQt::frameCount()
 
 int ImageDecoderQt::repetitionCount() const
 {
-    if (m_reader && m_reader->supportsAnimation())
+    if (m_reader && m_reader->supportsAnimation() && RuntimeEnabledFeatures::imageAnimationEnabled())
         m_repetitionCount = m_reader->loopCount();
     return m_repetitionCount;
 }
