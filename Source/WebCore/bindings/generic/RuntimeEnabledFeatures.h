@@ -245,6 +245,9 @@ public:
     // The lang attribute support is incomplete and should only be turned on for tests.
     static void setLangAttributeAwareFormControlUIEnabled(bool isEnabled) { isLangAttributeAwareFormControlUIEnabled = isEnabled; }
 
+    static bool imageAnimationEnabled() { return isImageAnimationEnabled; }
+    static void setImageAnimationEnabled(bool isEnabled) { isImageAnimationEnabled = isEnabled; }
+
 private:
     // Never instantiate.
     RuntimeEnabledFeatures() { }
@@ -342,6 +345,8 @@ private:
 #if ENABLE(FONT_LOAD_EVENTS)
     static bool isFontLoadEventsEnabled;
 #endif
+
+    static bool isImageAnimationEnabled;
 
 };
 
