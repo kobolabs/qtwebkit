@@ -212,4 +212,8 @@ bool RuntimeEnabledFeatures::isFontLoadEventsEnabled = false;
 
 bool RuntimeEnabledFeatures::isImageAnimationEnabled = true;
 
+bool RuntimeEnabledFeatures::isFontHighlightStyleUnderline = false;
+
+bool RuntimeEnabledFeatures::isFontHighlightStyleOverline = false;
+
 } // namespace WebCore
