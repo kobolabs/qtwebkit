@@ -248,6 +248,12 @@ public:
     static bool imageAnimationEnabled() { return isImageAnimationEnabled; }
     static void setImageAnimationEnabled(bool isEnabled) { isImageAnimationEnabled = isEnabled; }
 
+    static bool fontHighlightStyleUnderline() { return isFontHighlightStyleUnderline; }
+    static void setFontHighlightStyleUnderline(bool isEnabled) { isFontHighlightStyleUnderline = isEnabled; }
+
+    static bool fontHighlightStyleOverline() { return isFontHighlightStyleOverline; }
+    static void setFontHighlightStyleOverline(bool isEnabled) { isFontHighlightStyleOverline = isEnabled; }
+
 private:
     // Never instantiate.
     RuntimeEnabledFeatures() { }
@@ -347,6 +353,10 @@ private:
 #endif
 
     static bool isImageAnimationEnabled;
+
+    static bool isFontHighlightStyleUnderline;
+
+    static bool isFontHighlightStyleOverline;
 
 };
 

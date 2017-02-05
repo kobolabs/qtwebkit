@@ -84,6 +84,7 @@ public:
     QWebSettings::ThirdPartyCookiePolicy thirdPartyCookiePolicy;
     void apply();
     WebCore::Settings* settings;
+    QWebSettings::FontHighlightStyle fontHighlightStyle;
 };
 
 Q_GLOBAL_STATIC(QList<QWebSettingsPrivate*>, allSettings);
@@ -288,6 +289,9 @@ void QWebSettingsPrivate::apply()
         settings->setNeedsSiteSpecificQuirks(value);
 
         settings->setUsesPageCache(WebCore::pageCache()->capacity());
+
+        WebCore::RuntimeEnabledFeatures::setFontHighlightStyleUnderline(global->fontHighlightStyle == QWebSettings::FontHighlightStyle::Underline);
+        WebCore::RuntimeEnabledFeatures::setFontHighlightStyleOverline(global->fontHighlightStyle == QWebSettings::FontHighlightStyle::Overline);
 
         value = attributes.value(QWebSettings::ImageAnimationEnabled,
                                  global->attributes.value(QWebSettings::ImageAnimationEnabled));
@@ -564,6 +568,7 @@ QWebSettings::QWebSettings()
     d->offlineStorageDefaultQuota = 5 * 1024 * 1024;
     d->defaultTextEncoding = QLatin1String("iso-8859-1");
     d->thirdPartyCookiePolicy = AlwaysAllowThirdPartyCookies;
+    d->fontHighlightStyle = Highlight;
 }
 
 /*!
@@ -622,6 +627,17 @@ void QWebSettings::resetFontSize(FontSize type)
         d->fontSizes.remove(type);
         d->apply();
     }
+}
+
+void QWebSettings::setFontHighlightStyle(QWebSettings::FontHighlightStyle style)
+{
+    d->fontHighlightStyle = style;
+    d->apply();
+}
+
+QWebSettings::FontHighlightStyle QWebSettings::fontHighlightStyle() const
+{
+    return d->fontHighlightStyle;
 }
 
 /*!

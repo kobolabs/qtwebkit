@@ -33,11 +33,9 @@
 #include "IntRect.h"
 #include "RoundedRect.h"
 #include "TextRun.h"
+#include "RuntimeEnabledFeatures.h"
 
 #include "stdio.h"
-
-// gross...
-#include <QSettings>
 
 using namespace std;
 
@@ -469,15 +467,14 @@ void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run,
     if (paintingDisabled())
         return;
 
-    QSettings settings;
-    if (settings.value("selectionStyle", "underline") == "underline") {
+    if (RuntimeEnabledFeatures::fontHighlightStyleUnderline()) {
         FloatRect rect(font.selectionRectForText(run, point, h, from, to));
         rect.setY(rect.y() + rect.height() - 3);
         rect.setHeight(3);
         rect.setWidth(rect.width() - 1);
         Color color(0,0,0);
         fillRect(rect, color, colorSpace);
-    } else if (settings.value("selectionStyle", "underline") == "overline") {
+    } else if (RuntimeEnabledFeatures::fontHighlightStyleOverline()) {
         FloatRect rect(font.selectionRectForText(run, point, h, from, to));
         if (logicalHeight > 0) {
             rect.setY(rect.y() + rect.height() - logicalHeight);

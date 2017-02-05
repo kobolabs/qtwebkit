@@ -104,6 +104,11 @@ public:
         DefaultFontSize,
         DefaultFixedFontSize
     };
+    enum FontHighlightStyle {
+        Highlight,
+        Underline,
+        Overline
+    };
     enum ThirdPartyCookiePolicy {
         AlwaysAllowThirdPartyCookies,
         AlwaysBlockThirdPartyCookies,
@@ -119,6 +124,9 @@ public:
     void setFontSize(FontSize type, int size);
     int fontSize(FontSize type) const;
     void resetFontSize(FontSize type);
+
+    void setFontHighlightStyle(FontHighlightStyle style);
+    FontHighlightStyle fontHighlightStyle() const;
 
     void setAttribute(WebAttribute attr, bool on);
     bool testAttribute(WebAttribute attr) const;
