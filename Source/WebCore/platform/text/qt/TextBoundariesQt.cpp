@@ -42,7 +42,7 @@ namespace WebCore {
 
 int findNextWordFromIndex(UChar const* buffer, int len, int position, bool forward)
 {
-    QString str(reinterpret_cast<QChar const*>(buffer), len);
+    QString str = QString::fromRawData(reinterpret_cast<QChar const *>(buffer), len);
     QTextBoundaryFinder iterator(QTextBoundaryFinder::Word, str);
     iterator.setPosition(position >= len ? len - 1 : position);
     if (forward) {
@@ -66,7 +66,7 @@ int findNextWordFromIndex(UChar const* buffer, int len, int position, bool forwa
 
 void findWordBoundary(UChar const* buffer, int len, int position, int* start, int* end)
 {
-    QString str(reinterpret_cast<QChar const*>(buffer), len);
+    QString str = QString::fromRawData(reinterpret_cast<QChar const *>(buffer), len);
     QTextBoundaryFinder iterator(QTextBoundaryFinder::Word, str);
     iterator.setPosition(position);
     *start = position > 0 ? iterator.toPreviousBoundary() : 0;
