@@ -1587,7 +1587,7 @@ static bool getPageHit(Frame *frame, const QPoint& hitPoint, WebCore::Node **nod
     return false;
 }
 
-void QWebPageAdapter::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd)
+bool QWebPageAdapter::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd)
 {
     Frame *frame = page->focusController()->focusedOrMainFrame();
     Node *innerNode = NULL;
@@ -1597,30 +1597,33 @@ void QWebPageAdapter::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd
         if (pos.isNotNull()) {
             VisibleSelection newSelection(pos, pos.next());
             frame->selection()->setSelection(newSelection);
+            return true;
         }
     }
+    return false;
 }
 
-void QWebPageAdapter::selectWordAtPoint(const QPoint &docPoint, int pageEnd, bool expandToWordBoundaries)
+bool QWebPageAdapter::selectWordAtPoint(const QPoint &docPoint, int pageEnd, bool expandToWordBoundaries)
 {
     Frame *frame = page->focusController()->focusedOrMainFrame();
     Node *innerNode = NULL;
     HitTestResult result;
     if (getPageHit(frame, docPoint, &innerNode, result, pageEnd)) {
         VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
-        VisibleSelection newSelection;
         if (pos.isNotNull()) {
-            newSelection = VisibleSelection(pos);
+            VisibleSelection newSelection(pos);
             if (expandToWordBoundaries) {
                 newSelection.expandUsingGranularity(WordGranularity);
             }
-        }
-        if (newSelection.isRange()) {
-            frame->selection()->setSelection(newSelection, WordGranularity);
-        } else {
-            frame->selection()->setSelection(newSelection);
+            if (newSelection.isRange()) {
+                frame->selection()->setSelection(newSelection, WordGranularity);
+            } else {
+                frame->selection()->setSelection(newSelection);
+            }
+            return true;
         }
     }
+    return false;
 }
 
 void QWebPageAdapter::clearSelection()

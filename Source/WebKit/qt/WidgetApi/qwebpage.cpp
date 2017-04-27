@@ -3199,16 +3199,16 @@ QWebPage::VisibilityState QWebPage::visibilityState() const
     return static_cast<VisibilityState>(d->visibilityState());
 }
 
-void QWebPage::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd)
+bool QWebPage::selectCharacterAtPoint(const QPoint &docPoint, int pageEnd)
 {
     d->createMainFrame();
-    handle()->selectCharacterAtPoint(docPoint, pageEnd);
+    return handle()->selectCharacterAtPoint(docPoint, pageEnd);
 }
 
-void QWebPage::selectWordAtPoint(const QPoint &docPoint, int pageEnd, bool expandToWordBoundaries)
+bool QWebPage::selectWordAtPoint(const QPoint &docPoint, int pageEnd, bool expandToWordBoundaries)
 {
     d->createMainFrame();
-    handle()->selectWordAtPoint(docPoint, pageEnd, expandToWordBoundaries);
+    return handle()->selectWordAtPoint(docPoint, pageEnd, expandToWordBoundaries);
 }
 
 void QWebPage::clearSelection()
