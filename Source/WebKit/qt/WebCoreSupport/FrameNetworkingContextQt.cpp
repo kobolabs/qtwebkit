@@ -30,16 +30,15 @@
 
 namespace WebCore {
 
-FrameNetworkingContextQt::FrameNetworkingContextQt(Frame* frame, QObject* originatingObject, bool mimeSniffingEnabled)
+FrameNetworkingContextQt::FrameNetworkingContextQt(Frame* frame, QObject* originatingObject)
     : FrameNetworkingContext(frame)
     , m_originatingObject(originatingObject)
-    , m_mimeSniffingEnabled(mimeSniffingEnabled)
 {
 }
 
-PassRefPtr<FrameNetworkingContextQt> FrameNetworkingContextQt::create(Frame* frame, QObject* originatingObject, bool mimeSniffingEnabled)
+PassRefPtr<FrameNetworkingContextQt> FrameNetworkingContextQt::create(Frame* frame, QObject* originatingObject)
 {
-    return adoptRef(new FrameNetworkingContextQt(frame, originatingObject, mimeSniffingEnabled));
+    return adoptRef(new FrameNetworkingContextQt(frame, originatingObject));
 }
 
 QObject* FrameNetworkingContextQt::originatingObject() const
@@ -54,7 +53,7 @@ QNetworkAccessManager* FrameNetworkingContextQt::networkAccessManager() const
 
 bool FrameNetworkingContextQt::mimeSniffingEnabled() const
 {
-    return m_mimeSniffingEnabled;
+    return QWebFrameAdapter::kit(frame())->pageAdapter->settings->testAttribute(QWebSettings::MIMESniffingEnabled);
 }
 
 bool FrameNetworkingContextQt::thirdPartyCookiePolicyPermission(const QUrl& url) const
