@@ -1590,9 +1590,7 @@ QString FrameLoaderClientQt::chooseFile(const QString& oldFile)
 
 PassRefPtr<FrameNetworkingContext> FrameLoaderClientQt::createNetworkingContext()
 {
-    bool MIMESniffingDisabled = true;
-
-    return FrameNetworkingContextQt::create(m_frame, m_webFrame->handle(), !MIMESniffingDisabled);
+    return FrameNetworkingContextQt::create(m_frame, m_webFrame->handle());
 }
 
 QWebFrameAdapter* FrameLoaderClientQt::webFrame() const

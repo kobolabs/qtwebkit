@@ -26,10 +26,10 @@ namespace WebCore {
 
 class FrameNetworkingContextQt : public FrameNetworkingContext {
 public:
-    static PassRefPtr<FrameNetworkingContextQt> create(Frame*, QObject* originatingObject, bool mimeSniffingEnabled);
+    static PassRefPtr<FrameNetworkingContextQt> create(Frame*, QObject* originatingObject);
 
 private:
-    FrameNetworkingContextQt(Frame*, QObject* originatingObject, bool mimeSniffingEnabled);
+    FrameNetworkingContextQt(Frame*, QObject* originatingObject);
 
     virtual QObject* originatingObject() const;
     virtual QNetworkAccessManager* networkAccessManager() const;
@@ -37,7 +37,6 @@ private:
     virtual bool thirdPartyCookiePolicyPermission(const QUrl&) const;
 
     QObject* m_originatingObject;
-    bool m_mimeSniffingEnabled;
 };
 
 }
