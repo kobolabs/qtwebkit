@@ -248,6 +248,8 @@ bool GIFImageDecoder::haveDecodedRow(unsigned frameIndex, const Vector<unsigned 
             // later ones.
             if (writeTransparentPixels)
                 buffer.setRGBA(currentAddress, 0, 0, 0, 0);
+            else
+                buffer.setRGBA(currentAddress, 255, 255, 255, 0);
         }
         ++currentAddress;
     }
