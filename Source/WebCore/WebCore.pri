@@ -125,9 +125,7 @@ enable?(XSLT) {
     PKGCONFIG += libxml-2.0
 }
 
-use?(ZLIB) {
-    LIBS += -lz
-}
+LIBS += -lz
 
 enable?(NETSCAPE_PLUGIN_API) {
     unix {

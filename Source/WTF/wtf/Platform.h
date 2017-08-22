@@ -1037,7 +1037,7 @@
 #define WTF_USE_COREAUDIO 1
 #endif
 
-#if !defined(WTF_USE_ZLIB) && !PLATFORM(QT)
+#if !defined(WTF_USE_ZLIB)
 #define WTF_USE_ZLIB 1
 #endif
 
