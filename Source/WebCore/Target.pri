@@ -1045,6 +1045,7 @@ SOURCES += \
     platform/graphics/transforms/TransformState.cpp \
     platform/graphics/transforms/TranslateTransformOperation.cpp \
     platform/graphics/WidthIterator.cpp \
+    platform/graphics/WOFFFileFormat.cpp \
     platform/image-decoders/ImageDecoder.cpp \
     platform/image-decoders/bmp/BMPImageDecoder.cpp \
     platform/image-decoders/bmp/BMPImageReader.cpp \
@@ -2269,6 +2270,7 @@ HEADERS += \
     platform/graphics/transforms/TranslateTransformOperation.h \
     platform/graphics/WidthIterator.h \
     platform/graphics/WidthCache.h \
+    platform/graphics/WOFFFileFormat.h \
     platform/image-decoders/bmp/BMPImageDecoder.h \
     platform/image-decoders/bmp/BMPImageReader.h \
     platform/image-decoders/ico/ICOImageDecoder.h \
@@ -4238,11 +4240,6 @@ use?(LIBJPEG) {
 use?(WEBP) {
     HEADERS += platform/image-decoders/webp/WEBPImageDecoder.h
     SOURCES += platform/image-decoders/webp/WEBPImageDecoder.cpp
-}
-
-use?(ZLIB) {
-    HEADERS += platform/graphics/WOFFFileFormat.h
-    SOURCES += platform/graphics/WOFFFileFormat.cpp
 }
 
 !have?(sqlite3):exists($${SQLITE3SRCDIR}/sqlite3.c) {
