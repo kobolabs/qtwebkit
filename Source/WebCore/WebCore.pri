@@ -250,7 +250,7 @@ have?(sqlite3) {
 }
 
 contains(QT_CONFIG, system-zlib) {
-    if(unix|win32-g++*):     LIBS_PRIVATE += -lz
+    if(unix|win32-g++*):     LIBS += -lz
     else:                    LIBS += zdll.lib
 } else {
     load(qt_build_paths)
