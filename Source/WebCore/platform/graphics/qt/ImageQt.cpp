@@ -329,15 +329,23 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
         }
     }
 
+    static QPixmap ditheredImage;
+    static qint64 cacheKey = 0;
+
     const QPainter::RenderHints hints = ctxt->platformContext()->renderHints();
     if (!(hints & QPainter::SmoothPixmapTransform) && (hints & QPainter::Dithering)) {
         QImage &&i = resize ? resizedImage.toImage() : image->toImage();
-        QString key = QStringLiteral("qtwebkit_dithered_") % HexString<qint64>(i.cacheKey());
+        qint64 key = i.cacheKey();
         resize = true;
-        if (!QPixmapCache::find(key, &resizedImage)) {
-            resizedImage = QPixmap::fromImage(i.convertToFormat(QImage::Format_Mono, Qt::MonoOnly | Qt::DiffuseDither));
-            QPixmapCache::insert(key, resizedImage);
+        if (key == cacheKey) {
+            resizedImage = ditheredImage;
+        } else {
+            ditheredImage = resizedImage = QPixmap::fromImage(i.convertToFormat(QImage::Format_Mono, Qt::MonoOnly | Qt::DiffuseDither));
+            cacheKey = key;
         }
+    } else {
+        ditheredImage = QPixmap();
+        cacheKey = 0;
     }
 
     ctxt->platformContext()->drawPixmap(normalizedDst, resize ? resizedImage : *image, normalizedSrc);
