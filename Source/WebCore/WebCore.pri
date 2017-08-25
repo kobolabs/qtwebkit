@@ -125,8 +125,6 @@ enable?(XSLT) {
     PKGCONFIG += libxml-2.0
 }
 
-LIBS += -lz
-
 enable?(NETSCAPE_PLUGIN_API) {
     unix {
         mac {
@@ -249,6 +247,17 @@ have?(sqlite3) {
         INCLUDEPATH += $${SQLITE3SRCDIR}
         LIBS += -lsqlite3
     }
+}
+
+contains(QT_CONFIG, system-zlib) {
+    if(unix|win32-g++*):     LIBS_PRIVATE += -lz
+    else:                    LIBS += zdll.lib
+} else {
+    load(qt_build_paths)
+    git_build: \
+        INCLUDEPATH += $$[QT_INSTALL_HEADERS/get]/QtZlib
+    else: \
+        INCLUDEPATH += $$[QT_INSTALL_HEADERS/src]/QtZlib
 }
 
 use?(libjpeg): LIBS += -ljpeg
