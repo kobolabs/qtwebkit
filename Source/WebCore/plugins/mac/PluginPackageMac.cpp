@@ -246,17 +246,7 @@ bool PluginPackage::fetchInfo()
 
 bool PluginPackage::isPluginBlacklisted()
 {
-    const QLatin1String pluginBlacklist[] = {
-        QLatin1String("fbplugin")
-    };
-
-    QString baseName = QFileInfo(static_cast<QString>(m_path)).baseName();
-    for (unsigned i = 0; i < sizeof(pluginBlacklist) / sizeof(QLatin1String); ++i) {
-        if (baseName.startsWith(pluginBlacklist[i], Qt::CaseInsensitive))
-            return true;
-    }
-
-    return false;
+    return true;
 }
 
 bool PluginPackage::load()
