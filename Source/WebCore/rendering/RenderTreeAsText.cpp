@@ -953,7 +953,7 @@ static bool containsOnlyUnicodeWhitespace(const RenderText& renderText)
     return true;
 }
 
-static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, bool vertical)
+static void getRunRectsRecursively(QVector<QRect>& out, const RenderObject& o, bool vertical)
 {
     /* Figure out what the runs' positions are relative to. */
     FloatPoint origin;
@@ -1065,7 +1065,7 @@ static void getRunRectsRecursively(QList<QRect>& out, const RenderObject& o, boo
     }
 }
 
-static void getRunRectsForAllLayers(QList<QRect>& out, RenderLayer* l, bool vertical)
+static void getRunRectsForAllLayers(QVector<QRect>& out, RenderLayer* l, bool vertical)
 {
     /* heavily based on writeLayers, mostly without any understanding of what "layers" even are. */
     l->updateLayerListsIfNeeded();
@@ -1091,12 +1091,12 @@ static void getRunRectsForAllLayers(QList<QRect>& out, RenderLayer* l, bool vert
     }
 }
 
-QList<QRect> getRunRects(RenderView* o, bool vertical)
+QVector<QRect> getRunRects(RenderView* o, bool vertical)
 {
     if (o->view()->frameView())
         o->view()->frameView()->layout();
 
-    QList<QRect> out;
+    QVector<QRect> out;
     if (o->hasLayer()) {
         RenderLayer *l = o->layer();
         getRunRectsForAllLayers(out, l, vertical);

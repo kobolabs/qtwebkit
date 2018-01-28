@@ -939,7 +939,7 @@ bool QWebFrame::hasPendingStyleSheets() const
     return handle()->hasPendingStylesheets();
 }
 
-QList<QRect> QWebFrame::renderTreeRunRects()
+QVector<QRect> QWebFrame::renderTreeRunRects()
 {
     return handle()->renderTreeRunRects();
 }

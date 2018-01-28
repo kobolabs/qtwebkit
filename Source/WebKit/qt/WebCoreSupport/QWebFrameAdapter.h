@@ -222,7 +222,7 @@ public:
     void setDelegatesScrolling(bool /*resizesToContents*/);
     void setConstrainsScrollingToContentEdge(bool constrainsScrollingToContentEdge);
     bool hasPendingStylesheets() const;
-    QList<QRect> renderTreeRunRects();
+    QVector<QRect> renderTreeRunRects();
     bool selectionIntersectsElement(const QString &nodeName, const QString &className, const QString &retrievedAttribute, QString &id);
 
     QWebPageAdapter* pageAdapter;
