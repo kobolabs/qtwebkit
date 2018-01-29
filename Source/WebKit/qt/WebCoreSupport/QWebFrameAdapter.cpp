@@ -1009,10 +1009,10 @@ bool QWebFrameAdapter::hasPendingStylesheets() const
 }
 
 namespace WebCore {
-    QList<QRect> getRunRects(RenderView*, bool);
+    QVector<QRect> getRunRects(RenderView*, bool);
 }
 
-QList<QRect> QWebFrameAdapter::renderTreeRunRects()
+QVector<QRect> QWebFrameAdapter::renderTreeRunRects()
 {
     ASSERT(frame->view());
     if (frame->view() && frame->view()->layoutPending())
