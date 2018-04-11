@@ -1018,7 +1018,7 @@ QVector<QRect> QWebFrameAdapter::renderTreeRunRects()
     if (frame->view() && frame->view()->layoutPending())
         frame->view()->layout();
     RenderView* o = frame->contentRenderer();
-    return WebCore::getRunRects(o, documentElement().styleProperty(QString::fromLatin1("-epub-writing-mode"), QWebElement::ComputedStyle).startsWith(QString::fromLatin1("vertical")));
+    return WebCore::getRunRects(o, documentElement().styleProperty(QLatin1String("-epub-writing-mode"), QWebElement::ComputedStyle).startsWith(QLatin1String("vertical")));
 }
 
 static Element *findAncestorElement(Element *element, const QString &nodeName, const QString &className)
