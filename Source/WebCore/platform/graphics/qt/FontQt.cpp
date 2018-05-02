@@ -382,10 +382,9 @@ void Font::drawGlyphs(GraphicsContext* context, const SimpleFontData* fontData, 
         width += advance;
     }
 
-    QGlyphRun qtGlyphs;
+    QGlyphRun qtGlyphs(font);;
     qtGlyphs.setGlyphIndexes(glyphIndexes);
     qtGlyphs.setPositions(positions);
-    qtGlyphs.setRawFont(font);
     qtGlyphs.setGlyphIsCJKOrSymbol(glyphIsCJKOrSymbol);
 
     drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0, m_fontDescription.orientation() == Vertical);

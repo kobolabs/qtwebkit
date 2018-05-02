@@ -48,9 +48,8 @@ void FontCache::platformInit()
 
 static QRawFont rawFontForCharacters(const QString& string, const QRawFont& font)
 {
-    QTextLayout layout(string);
+    QTextLayout layout(string, font);
     layout.setCacheEnabled(true);
-    layout.setRawFont(font);
     layout.beginLayout();
     layout.createLine();
     layout.endLayout();
