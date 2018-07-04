@@ -71,7 +71,10 @@ public:
 
     FontPlatformDataPrivate(WTF::HashTableDeletedValueType)
         : isDeletedValue(true)
-    { }
+    {
+        static QRawFont emptyRawFont;
+        rawFont = emptyRawFont;
+    }
 
     QRawFont rawFont;
     float size;
@@ -93,8 +96,8 @@ public:
     {
         m_data->orientation = orientation;
     }
-    FontPlatformData(WTF::HashTableDeletedValueType)
-        : m_data(adoptRef(new FontPlatformDataPrivate()))
+    FontPlatformData(WTF::HashTableDeletedValueType type)
+        : m_data(adoptRef(new FontPlatformDataPrivate(type)))
     {
         m_data->isDeletedValue = true;
     }
