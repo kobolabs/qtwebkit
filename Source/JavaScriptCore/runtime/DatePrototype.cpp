@@ -167,7 +167,7 @@ static JSCell* formatLocaleDate(ExecState* exec, DateInstance*, double timeInMil
     CFRelease(locale);
 
     if (useCustomFormat) {
-        CFStringRef customFormatCFString = CFStringCreateWithCharacters(0, customFormatString.characters(), customFormatString.length());
+        CFStringRef customFormatCFString = CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar *>(customFormatString.characters()), customFormatString.length());
         CFDateFormatterSetFormat(formatter, customFormatCFString);
         CFRelease(customFormatCFString);
     }
@@ -184,7 +184,7 @@ static JSCell* formatLocaleDate(ExecState* exec, DateInstance*, double timeInMil
     ASSERT(length <= bufferLength);
     if (length > bufferLength)
         length = bufferLength;
-    CFStringGetCharacters(string, CFRangeMake(0, length), buffer);
+    CFStringGetCharacters(string, CFRangeMake(0, length), reinterpret_cast<UniChar *>(buffer));
 
     CFRelease(string);
 
