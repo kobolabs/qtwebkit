@@ -85,6 +85,9 @@ static QString macVersionForUAString()
             case QSysInfo::MV_10_14:
                 ver = "10_14";
                 break;
+            case QSysInfo::MV_10_15:
+                ver = "10_15";
+                break;
             default:
                 ver = "Unknown";
                 break;
