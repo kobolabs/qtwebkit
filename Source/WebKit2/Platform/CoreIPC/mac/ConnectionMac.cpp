@@ -423,7 +423,7 @@ void Connection::receiveSourceEventHandler()
     OwnPtr<MessageDecoder> decoder = createMessageDecoder(header);
     ASSERT(decoder);
 
-#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
+#if PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
     decoder->setImportanceAssertion(ImportanceAssertion::create(header));
 #endif
 
