@@ -691,9 +691,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
                 renderer()->frame()->editor().compositionEnd());
 
         paintDocumentMarkers(context, boxOrigin, styleToUse, font, true);
-
-        if (haveSelection && !useCustomUnderlines)
-            paintSelection(context, boxOrigin, styleToUse, font, selectionFillColor);
     }
 
     if (Frame* frame = renderer()->frame()) {
@@ -838,6 +835,9 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
                     break;
             }
         }
+
+        if (haveSelection && !useCustomUnderlines)
+            paintSelection(context, boxOrigin, styleToUse, font, selectionFillColor);
     }
     
     if (shouldRotate)
