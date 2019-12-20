@@ -547,7 +547,7 @@
 
 #if !USE(WCHAR_UNICODE)
 #define WTF_USE_ICU_UNICODE 1
-#include <unicode/platform.h>
+#include <unicode/uvernum.h>
 #endif
 
 #if PLATFORM(MAC) && !PLATFORM(IOS)
