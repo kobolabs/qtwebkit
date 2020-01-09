@@ -487,8 +487,7 @@ void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run,
         fillRect(rect, color, colorSpace);
     }
     else {
-        Color color(0xff,0xff,0xff);
-        fillRect(font.selectionRectForText(run, point, h, from, to), color, colorSpace, CompositeSourceOver, BlendModeDifference);
+        fillRect(font.selectionRectForText(run, point, h, from, to), backgroundColor, colorSpace);
     }
 }
 
