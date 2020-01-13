@@ -1726,8 +1726,8 @@ QPair<QRect, QRect> QWebPageAdapter::selectionEndPoints()
     IntRect endRect = rects.last();
     QString writingMode = mainFrameAdapter()->documentElement().styleProperty(QString::fromLatin1("-epub-writing-mode"), QWebElement::ComputedStyle);
     if (writingMode == QString::fromLatin1("vertical-rl") || writingMode == QString::fromLatin1("tb-rl")) {
-        QRect startQRect(startRect.x(), startRect.y(), startRect.width(), startRect.height());
-        QRect endQRect(endRect.x(), endRect.y() + endRect.height(), qMax(endRect.width(), 1), qMax(endRect.height(), 1));
+        QRect startQRect(startRect.x(), startRect.y(), startRect.width(), 1);
+        QRect endQRect(endRect.x(), endRect.y() + endRect.height(), endRect.width(), 1);
         return QPair<QRect, QRect>(startQRect, endQRect);
     }
     QRect startQRect(startRect.x(), startRect.y(), 1, startRect.height());
