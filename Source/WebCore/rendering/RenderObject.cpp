@@ -1642,7 +1642,11 @@ Color RenderObject::selectionBackgroundColor() const
         else {
             RefPtr<RenderStyle> pseudoStyle = getUncachedPseudoStyle(PseudoStyleRequest(SELECTION));
             if (pseudoStyle && pseudoStyle->visitedDependentColor(CSSPropertyBackgroundColor).isValid())
+#if OS(LINUX) && !(CPU(X86) || CPU(X86_64))
+                color = pseudoStyle->visitedDependentColor(CSSPropertyBackgroundColor);
+#else
                 color = pseudoStyle->visitedDependentColor(CSSPropertyBackgroundColor).blendWithWhite();
+#endif
         }
     }
 
