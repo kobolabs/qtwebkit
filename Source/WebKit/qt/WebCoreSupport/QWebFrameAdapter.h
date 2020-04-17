@@ -225,6 +225,9 @@ public:
     QVector<QRect> renderTreeRunRects();
     bool selectionIntersectsElement(const QString &nodeName, const QString &className, const QString &retrievedAttribute, QString &id);
 
+    int addCSSRule(const QString& rule);
+    void removeCSSRule(int rule);
+
     QWebPageAdapter* pageAdapter;
 
 // protected:
