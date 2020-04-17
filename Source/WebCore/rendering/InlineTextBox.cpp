@@ -158,7 +158,7 @@ RenderObject::SelectionState InlineTextBox::selectionState()
         else if ((state == RenderObject::SelectionEnd || startPos < m_start) &&
                  (state == RenderObject::SelectionStart || endPos > lastSelectable))
             state = RenderObject::SelectionInside;
-        else if (state == RenderObject::SelectionBoth)
+        else
             state = RenderObject::SelectionNone;
     }
 
