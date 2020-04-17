@@ -630,17 +630,21 @@ static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset
     return child ? child : object->nextInPreOrderAfterChildren();
 }
 
+static inline bool isInsideRubyText(RenderObject* o) {
+    while (o) {
+        if (o->isRubyText()) {
+            return true;
+        }
+        o = o->parent();
+    }
+    return false;
+}
+
 static inline bool canBeSelectionLeafNotRuby(RenderObject* o) {
     if (!o->canBeSelectionLeaf()) {
         return false;
     }
-    while (o) {
-        if (o->isRubyText()) {
-            return false;
-        }
-        o = o->parent();
-    }
-    return true;
+    return !isInsideRubyText(o);
 }
 
 IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
@@ -731,7 +735,7 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
     if ((start && !end) || (end && !start))
         return;
 
-    if ((start && end) && (!canBeSelectionLeafNotRuby(start) || !canBeSelectionLeafNotRuby(end))) {
+    if ((start && end) && (isInsideRubyText(start) || isInsideRubyText(end))) {
         return;
     }
 
