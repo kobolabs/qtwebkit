@@ -24,6 +24,7 @@
 #include "APICast.h"
 #include "Chrome.h"
 #include "ChromeClientQt.h"
+#include "CSSStyleSheet.h"
 #include "DocumentLoader.h"
 #include "DOMSelection.h"
 #include "EventHandler.h"
@@ -1063,4 +1064,37 @@ bool QWebFrameAdapter::selectionIntersectsElement(const QString &nodeName, const
         node = NodeTraversal::next(node);
     }
     return false;
+}
+
+static CSSStyleSheet* getPageUserSheetFromFrame(WebCore::Frame *frame)
+{
+    auto doc = frame->document();
+    if (!doc) {
+        return nullptr;
+    }
+    auto styleSheetCollection = doc->styleSheetCollection();
+    if (!styleSheetCollection) {
+        return nullptr;
+    }
+    return styleSheetCollection->pageUserSheet();
+}
+
+int QWebFrameAdapter::addCSSRule(const QString& rule)
+{
+    auto pageUserSheet = getPageUserSheetFromFrame(frame);
+    if (!pageUserSheet) {
+        return -1;
+    }
+    ExceptionCode ec;
+    return pageUserSheet->insertRule(rule, pageUserSheet->length(), ec);
+}
+
+void QWebFrameAdapter::removeCSSRule(int rule)
+{
+    auto pageUserSheet = getPageUserSheetFromFrame(frame);
+    if (!pageUserSheet) {
+        return;
+    }
+    ExceptionCode ec;
+    pageUserSheet->deleteRule(rule, ec);
 }

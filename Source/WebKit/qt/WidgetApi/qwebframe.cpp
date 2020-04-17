@@ -949,6 +949,15 @@ bool QWebFrame::selectionIntersectsElement(const QString &nodeName, const QStrin
     return handle()->selectionIntersectsElement(nodeName, className, retrievedAttribute, id);
 }
 
+int QWebFrame::addCSSRule(const QString& rule)
+{
+    return handle()->addCSSRule(rule);
+}
+
+void QWebFrame::removeCSSRule(int rule)
+{
+    handle()->removeCSSRule(rule);
+}
 
 /*!
     \fn void QWebFrame::javaScriptWindowObjectCleared()
