@@ -2622,6 +2622,14 @@ bool QWebPage::focusNextPrevChild(bool next)
     return d->hasFocusedNode();
 }
 
+bool QWebPage::setInitialFocus()
+{
+   if (!d->mainFrame) {
+      return false;
+   }
+   return d->setInitialFocus();
+}
+
 /*!
     \property QWebPage::contentEditable
     \brief whether the content in this QWebPage is editable or not
