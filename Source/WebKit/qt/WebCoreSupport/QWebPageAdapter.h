@@ -345,6 +345,8 @@ public:
 
     QObject* currentFrame() const;
     bool hasFocusedNode() const;
+    bool setInitialFocus();
+
     struct ViewportAttributes {
         qreal initialScaleFactor;
         qreal minimumScaleFactor;

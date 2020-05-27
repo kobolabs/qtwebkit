@@ -313,6 +313,7 @@ public:
 
     virtual bool event(QEvent*);
     bool focusNextPrevChild(bool next);
+    bool setInitialFocus();
 
     QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
 

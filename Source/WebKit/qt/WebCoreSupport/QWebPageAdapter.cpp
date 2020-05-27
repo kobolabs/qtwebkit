@@ -1361,6 +1361,14 @@ bool QWebPageAdapter::hasFocusedNode() const
     return hasFocus;
 }
 
+bool QWebPageAdapter::setInitialFocus()
+{
+   if (hasFocusedNode()) {
+      return false;
+   }
+   return page->focusController()->setInitialFocus(FocusDirectionForward, 0);
+}
+
 QWebPageAdapter::ViewportAttributes QWebPageAdapter::viewportAttributesForSize(const QSize &availableSize, const QSize &deviceSize) const
 {
     static const int desktopWidth = 980;
