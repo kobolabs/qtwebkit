@@ -634,7 +634,9 @@ static ALWAYS_INLINE uint32_t freedObjectEndPoison()
 #    elif (K_PAGE_SHIFT == 14)
 #        define K_NUM_CLASSES 77
 #    else
-#        error "Unsupported PAGE_SHIFT amount"
+#        undef K_PAGE_SHIFT
+#        define K_PAGE_SHIFT 12
+#        define K_NUM_CLASSES 68
 #    endif
 #else
 #    define K_PAGE_SHIFT 12

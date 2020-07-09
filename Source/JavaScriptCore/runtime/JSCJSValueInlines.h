@@ -198,7 +198,7 @@ inline JSValue::JSValue(JSCell* ptr)
         u.asBits.tag = CellTag;
     else
         u.asBits.tag = EmptyValueTag;
-    u.asBits.payload = reinterpret_cast<int32_t>(ptr);
+    u.asBits.payload = reinterpret_cast<intptr_t>(ptr);
 }
 
 inline JSValue::JSValue(const JSCell* ptr)
@@ -207,7 +207,7 @@ inline JSValue::JSValue(const JSCell* ptr)
         u.asBits.tag = CellTag;
     else
         u.asBits.tag = EmptyValueTag;
-    u.asBits.payload = reinterpret_cast<int32_t>(const_cast<JSCell*>(ptr));
+    u.asBits.payload = reinterpret_cast<intptr_t>(const_cast<JSCell*>(ptr));
 }
 
 inline JSValue::operator bool() const

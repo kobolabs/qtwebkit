@@ -2945,11 +2945,13 @@ void CodeBlock::countReoptimization()
         m_reoptimizationRetryCounter = Options::reoptimizationRetryCounterMax();
 }
 
+#if ENABLE(JIT)
 unsigned CodeBlock::numberOfDFGCompiles()
 {
     ASSERT(JITCode::isBaselineCode(getJITType()));
     return (JITCode::isOptimizingJIT(replacement()->getJITType()) ? 1 : 0) + m_reoptimizationRetryCounter;
 }
+#endif
 
 int32_t CodeBlock::codeTypeThresholdMultiplier() const
 {

@@ -262,6 +262,15 @@
 /* --------- Qt port (Unix, Windows, Mac, WinCE) --------- */
 #if PLATFORM(QT)
 
+#if OS(DARWIN) && defined(__arm64__)
+#undef ENABLE_JIT
+#undef ENABLE_YARR_JIT
+#undef ENABLE_ASSEMBLER
+#define ENABLE_JIT 0
+#define ENABLE_YARR_JIT 0
+#define ENABLE_ASSEMBLER 0
+#endif
+
 #if OS(UNIX)
 #if !defined(ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH)
 #define ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH 1
