@@ -726,7 +726,8 @@
     || CPU(ALPHA) \
     || CPU(SPARC64) \
     || CPU(S390X) \
-    || CPU(PPC64)
+    || CPU(PPC64) \
+    || defined(__arm64__)
 #define WTF_USE_JSVALUE64 1
 #else
 #define WTF_USE_JSVALUE32_64 1
