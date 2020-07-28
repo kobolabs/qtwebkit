@@ -140,6 +140,10 @@ void QWebSettingsPrivate::apply()
                                       global->attributes.value(QWebSettings::AutoLoadImages));
         settings->setLoadsImagesAutomatically(value);
 
+        value = attributes.value(QWebSettings::OpaqueSelectionBackground,
+                                      global->attributes.value(QWebSettings::OpaqueSelectionBackground));
+        settings->setOpaqueSelectionBackground(value);
+
         value = attributes.value(QWebSettings::DnsPrefetchEnabled,
                                  global->attributes.value(QWebSettings::DnsPrefetchEnabled));
         settings->setDNSPrefetchingEnabled(value);
@@ -566,6 +570,7 @@ QWebSettings::QWebSettings()
     d->attributes.insert(QWebSettings::NotificationsEnabled, true);
     d->attributes.insert(QWebSettings::ImageAnimationEnabled, true);
     d->attributes.insert(QWebSettings::MIMESniffingEnabled, false);
+    d->attributes.insert(QWebSettings::OpaqueSelectionBackground, false);
     d->offlineStorageDefaultQuota = 5 * 1024 * 1024;
     d->defaultTextEncoding = QLatin1String("iso-8859-1");
     d->thirdPartyCookiePolicy = AlwaysAllowThirdPartyCookies;
