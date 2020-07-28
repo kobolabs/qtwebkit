@@ -107,6 +107,10 @@ namespace WebCore {
         void setLoadsImagesAutomatically(bool);
         bool loadsImagesAutomatically() const { return m_loadsImagesAutomatically; }
 
+        // Allow disabling selection background opacity blending
+        void setOpaqueSelectionBackground(bool);
+        bool opaqueSelectionBackground() const { return m_opaqueSelectionBackground; }
+
         // Clients that execute script should call ScriptController::canExecuteScripts()
         // instead of this function. ScriptController::canExecuteScripts() checks the
         // HTML sandbox, plug-in sandboxing, and other important details.
@@ -283,6 +287,7 @@ namespace WebCore {
         bool m_isJavaEnabled : 1;
         bool m_isJavaEnabledForLocalFiles : 1;
         bool m_loadsImagesAutomatically : 1;
+        bool m_opaqueSelectionBackground : 1;
         bool m_privateBrowsingEnabled : 1;
         bool m_areImagesEnabled : 1;
         bool m_arePluginsEnabled : 1;

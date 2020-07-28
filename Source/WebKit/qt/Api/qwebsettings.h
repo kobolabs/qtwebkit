@@ -87,7 +87,8 @@ public:
         NotificationsEnabled,
         WebAudioEnabled,
         ImageAnimationEnabled,
-        MIMESniffingEnabled
+        MIMESniffingEnabled,
+        OpaqueSelectionBackground
     };
     enum WebGraphic {
         MissingImageGraphic,

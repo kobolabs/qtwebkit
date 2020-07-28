@@ -139,6 +139,7 @@ Settings::Settings(Page* page)
     , m_isJavaEnabled(false)
     , m_isJavaEnabledForLocalFiles(true)
     , m_loadsImagesAutomatically(false)
+    , m_opaqueSelectionBackground(false)
     , m_privateBrowsingEnabled(false)
     , m_areImagesEnabled(true)
     , m_arePluginsEnabled(false)
@@ -349,6 +350,11 @@ void Settings::setLoadsImagesAutomatically(bool loadsImagesAutomatically)
     // before they have a chance to really start.
     // See http://webkit.org/b/60572 for more discussion.
     m_setImageLoadingSettingsTimer.startOneShot(0);
+}
+
+void Settings::setOpaqueSelectionBackground(bool opaqueSelectionBackground)
+{
+    m_opaqueSelectionBackground = opaqueSelectionBackground;
 }
 
 void Settings::imageLoadingSettingsTimerFired(Timer<Settings>*)
