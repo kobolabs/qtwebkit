@@ -1002,7 +1002,7 @@ GENERATORS += pluginsresources
 # GENERATOR 11: XPATH grammar
 xpathbison.output = ${QMAKE_FILE_BASE}.cpp
 xpathbison.input = XPATHBISON
-xpathbison.commands = bison -d -p xpathyy ${QMAKE_FILE_NAME} -o ${QMAKE_FUNC_FILE_OUT_PATH}/${QMAKE_FILE_BASE}.tab.c && $(MOVE) ${QMAKE_FUNC_FILE_OUT_PATH}$${QMAKE_DIR_SEP}${QMAKE_FILE_BASE}.tab.c ${QMAKE_FUNC_FILE_OUT_PATH}$${QMAKE_DIR_SEP}${QMAKE_FILE_BASE}.cpp && $(MOVE) ${QMAKE_FUNC_FILE_OUT_PATH}$${QMAKE_DIR_SEP}${QMAKE_FILE_BASE}.tab.h ${QMAKE_FUNC_FILE_OUT_PATH}$${QMAKE_DIR_SEP}${QMAKE_FILE_BASE}.h
+xpathbison.commands = bison --defines=${QMAKE_FUNC_FILE_OUT_PATH}/${QMAKE_FILE_BASE}.h -p xpathyy ${QMAKE_FILE_NAME} -o ${QMAKE_FUNC_FILE_OUT_PATH}/${QMAKE_FILE_BASE}.cpp 
 xpathbison.depends = ${QMAKE_FILE_NAME}
 GENERATORS += xpathbison
 
