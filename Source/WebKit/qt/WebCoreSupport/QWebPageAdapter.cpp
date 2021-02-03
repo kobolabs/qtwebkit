@@ -46,6 +46,7 @@
 #include "DragSession.h"
 #include "Editor.h"
 #include "EditorClientQt.h"
+#include "Element.h"
 #include "EventHandler.h"
 #include "FocusController.h"
 #include "FrameLoadRequest.h"
@@ -64,6 +65,7 @@
 #include "HTMLMediaElement.h"
 #include "HitTestResult.h"
 #include "InitWebCoreQt.h"
+#include "InlineTextBox.h"
 #include "InspectorClientQt.h"
 #include "InspectorController.h"
 #include "InspectorServerQt.h"
@@ -72,6 +74,7 @@
 #include "MemoryCache.h"
 #include "NetworkingContext.h"
 #include "NodeList.h"
+#include "NodeTraversal.h"
 #include "NotificationPresenterClientQt.h"
 #include "PageGroup.h"
 #include "Pasteboard.h"
@@ -83,13 +86,16 @@
 #include "PluginPackage.h"
 #include "ProgressTracker.h"
 #include "QWebFrameAdapter.h"
+#include "RenderBoxModelObject.h"
 #include "RenderLayer.h"
+#include "RenderText.h"
 #include "RenderTextControl.h"
 #include "RenderView.h"
 #include "SchemeRegistry.h"
 #include "Scrollbar.h"
 #include "ScrollbarTheme.h"
 #include "Settings.h"
+#include "Text.h"
 #include "UndoStepQt.h"
 #include "UserAgentQt.h"
 #include "UserGestureIndicator.h"
@@ -1778,4 +1784,63 @@ QVector<QRect> QWebPageAdapter::selectionTextRects()
         selectionTextRects.append(QRect(rects[i].x(), rects[i].y(), rects[i].width(), rects[i].height()));
     }
     return selectionTextRects;
+}
+
+static void forEachLineInRangeV1(PassRefPtr<Range> range, const std::function<void(const QString&)>& fn) {
+    QString currentLine;
+
+    RenderObject* renderer = nullptr;
+    Node* startContainer = range->startContainer();
+    Node* endContainer = range->endContainer();
+    Node* stopNode = range->pastLastNode();
+    for (Node* node = range->firstNode(); node != stopNode; node = NodeTraversal::next(node)) {
+        if (node->isTextNode() && (renderer = toText(node)->renderer())) {
+            RenderText* renderText = toRenderText(renderer);
+            int startOffset = (node == startContainer) ? range->startOffset() : 0;
+            int endOffset = (node == endContainer) ? range->endOffset() : INT_MAX;
+            //the inline text boxes represent individual lines of text within the same text node
+            for (InlineTextBox* box = renderText->firstTextBox(); box; box = box->nextTextBox()) {
+                unsigned int boxStart = box->start();
+                unsigned int boxEnd = box->end()+1;
+                if (boxEnd < startOffset) continue;
+                if (boxStart >= endOffset) continue;
+                int subRangeStart = boxStart < startOffset ? startOffset : boxStart;
+                int subRangeEnd = boxEnd > endOffset ? endOffset : boxEnd;
+                auto clientRange = Range::create(range->ownerDocument(), node, subRangeStart, node, subRangeEnd);
+
+                QString text = clientRange->text();
+                if (box->prevOnLine() == nullptr || box->isLineBreak()) {
+                    if (!currentLine.isEmpty()) {
+                        fn(currentLine.trimmed());
+                    }
+                    currentLine.clear();
+                }
+                currentLine += text;
+            }
+        }
+        //if we pass a non-inline element, we need to force a new line
+        if (node->isElementNode() && (renderer = toElement(node)->renderer())) {
+            if (!renderer->isInline()) {
+                if (!currentLine.isEmpty()) {
+                    fn(currentLine.trimmed());
+                }
+                currentLine.clear();
+            }
+        }
+    }
+    if (!currentLine.isEmpty()) {
+        fn(currentLine.trimmed());
+    }
+}
+
+void QWebPageAdapter::forEachLineInSelection(int version, const std::function<void(const QString&)>& fn)
+{
+    VisibleSelection selection = page->focusController()->focusedOrMainFrame()->selection()->selection();
+    PassRefPtr<Range> range = selection.firstRange();
+    if (range.get() == NULL) {
+        return;
+    }
+    if (version == 1) {
+        forEachLineInRangeV1(range, fn);
+    }
 }

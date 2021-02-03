@@ -383,6 +383,7 @@ public:
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
     QVector<QRect> selectionTextRects();
+    void forEachLineInSelection(int version, const std::function<void(const QString&)>& fn);
 
 private:
     QNetworkAccessManager *networkManager;

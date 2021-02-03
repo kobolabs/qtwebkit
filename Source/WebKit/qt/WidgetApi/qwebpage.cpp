@@ -3249,6 +3249,12 @@ QVector<QRect> QWebPage::selectionTextRects()
     return handle()->selectionTextRects();
 }
 
+void QWebPage::forEachLineInSelection(int version, const std::function<void(const QString&)>& fn)
+{
+    d->createMainFrame();
+    handle()->forEachLineInSelection(version, fn);
+}
+
 /*!
     \since 4.8
     \fn void QWebPage::viewportChangeRequested()

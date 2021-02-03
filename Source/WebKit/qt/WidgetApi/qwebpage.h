@@ -27,6 +27,7 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qurl.h>
 #include <QtWidgets/qwidget.h>
+#include <functional>
 
 QT_BEGIN_NAMESPACE
 class QNetworkProxy;
@@ -397,6 +398,7 @@ public:
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
     QVector<QRect> selectionTextRects();
+    void forEachLineInSelection(int version, const std::function<void(const QString&)>& fn);
 
 Q_SIGNALS:
     void loadStarted();
