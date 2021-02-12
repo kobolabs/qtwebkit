@@ -27,6 +27,7 @@
 #include <QtCore/qshareddata.h>
 
 #include "qwebkitglobal.h"
+#include "qwebnode.h"
 namespace WebCore {
     class Element;
     class Node;
@@ -51,6 +52,9 @@ public:
     bool operator!=(const QWebElement& o) const;
 
     bool isNull() const;
+
+    static QWebNode toNode(const QWebElement& element);
+    static QWebElement fromNode(const QWebNode& node);
 
     QWebElementCollection findAll(const QString &selectorQuery) const;
     QWebElement findFirst(const QString &selectorQuery) const;

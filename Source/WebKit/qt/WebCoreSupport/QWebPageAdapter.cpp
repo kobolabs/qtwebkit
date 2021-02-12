@@ -386,6 +386,16 @@ bool QWebPageAdapter::hasSelection() const
     return false;
 }
 
+QWebRange QWebPageAdapter::selectionRange() const
+{
+    VisibleSelection selection = page->focusController()->focusedOrMainFrame()->selection()->selection();
+    PassRefPtr<Range> range = selection.firstRange();
+    if (range.get() == NULL) {
+        return QWebRange();
+    }
+    return QWebRange(range.get());
+}
+
 QString QWebPageAdapter::selectedText() const
 {
     Frame* frame = page->focusController()->focusedOrMainFrame();
@@ -1648,8 +1658,23 @@ void QWebPageAdapter::clearSelection()
 
 void QWebPageAdapter::selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
 {
-    if (one == two) {
+    QWebRange range = rangeBetweenPoints(one, two, expandToWordBoundaries, pageEnd);
+    if (range.isNull()) {
         return;
+    }
+
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    QString oldText = selectedText();
+    if (oldText.isEmpty() || !range.text().isEmpty()) {
+        VisibleSelection newSelection(range.m_range);
+        frame->selection()->setSelection(newSelection);
+    }
+}
+
+QWebRange QWebPageAdapter::rangeBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
+{
+    if (one == two) {
+        return QWebRange();
     }
 
     Frame *frame = page->focusController()->focusedOrMainFrame();
@@ -1670,14 +1695,17 @@ void QWebPageAdapter::selectBetweenPoints(const QPoint &one, const QPoint &two, 
             } else {
                 newSelection.expandUsingGranularity(CharacterGranularity);
             }
-            // don't stomp on a good selection with a bogus one
-            QString oldText = selectedText();
             PassRefPtr<Range> range = newSelection.firstRange();
-            if (oldText.isEmpty() || (range && !range->text().isEmpty())) {
-              frame->selection()->setSelection(newSelection);
-            }
+            return QWebRange(range.get());
         }
     }
+    return QWebRange();
+}
+
+QWebRange QWebPageAdapter::createRange(const QWebNode& startContainer, int startOffset, const QWebNode& endContainer, int endOffset)
+{
+    auto range = Range::create(startContainer.m_node->document(), PassRefPtr<Node>(startContainer.m_node), startOffset, PassRefPtr<Node>(endContainer.m_node), endOffset);
+    return QWebRange(range.get());
 }
 
 bool QWebPageAdapter::updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped)
@@ -1786,7 +1814,7 @@ QVector<QRect> QWebPageAdapter::selectionTextRects()
     return selectionTextRects;
 }
 
-static void forEachLineInRangeV1(PassRefPtr<Range> range, const std::function<void(const QString&)>& fn) {
+static void forEachLineInRangeV1(Range* range, const std::function<void(const QString&)>& fn) {
     QString currentLine;
 
     RenderObject* renderer = nullptr;
@@ -1833,14 +1861,12 @@ static void forEachLineInRangeV1(PassRefPtr<Range> range, const std::function<vo
     }
 }
 
-void QWebPageAdapter::forEachLineInSelection(int version, const std::function<void(const QString&)>& fn)
+void QWebPageAdapter::forEachLineInRange(int version, const QWebRange& range, const std::function<void(const QString&)>& fn)
 {
-    VisibleSelection selection = page->focusController()->focusedOrMainFrame()->selection()->selection();
-    PassRefPtr<Range> range = selection.firstRange();
-    if (range.get() == NULL) {
+    if (range.isNull()) {
         return;
     }
     if (version == 1) {
-        forEachLineInRangeV1(range, fn);
+        forEachLineInRangeV1(range.m_range, fn);
     }
 }

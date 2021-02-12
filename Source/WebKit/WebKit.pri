@@ -5,6 +5,8 @@ SOURCES += \
     $$PWD/qt/Api/qwebview.cpp \
     $$PWD/qt/Api/qwebelement.cpp \
     $$PWD/qt/Api/qwebhistory.cpp \
+    $$PWD/qt/Api/qwebnode.cpp \
+    $$PWD/qt/Api/qwebrange.cpp \
     $$PWD/qt/Api/qwebsettings.cpp \
     $$PWD/qt/Api/qwebhistoryinterface.cpp \
     $$PWD/qt/Api/qwebplugindatabase.cpp \
@@ -34,7 +36,9 @@ HEADERS += \
     $$PWD/qt/Api/qwebhistory.h \
     $$PWD/qt/Api/qwebinspector.h \
     $$PWD/qt/Api/qwebkitversion.h \
+    $$PWD/qt/Api/qwebnode.h \
     $$PWD/qt/Api/qwebplugindatabase_p.h \
+    $$PWD/qt/Api/qwebrange.h \
     $$PWD/qt/Api/qhttpheader_p.h
 
 contains(CONFIG, accessibility) {

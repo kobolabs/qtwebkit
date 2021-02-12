@@ -25,8 +25,10 @@ SOURCES += \
     $$PWD/qt/Api/qwebhistory.cpp \
     $$PWD/qt/Api/qwebhistoryinterface.cpp \
     $$PWD/qt/Api/qwebkitglobal.cpp \
+    $$PWD/qt/Api/qwebnode.cpp \
     $$PWD/qt/Api/qwebplugindatabase.cpp \
     $$PWD/qt/Api/qwebpluginfactory.cpp \
+    $$PWD/qt/Api/qwebrange.cpp \
     $$PWD/qt/Api/qwebsecurityorigin.cpp \
     $$PWD/qt/Api/qwebsettings.cpp \
     $$PWD/qt/Api/qwebscriptworld.cpp \
@@ -62,9 +64,11 @@ HEADERS += \
     $$PWD/qt/Api/qwebelement_p.h \
     $$PWD/qt/Api/qwebhistory.h \
     $$PWD/qt/Api/qwebhistory_p.h \
+    $$PWD/qt/Api/qwebnode.h \
     $$PWD/qt/Api/qwebhistoryinterface.h \
     $$PWD/qt/Api/qwebplugindatabase_p.h \
     $$PWD/qt/Api/qwebpluginfactory.h \
+    $$PWD/qt/Api/qwebrange.h \
     $$PWD/qt/Api/qwebsecurityorigin.h \
     $$PWD/qt/Api/qwebsettings.h \
     $$PWD/qt/Api/qwebscriptworld_p.h \

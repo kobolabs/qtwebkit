@@ -2144,6 +2144,12 @@ bool QWebPage::hasSelection() const
     return d->hasSelection();
 }
 
+QWebRange QWebPage::selectionRange() const
+{
+    d->createMainFrame();
+    return d->selectionRange();
+}
+
 /*!
     \property QWebPage::selectedText
     \brief the text currently selected
@@ -3231,6 +3237,18 @@ void QWebPage::selectBetweenPoints(const QPoint &one, const QPoint &two, bool ex
     handle()->selectBetweenPoints(one, two, expandToWordBoundaries, pageEnd);
 }
 
+QWebRange QWebPage::rangeBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
+{
+    d->createMainFrame();
+    return handle()->rangeBetweenPoints(one, two, expandToWordBoundaries, pageEnd);
+}
+
+QWebRange QWebPage::createRange(const QWebNode& startContainer, int startOffset, const QWebNode& endContainer, int endOffset)
+{
+    d->createMainFrame();
+    return handle()->createRange(startContainer, startOffset, endContainer, endOffset);
+}
+
 bool QWebPage::updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped)
 {
     d->createMainFrame();
@@ -3249,10 +3267,10 @@ QVector<QRect> QWebPage::selectionTextRects()
     return handle()->selectionTextRects();
 }
 
-void QWebPage::forEachLineInSelection(int version, const std::function<void(const QString&)>& fn)
+void QWebPage::forEachLineInRange(int version, const QWebRange& range, const std::function<void(const QString&)>& fn)
 {
     d->createMainFrame();
-    handle()->forEachLineInSelection(version, fn);
+    handle()->forEachLineInRange(version, range, fn);
 }
 
 /*!
