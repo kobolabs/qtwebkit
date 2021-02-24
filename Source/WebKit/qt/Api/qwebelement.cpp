@@ -220,6 +220,16 @@ bool QWebElement::isNull() const
     return !m_element;
 }
 
+QWebNode QWebElement::toNode(const QWebElement& element)
+{
+    return QWebNode(element.m_element);
+}
+
+QWebElement QWebElement::fromNode(const QWebNode& node)
+{
+    return QWebElement(node.m_node);
+}
+
 /*!
     Returns a new list of child elements matching the given CSS selector
     \a selectorQuery. If there are no matching elements, an empty list is

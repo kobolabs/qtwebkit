@@ -23,10 +23,12 @@
 
 #include <QtWebKit/qwebkitglobal.h>
 #include <QtWebKit/qwebsettings.h>
+#include <QtWebKit/qwebrange.h>
 
 #include <QtCore/qobject.h>
 #include <QtCore/qurl.h>
 #include <QtWidgets/qwidget.h>
+#include <functional>
 
 QT_BEGIN_NAMESPACE
 class QNetworkProxy;
@@ -295,6 +297,7 @@ public:
     void setVisibilityState(VisibilityState);
 
     bool hasSelection() const;
+    QWebRange selectionRange() const;
     QString selectedText() const;
     QString selectedHtml() const;
 
@@ -394,9 +397,12 @@ public:
     bool selectWordAtPoint(const QPoint &point, int pageEnd, bool expandToWordBoundaries = true);
     void clearSelection();
     void selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
+    QWebRange rangeBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
+    QWebRange createRange(const QWebNode& startContainer, int startOffset, const QWebNode& endContainer, int endOffset);
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
     QVector<QRect> selectionTextRects();
+    void forEachLineInRange(int version, const QWebRange& range, const std::function<void(const QString&)>& fn);
 
 Q_SIGNALS:
     void loadStarted();

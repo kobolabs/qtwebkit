@@ -46,6 +46,7 @@
 #include "DragSession.h"
 #include "Editor.h"
 #include "EditorClientQt.h"
+#include "Element.h"
 #include "EventHandler.h"
 #include "FocusController.h"
 #include "FrameLoadRequest.h"
@@ -64,6 +65,7 @@
 #include "HTMLMediaElement.h"
 #include "HitTestResult.h"
 #include "InitWebCoreQt.h"
+#include "InlineTextBox.h"
 #include "InspectorClientQt.h"
 #include "InspectorController.h"
 #include "InspectorServerQt.h"
@@ -72,6 +74,7 @@
 #include "MemoryCache.h"
 #include "NetworkingContext.h"
 #include "NodeList.h"
+#include "NodeTraversal.h"
 #include "NotificationPresenterClientQt.h"
 #include "PageGroup.h"
 #include "Pasteboard.h"
@@ -83,13 +86,16 @@
 #include "PluginPackage.h"
 #include "ProgressTracker.h"
 #include "QWebFrameAdapter.h"
+#include "RenderBoxModelObject.h"
 #include "RenderLayer.h"
+#include "RenderText.h"
 #include "RenderTextControl.h"
 #include "RenderView.h"
 #include "SchemeRegistry.h"
 #include "Scrollbar.h"
 #include "ScrollbarTheme.h"
 #include "Settings.h"
+#include "Text.h"
 #include "UndoStepQt.h"
 #include "UserAgentQt.h"
 #include "UserGestureIndicator.h"
@@ -378,6 +384,16 @@ bool QWebPageAdapter::hasSelection() const
     if (frame)
         return (frame->selection()->selection().selectionType() != VisibleSelection::NoSelection);
     return false;
+}
+
+QWebRange QWebPageAdapter::selectionRange() const
+{
+    VisibleSelection selection = page->focusController()->focusedOrMainFrame()->selection()->selection();
+    PassRefPtr<Range> range = selection.firstRange();
+    if (range.get() == NULL) {
+        return QWebRange();
+    }
+    return QWebRange(range.get());
 }
 
 QString QWebPageAdapter::selectedText() const
@@ -1642,8 +1658,23 @@ void QWebPageAdapter::clearSelection()
 
 void QWebPageAdapter::selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
 {
-    if (one == two) {
+    QWebRange range = rangeBetweenPoints(one, two, expandToWordBoundaries, pageEnd);
+    if (range.isNull()) {
         return;
+    }
+
+    Frame *frame = page->focusController()->focusedOrMainFrame();
+    QString oldText = selectedText();
+    if (oldText.isEmpty() || !range.text().isEmpty()) {
+        VisibleSelection newSelection(range.m_range);
+        frame->selection()->setSelection(newSelection);
+    }
+}
+
+QWebRange QWebPageAdapter::rangeBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd)
+{
+    if (one == two) {
+        return QWebRange();
     }
 
     Frame *frame = page->focusController()->focusedOrMainFrame();
@@ -1664,14 +1695,17 @@ void QWebPageAdapter::selectBetweenPoints(const QPoint &one, const QPoint &two, 
             } else {
                 newSelection.expandUsingGranularity(CharacterGranularity);
             }
-            // don't stomp on a good selection with a bogus one
-            QString oldText = selectedText();
             PassRefPtr<Range> range = newSelection.firstRange();
-            if (oldText.isEmpty() || (range && !range->text().isEmpty())) {
-              frame->selection()->setSelection(newSelection);
-            }
+            return QWebRange(range.get());
         }
     }
+    return QWebRange();
+}
+
+QWebRange QWebPageAdapter::createRange(const QWebNode& startContainer, int startOffset, const QWebNode& endContainer, int endOffset)
+{
+    auto range = Range::create(startContainer.m_node->document(), PassRefPtr<Node>(startContainer.m_node), startOffset, PassRefPtr<Node>(endContainer.m_node), endOffset);
+    return QWebRange(range.get());
 }
 
 bool QWebPageAdapter::updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped)
@@ -1778,4 +1812,61 @@ QVector<QRect> QWebPageAdapter::selectionTextRects()
         selectionTextRects.append(QRect(rects[i].x(), rects[i].y(), rects[i].width(), rects[i].height()));
     }
     return selectionTextRects;
+}
+
+static void forEachLineInRangeV1(Range* range, const std::function<void(const QString&)>& fn) {
+    QString currentLine;
+
+    RenderObject* renderer = nullptr;
+    Node* startContainer = range->startContainer();
+    Node* endContainer = range->endContainer();
+    Node* stopNode = range->pastLastNode();
+    for (Node* node = range->firstNode(); node != stopNode; node = NodeTraversal::next(node)) {
+        if (node->isTextNode() && (renderer = toText(node)->renderer())) {
+            RenderText* renderText = toRenderText(renderer);
+            int startOffset = (node == startContainer) ? range->startOffset() : 0;
+            int endOffset = (node == endContainer) ? range->endOffset() : INT_MAX;
+            //the inline text boxes represent individual lines of text within the same text node
+            for (InlineTextBox* box = renderText->firstTextBox(); box; box = box->nextTextBox()) {
+                unsigned int boxStart = box->start();
+                unsigned int boxEnd = box->end()+1;
+                if (boxEnd < startOffset) continue;
+                if (boxStart >= endOffset) continue;
+                int subRangeStart = boxStart < startOffset ? startOffset : boxStart;
+                int subRangeEnd = boxEnd > endOffset ? endOffset : boxEnd;
+                auto clientRange = Range::create(range->ownerDocument(), node, subRangeStart, node, subRangeEnd);
+
+                QString text = clientRange->text();
+                if (box->prevOnLine() == nullptr || box->isLineBreak()) {
+                    if (!currentLine.isEmpty()) {
+                        fn(currentLine.trimmed());
+                    }
+                    currentLine.clear();
+                }
+                currentLine += text;
+            }
+        }
+        //if we pass a non-inline element, we need to force a new line
+        if (node->isElementNode() && (renderer = toElement(node)->renderer())) {
+            if (!renderer->isInline()) {
+                if (!currentLine.isEmpty()) {
+                    fn(currentLine.trimmed());
+                }
+                currentLine.clear();
+            }
+        }
+    }
+    if (!currentLine.isEmpty()) {
+        fn(currentLine.trimmed());
+    }
+}
+
+void QWebPageAdapter::forEachLineInRange(int version, const QWebRange& range, const std::function<void(const QString&)>& fn)
+{
+    if (range.isNull()) {
+        return;
+    }
+    if (version == 1) {
+        forEachLineInRangeV1(range.m_range, fn);
+    }
 }

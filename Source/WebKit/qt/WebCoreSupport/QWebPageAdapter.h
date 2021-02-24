@@ -24,6 +24,7 @@
 #include "QWebPageClient.h"
 #include "ViewportArguments.h"
 #include "qwebhistory.h"
+#include "qwebrange.h"
 
 #include <qbasictimer.h>
 #include <qevent.h>
@@ -276,6 +277,7 @@ public:
     QNetworkAccessManager* networkAccessManager();
 
     bool hasSelection() const;
+    QWebRange selectionRange() const;
     QString selectedText() const;
     QString selectedHtml() const;
 
@@ -380,9 +382,12 @@ public:
     bool selectWordAtPoint(const QPoint &point, int pageEnd, bool expandToWordBoundaries = true);
     void clearSelection();
     void selectBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
+    QWebRange rangeBetweenPoints(const QPoint &one, const QPoint &two, bool expandToWordBoundaries, int pageEnd);
+    QWebRange createRange(const QWebNode& startContainer, int startOffset, const QWebNode& endContainer, int endOffset);
     bool updateSelection(const QPoint &newPoint, bool expandToWordBoundaries, int pageEnd, bool isStart, bool &flipped);
     QPair<QRect, QRect> selectionEndPoints();
     QVector<QRect> selectionTextRects();
+    void forEachLineInRange(int version, const QWebRange& range, const std::function<void(const QString&)>& fn);
 
 private:
     QNetworkAccessManager *networkManager;
