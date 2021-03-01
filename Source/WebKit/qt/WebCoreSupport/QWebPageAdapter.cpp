@@ -1704,6 +1704,9 @@ QWebRange QWebPageAdapter::rangeBetweenPoints(const QPoint &one, const QPoint &t
 
 QWebRange QWebPageAdapter::createRange(const QWebNode& startContainer, int startOffset, const QWebNode& endContainer, int endOffset)
 {
+    if (startContainer.isNull() || endContainer.isNull()) {
+        return QWebRange();
+    }
     auto range = Range::create(startContainer.m_node->document(), PassRefPtr<Node>(startContainer.m_node), startOffset, PassRefPtr<Node>(endContainer.m_node), endOffset);
     return QWebRange(range.get());
 }
@@ -1814,7 +1817,7 @@ QVector<QRect> QWebPageAdapter::selectionTextRects()
     return selectionTextRects;
 }
 
-static void forEachLineInRangeV1(Range* range, const std::function<void(const QString&)>& fn) {
+void QWebPageAdapter::forEachLineInRangeV1(Range* range, const std::function<void(const QString&)>& fn) {
     QString currentLine;
 
     RenderObject* renderer = nullptr;
