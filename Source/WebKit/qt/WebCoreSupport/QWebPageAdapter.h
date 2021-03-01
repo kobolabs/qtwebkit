@@ -53,6 +53,7 @@ class DeviceMotionClient;
 class GeolocationClientQt;
 class GeolocationClient;
 class Page;
+class Range;
 class UndoStep;
 }
 
@@ -394,6 +395,8 @@ private:
     WebCore::DeviceOrientationClient* m_deviceOrientationClient;
     WebCore::DeviceMotionClient* m_deviceMotionClient;
     WebCore::GeolocationClient* m_geolocationClient;
+
+    void forEachLineInRangeV1(WebCore::Range* range, const std::function<void(const QString&)>& fn);
 
 public:
     static bool drtRun;
