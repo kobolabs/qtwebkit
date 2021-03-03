@@ -1824,6 +1824,7 @@ void QWebPageAdapter::forEachLineInRangeV1(Range* range, const std::function<voi
     Node* startContainer = range->startContainer();
     Node* endContainer = range->endContainer();
     Node* stopNode = range->pastLastNode();
+    RootInlineBox* rootBox = nullptr;
     for (Node* node = range->firstNode(); node != stopNode; node = NodeTraversal::next(node)) {
         if (node->isTextNode() && (renderer = toText(node)->renderer())) {
             RenderText* renderText = toRenderText(renderer);
@@ -1838,24 +1839,20 @@ void QWebPageAdapter::forEachLineInRangeV1(Range* range, const std::function<voi
                 int subRangeStart = boxStart < startOffset ? startOffset : boxStart;
                 int subRangeEnd = boxEnd > endOffset ? endOffset : boxEnd;
                 auto clientRange = Range::create(range->ownerDocument(), node, subRangeStart, node, subRangeEnd);
-
                 QString text = clientRange->text();
-                if (box->prevOnLine() == nullptr || box->isLineBreak()) {
+
+                RootInlineBox* currentRoot = box->root();
+                if (rootBox == nullptr) {
+                    rootBox = currentRoot;
+                }
+                if (rootBox != currentRoot) {
                     if (!currentLine.isEmpty()) {
                         fn(currentLine.trimmed());
                     }
                     currentLine.clear();
+                    rootBox = currentRoot;
                 }
                 currentLine += text;
-            }
-        }
-        //if we pass a non-inline element, we need to force a new line
-        if (node->isElementNode() && (renderer = toElement(node)->renderer())) {
-            if (!renderer->isInline()) {
-                if (!currentLine.isEmpty()) {
-                    fn(currentLine.trimmed());
-                }
-                currentLine.clear();
             }
         }
     }
