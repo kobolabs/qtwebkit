@@ -1842,12 +1842,16 @@ void QWebPageAdapter::forEachLineInRangeV1(Range* range, const std::function<voi
                 QString text = clientRange->text();
 
                 RootInlineBox* currentRoot = box->root();
+                if (currentRoot->lastLeafChild() == box && subRangeEnd == boxEnd) {
+                    //strip whitespace at the end of a broken line
+                    text.remove(QRegExp("\\s*$"));
+                }
                 if (rootBox == nullptr) {
                     rootBox = currentRoot;
                 }
                 if (rootBox != currentRoot) {
                     if (!currentLine.isEmpty()) {
-                        fn(currentLine.trimmed());
+                        fn(currentLine);
                     }
                     currentLine.clear();
                     rootBox = currentRoot;
@@ -1857,7 +1861,7 @@ void QWebPageAdapter::forEachLineInRangeV1(Range* range, const std::function<voi
         }
     }
     if (!currentLine.isEmpty()) {
-        fn(currentLine.trimmed());
+        fn(currentLine);
     }
 }
 
