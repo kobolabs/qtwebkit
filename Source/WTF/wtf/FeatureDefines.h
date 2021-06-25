@@ -332,7 +332,7 @@
 #endif
 
 #if !defined(ENABLE_CSP_NEXT)
-#define ENABLE_CSP_NEXT 0
+#define ENABLE_CSP_NEXT 1
 #endif
 
 #if !defined(ENABLE_CSS3_CONDITIONAL_RULES)

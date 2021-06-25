@@ -1905,7 +1905,7 @@ void ContentSecurityPolicy::reportBlockedScriptExecutionToInspector(const String
 bool ContentSecurityPolicy::experimentalFeaturesEnabled() const
 {
 #if ENABLE(CSP_NEXT)
-    return RuntimeEnabledFeatures::experimentalContentSecurityPolicyFeaturesEnabled();
+    return true;
 #else
     return false;
 #endif
