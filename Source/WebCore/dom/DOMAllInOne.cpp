@@ -49,6 +49,9 @@
 #include "DOMCoreException.cpp"
 #include "DOMImplementation.cpp"
 #include "DOMNamedFlowCollection.cpp"
+#if ENABLE(CSP_NEXT)
+#include "DOMSecurityPolicy.cpp"
+#endif
 #include "DOMStringList.cpp"
 #include "DOMStringMap.cpp"
 #include "DatasetDOMStringMap.cpp"
