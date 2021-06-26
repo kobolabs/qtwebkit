@@ -281,6 +281,7 @@ IDL_BINDINGS += \
     $$PWD/dom/RangeException.idl \
     $$PWD/dom/Range.idl \
     $$PWD/dom/RequestAnimationFrameCallback.idl \
+    $$PWD/dom/SecurityPolicyViolationEvent.idl \
     $$PWD/dom/ShadowRoot.idl \
     $$PWD/dom/StringCallback.idl \
     $$PWD/dom/Text.idl \
