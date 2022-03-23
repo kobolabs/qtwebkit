@@ -83,14 +83,14 @@ GENERATORS += msvcstubs
 retgen.output = RegExpJitTables.h
 retgen.script = $$PWD/create_regex_tables
 retgen.input = retgen.script
-retgen.commands = python $$retgen.script > ${QMAKE_FILE_OUT}
+retgen.commands = python3 $$retgen.script > ${QMAKE_FILE_OUT}
 GENERATORS += retgen
 
 #GENERATOR: "KeywordLookup.h": decision tree used by the lexer
 klgen.output = KeywordLookup.h
 klgen.script = $$PWD/KeywordLookupGenerator.py
 klgen.input = KEYWORDLUT_FILES
-klgen.commands = python $$klgen.script ${QMAKE_FILE_NAME} > ${QMAKE_FILE_OUT}
+klgen.commands = python3 $$klgen.script ${QMAKE_FILE_NAME} > ${QMAKE_FILE_OUT}
 GENERATORS += klgen
 
 EXTRACTOR_BINARY = LLIntOffsetsExtractor$$BIN_EXTENSION
@@ -114,7 +114,7 @@ linux-*:if(isEqual(QT_ARCH, "i386")|isEqual(QT_ARCH, "x86_64")) {
     disassembler.input = DISASSEMBLER_FILES
     disassembler.script = $$PWD/disassembler/udis86/itab.py
     disassembler.depends = $$DISASSEMBLER_DEPENDENCY
-    disassembler.commands = python $$disassembler.script ${QMAKE_FILE_NAME} --outputDir ${QMAKE_FUNC_FILE_OUT_PATH}
+    disassembler.commands = python3 $$disassembler.script ${QMAKE_FILE_NAME} --outputDir ${QMAKE_FUNC_FILE_OUT_PATH}
     disassembler.CONFIG += no_link
     GENERATORS += disassembler
 }
