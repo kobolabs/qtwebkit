@@ -60,7 +60,7 @@ win32-msvc*: MAKEFILE_NOOP_COMMAND = @echo >NUL
 
 # Set up a default python version
 scratchbox: PYTHON = python2.6
-else: PYTHON = python3
+else: PYTHON = python
 
 # We use private_tests to detect developer build, since the destdir will
 # always be our webkit build dir. This might change as configure changes.
